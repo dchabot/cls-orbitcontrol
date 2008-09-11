@@ -1,0 +1,27 @@
+# just support dac for now
+record(longout, "$(clsName):dac")
+{
+	field(DESC, "SR OC $(clsName)")
+	field(EGU, "DAC")
+	field(HOPR, "7602176")
+	field(HIHI, "7602176")
+	field(HIGH, "7601176")
+	field(LOW, "-7601176")
+	field(LOLO, "-7602176")
+	field(LOPR, "-7602176")
+	field(FLNK, "$(clsName):dac:strForm")
+}
+
+record(scalcout, "$(clsName):dac:strForm") {
+	field(INPA, "$(clsName):dac.VAL")
+	field(CALC, "PRINTF('$(crate_id) $(baseAddr) $(offset) $(channel) %i',A)")
+	field(OUT, "$(clsName):dac:out.AOUT PP")
+#	field(FLNK, "$(clsName):dac:out")
+}
+
+record(asyn, "$(clsName):dac:out") {
+	field(PORT, "$(PORT)")
+	field(ADDR, "$(ADDR)")
+	field(SCAN, "Passive")
+	field(TMOD, "Write")
+}

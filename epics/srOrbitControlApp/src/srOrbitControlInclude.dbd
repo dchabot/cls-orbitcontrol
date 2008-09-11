@@ -1,0 +1,9 @@
+include "base.dbd"
+#include definitions for any other support applications needed
+include "asynRecord.dbd"
+include "calcSupport.dbd"
+include "drvAsynIPPort.dbd"
+include "aaiRecord.dbd"
+# need this for *.stt FSMzzz...
+registrar(ocFsmRegistrar)
+#registrar(SR_orbit_rmsRegistrar)

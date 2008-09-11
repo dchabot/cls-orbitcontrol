@@ -1,0 +1,35 @@
+#! /bin/bash
+#
+# chkconfig: 345 59 99
+# description: EPICS interface to the RTEMS SR1 DAQ system
+#
+#./etc/rc.d/init.d/functions
+
+INSTALL_DIR=/iocApps/rtems-OrbitCorr
+IOC_NAME=ioc2400-109
+EXE_CMD=st.cmd
+BIN_NAME=srOrbitControl
+
+case "$1" in
+    start)
+        echo "Starting EPICS interface to the RTEMS SR1 DAQ system..."
+          
+        if [ -x ${INSTALL_DIR}/${IOC_NAME}/iocBoot/${IOC_NAME}/${EXE_CMD} ]; then
+	    echo "Found ${EXE_CMD} !!"
+       	    cd ${INSTALL_DIR}/${IOC_NAME}/iocBoot/${IOC_NAME}
+        else
+            echo "Couldn't find ${EXE_CMD} at ${INSTALL_DIR}/${IOC_NAME}/iocBoot/${IOC_NAME}"
+            exit 1;
+         fi
+                                                            
+        su epics -c "./${EXE_CMD} &"
+         ;;
+    status)
+       status ${BIN_NAME}
+       ;;
+    stop)
+       echo "Stopping ${BIN_NAME}..."
+       killall ${BIN_NAME}
+       ;;
+esac
+

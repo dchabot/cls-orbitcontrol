@@ -1,0 +1,54 @@
+TOP=../..
+include $(TOP)/configure/CONFIG
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+#----------------------------------------------------
+#  Optimization of db files using dbst (DEFAULT: NO)
+#DB_OPT = YES
+
+#----------------------------------------------------
+# Create and install (or just install) into <top>/db
+# databases, templates, substitutions like this
+#DB += SrBpms.db
+DB += SrBpmOrbit.db
+#DB += SrOrbitRms.db
+
+DB += SrOC2408-01.db SrOC2404-05.db SrOC2406-01.db SrOC2406-03.db 
+DB += SrChicane2408-01.db  
+
+#DB += DacTest.db
+
+#----------------------------------------------------
+# If <anyname>.db template is not named <anyname>*.template add
+# <anyname>_template = <templatename>
+SrBpmOrbit_TEMPLATES += SrBpmOrbit.template
+SrOC_TEMPLATES += SrOC.template
+
+include $(TOP)/configure/RULES
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+
+vpath %.template
+
+%.template: ../%.template
+	cp $< $@
+	chmod 664 $@
+	
+../O.Common/SrOC2408-01.db: ../SrOC2408-01.sub $(SrOC_TEMPLATES)
+	msi -S ../SrOC2408-01.sub > ../O.Common/SrOC2408-01.db
+
+../O.Common/SrOC2404-05.db: ../SrOC2404-05.sub $(SrOC_TEMPLATES)
+	msi -S ../SrOC2404-05.sub > ../O.Common/SrOC2404-05.db
+
+../O.Common/SrOC2406-01.db: ../SrOC2406-01.sub $(SrOC_TEMPLATES)
+	msi -S ../SrOC2406-01.sub > ../O.Common/SrOC2406-01.db
+
+../O.Common/SrOC2406-03.db: ../SrOC2406-03.sub $(SrOC_TEMPLATES)
+	msi -S ../SrOC2406-03.sub > ../O.Common/SrOC2406-03.db
+
+../O.Common/SrChicane2408-01.db: ../SrChicane2408-01.sub $(SrOC_TEMPLATES)
+	msi -S ../SrChicane2408-01.sub > ../O.Common/SrChicane2408-01.db
+	
+../O.Common/SrBpmOrbit.db: ../SrBpmOrbit.sub $(SrBpmOrbit_TEMPLATES)
+	msi -S ../SrBpmOrbit.sub > ../O.Common/SrBpmOrbit.db 

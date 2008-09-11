@@ -1,0 +1,17 @@
+
+#  hopr & lopr unused.
+#   
+#
+
+file SrOC.template
+{
+#                    
+    pattern
+    {  clsName     	crate_id  baseAddr 	offset  channel    }
+
+    {  BID1408-02		3	0x00700010		8		5		}
+    {  BID1411-02		3	0x00700010		8		6		}
+    {  BID1410-03		3   0x00700010   	8		7		}
+    
+}    
+

@@ -1,0 +1,2793 @@
+Script started on Mon Nov 12 20:52:04 2007
+]0;root@IOC2400-104:/etc/init.d[root@IOC2400-104 init.d]# ./srVmeControl restra  art
+Shutting down SRControl: vmeMon: no process killed
+insmod: a module named sis1100 already exists
+the 2 args passed to sis1100CallFunc are 1 /dev/sis1100_4
+INitSis1100: she's open rv_2: /dev/sis1100_4
+map_memory: the args passed to MapMemory are: 1 0 0x00700000 0x39
+Mapping memory: [0] 0x00700000 am=0x39
+MAP_IT: board 0x00700000 mapped at index 0 to virtAddr 0x4025c000
+map_memory: the args passed to MapMemory are: 1 1 0x00D00000 0x39
+Mapping memory: [1] 0x00d00000 am=0x39
+MAP_IT: board 0x00d00000 mapped at index 1 to virtAddr 0x40a5c000
+the 6 args passed to Init110bl are: 1 1 20.000000 0 0 0
+Initializing ICS110bl 24 bit ADC
+
+Setting for INTERNAL clocking source 
+the 6 args passed to runScriptCallFunc are: 1 0
+Initializing VMIC 2536 Digital IO VME board
+the 2 args passed to sis1100CallFunc are 2 /dev/sis1100_1
+INitSis1100: she's open rv_2: /dev/sis1100_1
+map_memory: the args passed to MapMemory are: 2 0 0x00700000 0x39
+Mapping memory: [0] 0x00700000 am=0x39
+MAP_IT: board 0x00700000 mapped at index 0 to virtAddr 0x4125c000
+map_memory: the args passed to MapMemory are: 2 1 0x00D00000 0x39
+Mapping memory: [1] 0x00d00000 am=0x39
+MAP_IT: board 0x00d00000 mapped at index 1 to virtAddr 0x41a5c000
+the 6 args passed to Init110bl are: 2 1 20.000000 0 0 0
+Initializing ICS110bl 24 bit ADC
+
+Setting for INTERNAL clocking source 
+the 6 args passed to runScriptCallFunc are: 2 0
+Initializing VMIC 2536 Digital IO VME board
+the 2 args passed to sis1100CallFunc are 3 /dev/sis1100_2
+INitSis1100: she's open rv_2: /dev/sis1100_2
+map_memory: the args passed to MapMemory are: 3 0 0x00700000 0x39
+Mapping memory: [0] 0x00700000 am=0x39
+MAP_IT: board 0x00700000 mapped at index 0 to virtAddr 0x4225c000
+map_memory: the args passed to MapMemory are: 3 1 0x00D00000 0x39
+Mapping memory: [1] 0x00d00000 am=0x39
+MAP_IT: board 0x00d00000 mapped at index 1 to virtAddr 0x42a5c000
+the 6 args passed to Init110bl are: 3 1 20.000000 0 0 0
+Initializing ICS110bl 24 bit ADC
+
+Setting for INTERNAL clocking source 
+the 6 args passed to runScriptCallFunc are: 3 0
+Initializing VMIC 2536 Digital IO VME board
+the 2 args passed to sis1100CallFunc are 4 /dev/sis1100_3
+INitSis1100: she's open rv_2: /dev/sis1100_3
+map_memory: the args passed to MapMemory are: 4 0 0x00700000 0x39
+Mapping memory: [0] 0x00700000 am=0x39
+MAP_IT: board 0x00700000 mapped at index 0 to virtAddr 0x4325c000
+map_memory: the args passed to MapMemory are: 4 1 0x00D00000 0x39
+Mapping memory: [1] 0x00d00000 am=0x39
+MAP_IT: board 0x00d00000 mapped at index 1 to virtAddr 0x43a5c000
+map_memory: the args passed to MapMemory are: 4 2 0x00700010 0x39
+Mapping memory: [2] 0x00700010 am=0x39
+MAP_IT: board 0x00700010 mapped at index 2 to virtAddr 0x4425c000
+the 6 args passed to Init110bl are: 4 1 20.000000 0 0 0
+Initializing ICS110bl 24 bit ADC
+
+Setting for INTERNAL clocking source 
+the 6 args passed to runScriptCallFunc are: 4 0
+Initializing VMIC 2536 Digital IO VME board
+the 6 args passed to runScriptCallFunc are: 4 2
+Initializing VMIC 2536 Digital IO VME board
+@(#)SEQ Version 2.0.2: Tue Jan 29 10:40:42 CST 2002
+Spawning state program "SR_BPMs", thread 0xd0bd420: "SR_BPMs"
+@(#)SEQ Version 2.0.2: Tue Jan 29 10:40:42 CST 2002
+Spawning state program "SR_orbit_rms", thread 0xd0cba30: "SR_orbit_rms"
+############################################################################
+###  @(#)EPICS IOC CORE built on Nov 23 2001
+###  @(#)Version R3.14.0.beta.1 $$Name:  $$ $$Date: 2008/06/25 14:25:53CST $$
+############################################################################
+Starting iocInit
+ICS110bl: Using Software Triggering: Crate[4]:Board[1] at base address 0x00d00000
+FILTER_ORDER = 142
+mkfifo error
+open error for writing
+
+			RTC Driver Test Example.
+
+sizeof bpmRawChanData_st = 256, MAX_SAMPLES = 16256
+sizeof bpmDat1 = 4,
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e01,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+iocInit: All initialization complete
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e01,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e01,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e01,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+Daemon mode enabled
+starting init for SrBPMs:frmOff:val monitorRate script 
+:frmOff:valacquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e01,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e01,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (-0.000030) * RelBPMData[i]) (-0.000030)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000448) * RelBPMData[i]) (-0.000448)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000710) * RelBPMData[i]) (0.000710)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000269) * RelBPMData[i]) (0.000269)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000039) * RelBPMData[i]) (-0.000039)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.001124) * RelBPMData[i]) (0.001124)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000616) * RelBPMData[i]) (0.000616)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000637) * RelBPMData[i]) (0.000637)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000010) * RelBPMData[i]) (0.000010)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000096) * RelBPMData[i]) (-0.000096)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000004) * RelBPMData[i]) (-0.000004)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000208) * RelBPMData[i]) (-0.000208)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000058) * RelBPMData[i]) (-0.000058)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000043) * RelBPMData[i]) (-0.000043)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000016) * RelBPMData[i]) (-0.000016)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000302) * RelBPMData[i]) (-0.000302)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000075) * RelBPMData[i]) (-0.000075)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000414) * RelBPMData[i]) (0.000414)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000383) * RelBPMData[i]) (0.000383)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000477) * RelBPMData[i]) (0.000477)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000168) * RelBPMData[i]) (-0.000168)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000244) * RelBPMData[i]) (0.000244)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000374) * RelBPMData[i]) (-0.000374)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000664) * RelBPMData[i]) (-0.000664)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000236) * RelBPMData[i]) (0.000236)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000138) * RelBPMData[i]) (-0.000138)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000243) * RelBPMData[i]) (0.000243)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000500) * RelBPMData[i]) (0.000500)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000709) * RelBPMData[i]) (0.000709)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000030) * RelBPMData[i]) (-0.000030)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000412) * RelBPMData[i]) (0.000412)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000039) * RelBPMData[i]) (-0.000039)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000819) * RelBPMData[i]) (0.000819)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000755) * RelBPMData[i]) (-0.000755)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000142) * RelBPMData[i]) (-0.000142)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000217) * RelBPMData[i]) (-0.000217)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000003) * RelBPMData[i]) (-0.000003)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000172) * RelBPMData[i]) (0.000172)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000687) * RelBPMData[i]) (-0.000687)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000337) * RelBPMData[i]) (0.000337)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000139) * RelBPMData[i]) (-0.000139)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000012) * RelBPMData[i]) (0.000012)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000545) * RelBPMData[i]) (0.000545)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000414) * RelBPMData[i]) (-0.000414)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000224) * RelBPMData[i]) (-0.000224)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000125) * RelBPMData[i]) (-0.000125)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000023) * RelBPMData[i]) (-0.000023)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000238) * RelBPMData[i]) (-0.000238)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000191) * RelBPMData[i]) (0.000191)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000779) * RelBPMData[i]) (-0.000779)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000223) * RelBPMData[i]) (0.000223)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000007) * RelBPMData[i]) (0.000007)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000080) * RelBPMData[i]) (0.000080)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000004) * RelBPMData[i]) (-0.000004)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000262) * RelBPMData[i]) (0.000262)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (-0.000074) * RelBPMData[i]) (-0.000074)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000047) * RelBPMData[i]) (-0.000047)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000074) * RelBPMData[i]) (0.000074)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000370) * RelBPMData[i]) (0.000370)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000099) * RelBPMData[i]) (-0.000099)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.001624) * RelBPMData[i]) (0.001624)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000382) * RelBPMData[i]) (0.000382)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000562) * RelBPMData[i]) (0.000562)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000003) * RelBPMData[i]) (0.000003)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000097) * RelBPMData[i]) (-0.000097)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000003) * RelBPMData[i]) (0.000003)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000089) * RelBPMData[i]) (-0.000089)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000056) * RelBPMData[i]) (0.000056)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000013) * RelBPMData[i]) (0.000013)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000183) * RelBPMData[i]) (-0.000183)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000280) * RelBPMData[i]) (-0.000280)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000114) * RelBPMData[i]) (0.000114)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.001010) * RelBPMData[i]) (0.001010)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000323) * RelBPMData[i]) (0.000323)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000593) * RelBPMData[i]) (0.000593)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000143) * RelBPMData[i]) (-0.000143)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000056) * RelBPMData[i]) (0.000056)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000209) * RelBPMData[i]) (-0.000209)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.001199) * RelBPMData[i]) (-0.001199)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000047) * RelBPMData[i]) (0.000047)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000535) * RelBPMData[i]) (0.000535)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000207) * RelBPMData[i]) (0.000207)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000337) * RelBPMData[i]) (0.000337)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000850) * RelBPMData[i]) (0.000850)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000390) * RelBPMData[i]) (-0.000390)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000434) * RelBPMData[i]) (0.000434)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000164) * RelBPMData[i]) (0.000164)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000821) * RelBPMData[i]) (0.000821)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000601) * RelBPMData[i]) (-0.000601)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000240) * RelBPMData[i]) (-0.000240)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000253) * RelBPMData[i]) (-0.000253)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000014) * RelBPMData[i]) (0.000014)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000042) * RelBPMData[i]) (0.000042)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000898) * RelBPMData[i]) (-0.000898)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000433) * RelBPMData[i]) (0.000433)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000988) * RelBPMData[i]) (-0.000988)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000007) * RelBPMData[i]) (0.000007)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000438) * RelBPMData[i]) (0.000438)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000249) * RelBPMData[i]) (-0.000249)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000425) * RelBPMData[i]) (-0.000425)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000106) * RelBPMData[i]) (-0.000106)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000011) * RelBPMData[i]) (-0.000011)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000501) * RelBPMData[i]) (-0.000501)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000063) * RelBPMData[i]) (0.000063)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000571) * RelBPMData[i]) (-0.000571)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000078) * RelBPMData[i]) (0.000078)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000016) * RelBPMData[i]) (0.000016)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000064) * RelBPMData[i]) (0.000064)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000017) * RelBPMData[i]) (-0.000017)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000273) * RelBPMData[i]) (0.000273)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (-0.000099) * RelBPMData[i]) (-0.000099)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000307) * RelBPMData[i]) (-0.000307)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000373) * RelBPMData[i]) (0.000373)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000392) * RelBPMData[i]) (0.000392)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000286) * RelBPMData[i]) (-0.000286)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000053) * RelBPMData[i]) (0.000053)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000428) * RelBPMData[i]) (0.000428)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000316) * RelBPMData[i]) (0.000316)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000017) * RelBPMData[i]) (-0.000017)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000094) * RelBPMData[i]) (-0.000094)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000023) * RelBPMData[i]) (-0.000023)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.001031) * RelBPMData[i]) (-0.001031)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000149) * RelBPMData[i]) (-0.000149)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000016) * RelBPMData[i]) (-0.000016)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000275) * RelBPMData[i]) (-0.000275)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000448) * RelBPMData[i]) (-0.000448)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000156) * RelBPMData[i]) (0.000156)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000182) * RelBPMData[i]) (-0.000182)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000003) * RelBPMData[i]) (0.000003)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000537) * RelBPMData[i]) (-0.000537)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000341) * RelBPMData[i]) (-0.000341)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000557) * RelBPMData[i]) (-0.000557)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000228) * RelBPMData[i]) (-0.000228)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000438) * RelBPMData[i]) (-0.000438)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000349) * RelBPMData[i]) (-0.000349)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000167) * RelBPMData[i]) (-0.000167)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000287) * RelBPMData[i]) (-0.000287)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000382) * RelBPMData[i]) (0.000382)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000469) * RelBPMData[i]) (0.000469)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000623) * RelBPMData[i]) (0.000623)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000287) * RelBPMData[i]) (0.000287)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000028) * RelBPMData[i]) (0.000028)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000231) * RelBPMData[i]) (-0.000231)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000139) * RelBPMData[i]) (0.000139)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000345) * RelBPMData[i]) (-0.000345)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000402) * RelBPMData[i]) (-0.000402)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000013) * RelBPMData[i]) (0.000013)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000616) * RelBPMData[i]) (-0.000616)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000488) * RelBPMData[i]) (-0.000488)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000123) * RelBPMData[i]) (-0.000123)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000263) * RelBPMData[i]) (0.000263)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000115) * RelBPMData[i]) (0.000115)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000051) * RelBPMData[i]) (-0.000051)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000406) * RelBPMData[i]) (-0.000406)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000135) * RelBPMData[i]) (0.000135)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000219) * RelBPMData[i]) (0.000219)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000012) * RelBPMData[i]) (-0.000012)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000074) * RelBPMData[i]) (-0.000074)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000258) * RelBPMData[i]) (0.000258)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000576) * RelBPMData[i]) (-0.000576)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000384) * RelBPMData[i]) (0.000384)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000000) * RelBPMData[i]) (0.000000)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000021) * RelBPMData[i]) (0.000021)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000074) * RelBPMData[i]) (-0.000074)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000434) * RelBPMData[i]) (0.000434)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (0.000474) * RelBPMData[i]) (0.000474)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000121) * RelBPMData[i]) (0.000121)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000163) * RelBPMData[i]) (0.000163)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000260) * RelBPMData[i]) (-0.000260)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000055) * RelBPMData[i]) (0.000055)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000058) * RelBPMData[i]) (-0.000058)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000192) * RelBPMData[i]) (-0.000192)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000089) * RelBPMData[i]) (-0.000089)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000004) * RelBPMData[i]) (-0.000004)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000151) * RelBPMData[i]) (0.000151)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000310) * RelBPMData[i]) (0.000310)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000141) * RelBPMData[i]) (-0.000141)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000190) * RelBPMData[i]) (-0.000190)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000061) * RelBPMData[i]) (0.000061)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000132) * RelBPMData[i]) (-0.000132)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000226) * RelBPMData[i]) (0.000226)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000475) * RelBPMData[i]) (-0.000475)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000199) * RelBPMData[i]) (-0.000199)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000205) * RelBPMData[i]) (-0.000205)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000260) * RelBPMData[i]) (-0.000260)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000634) * RelBPMData[i]) (-0.000634)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000321) * RelBPMData[i]) (0.000321)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000234) * RelBPMData[i]) (0.000234)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000509) * RelBPMData[i]) (-0.000509)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000366) * RelBPMData[i]) (-0.000366)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000330) * RelBPMData[i]) (-0.000330)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000907) * RelBPMData[i]) (-0.000907)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000124) * RelBPMData[i]) (0.000124)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000258) * RelBPMData[i]) (0.000258)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000310) * RelBPMData[i]) (-0.000310)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000151) * RelBPMData[i]) (0.000151)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000010) * RelBPMData[i]) (0.000010)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000140) * RelBPMData[i]) (0.000140)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000074) * RelBPMData[i]) (-0.000074)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000382) * RelBPMData[i]) (0.000382)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000304) * RelBPMData[i]) (-0.000304)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000015) * RelBPMData[i]) (-0.000015)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000217) * RelBPMData[i]) (-0.000217)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000248) * RelBPMData[i]) (0.000248)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000032) * RelBPMData[i]) (-0.000032)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000264) * RelBPMData[i]) (0.000264)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000022) * RelBPMData[i]) (0.000022)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000432) * RelBPMData[i]) (-0.000432)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000483) * RelBPMData[i]) (-0.000483)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000431) * RelBPMData[i]) (0.000431)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000054) * RelBPMData[i]) (0.000054)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000016) * RelBPMData[i]) (-0.000016)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000262) * RelBPMData[i]) (-0.000262)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000401) * RelBPMData[i]) (-0.000401)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000063) * RelBPMData[i]) (-0.000063)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000117) * RelBPMData[i]) (0.000117)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000087) * RelBPMData[i]) (-0.000087)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000393) * RelBPMData[i]) (-0.000393)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000131) * RelBPMData[i]) (0.000131)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000172) * RelBPMData[i]) (0.000172)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (-0.000035) * RelBPMData[i]) (-0.000035)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000273) * RelBPMData[i]) (0.000273)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000162) * RelBPMData[i]) (-0.000162)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000112) * RelBPMData[i]) (0.000112)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000460) * RelBPMData[i]) (0.000460)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000263) * RelBPMData[i]) (0.000263)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000499) * RelBPMData[i]) (0.000499)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000161) * RelBPMData[i]) (-0.000161)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000057) * RelBPMData[i]) (0.000057)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000192) * RelBPMData[i]) (-0.000192)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000030) * RelBPMData[i]) (-0.000030)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000800) * RelBPMData[i]) (-0.000800)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000055) * RelBPMData[i]) (-0.000055)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000046) * RelBPMData[i]) (-0.000046)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000192) * RelBPMData[i]) (-0.000192)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000312) * RelBPMData[i]) (-0.000312)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000105) * RelBPMData[i]) (0.000105)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000716) * RelBPMData[i]) (0.000716)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000095) * RelBPMData[i]) (0.000095)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000666) * RelBPMData[i]) (0.000666)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000489) * RelBPMData[i]) (0.000489)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000470) * RelBPMData[i]) (0.000470)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000062) * RelBPMData[i]) (0.000062)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000386) * RelBPMData[i]) (-0.000386)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000314) * RelBPMData[i]) (0.000314)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000320) * RelBPMData[i]) (0.000320)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000068) * RelBPMData[i]) (-0.000068)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000515) * RelBPMData[i]) (0.000515)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000007) * RelBPMData[i]) (0.000007)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000181) * RelBPMData[i]) (-0.000181)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000008) * RelBPMData[i]) (-0.000008)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000206) * RelBPMData[i]) (-0.000206)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000199) * RelBPMData[i]) (0.000199)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000818) * RelBPMData[i]) (-0.000818)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000564) * RelBPMData[i]) (-0.000564)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000132) * RelBPMData[i]) (-0.000132)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000000) * RelBPMData[i]) (0.000000)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000116) * RelBPMData[i]) (0.000116)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.001591) * RelBPMData[i]) (-0.001591)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000725) * RelBPMData[i]) (0.000725)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000929) * RelBPMData[i]) (-0.000929)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000003) * RelBPMData[i]) (0.000003)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000381) * RelBPMData[i]) (0.000381)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000305) * RelBPMData[i]) (-0.000305)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000458) * RelBPMData[i]) (-0.000458)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000038) * RelBPMData[i]) (-0.000038)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000025) * RelBPMData[i]) (-0.000025)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000096) * RelBPMData[i]) (-0.000096)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000145) * RelBPMData[i]) (-0.000145)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000617) * RelBPMData[i]) (-0.000617)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000039) * RelBPMData[i]) (0.000039)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000005) * RelBPMData[i]) (-0.000005)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000152) * RelBPMData[i]) (0.000152)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000202) * RelBPMData[i]) (-0.000202)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000472) * RelBPMData[i]) (0.000472)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (-0.000052) * RelBPMData[i]) (-0.000052)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000048) * RelBPMData[i]) (0.000048)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000583) * RelBPMData[i]) (0.000583)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000366) * RelBPMData[i]) (0.000366)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000052) * RelBPMData[i]) (-0.000052)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.001598) * RelBPMData[i]) (0.001598)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000481) * RelBPMData[i]) (0.000481)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000016) * RelBPMData[i]) (0.000016)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000010) * RelBPMData[i]) (0.000010)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000067) * RelBPMData[i]) (-0.000067)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000025) * RelBPMData[i]) (-0.000025)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000154) * RelBPMData[i]) (-0.000154)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000005) * RelBPMData[i]) (0.000005)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000076) * RelBPMData[i]) (-0.000076)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000222) * RelBPMData[i]) (-0.000222)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000313) * RelBPMData[i]) (-0.000313)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000050) * RelBPMData[i]) (-0.000050)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000580) * RelBPMData[i]) (0.000580)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000393) * RelBPMData[i]) (0.000393)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000655) * RelBPMData[i]) (0.000655)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000417) * RelBPMData[i]) (-0.000417)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000261) * RelBPMData[i]) (0.000261)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000740) * RelBPMData[i]) (-0.000740)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000450) * RelBPMData[i]) (-0.000450)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000079) * RelBPMData[i]) (0.000079)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000848) * RelBPMData[i]) (0.000848)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000222) * RelBPMData[i]) (0.000222)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000557) * RelBPMData[i]) (0.000557)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000215) * RelBPMData[i]) (0.000215)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000045) * RelBPMData[i]) (-0.000045)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000322) * RelBPMData[i]) (0.000322)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000026) * RelBPMData[i]) (0.000026)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000561) * RelBPMData[i]) (0.000561)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000074) * RelBPMData[i]) (-0.000074)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000250) * RelBPMData[i]) (-0.000250)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000246) * RelBPMData[i]) (-0.000246)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000008) * RelBPMData[i]) (0.000008)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000157) * RelBPMData[i]) (0.000157)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000422) * RelBPMData[i]) (-0.000422)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000484) * RelBPMData[i]) (0.000484)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000223) * RelBPMData[i]) (-0.000223)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000024) * RelBPMData[i]) (0.000024)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000493) * RelBPMData[i]) (0.000493)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000253) * RelBPMData[i]) (-0.000253)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000149) * RelBPMData[i]) (-0.000149)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000079) * RelBPMData[i]) (-0.000079)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000007) * RelBPMData[i]) (-0.000007)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000426) * RelBPMData[i]) (-0.000426)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000104) * RelBPMData[i]) (0.000104)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000969) * RelBPMData[i]) (-0.000969)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000059) * RelBPMData[i]) (0.000059)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000010) * RelBPMData[i]) (0.000010)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000079) * RelBPMData[i]) (0.000079)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000078) * RelBPMData[i]) (0.000078)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000144) * RelBPMData[i]) (0.000144)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e01,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (-0.000086) * RelBPMData[i]) (-0.000086)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000041) * RelBPMData[i]) (0.000041)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000684) * RelBPMData[i]) (0.000684)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000306) * RelBPMData[i]) (0.000306)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000073) * RelBPMData[i]) (0.000073)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000364) * RelBPMData[i]) (0.000364)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000584) * RelBPMData[i]) (0.000584)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000361) * RelBPMData[i]) (0.000361)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000005) * RelBPMData[i]) (-0.000005)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000126) * RelBPMData[i]) (-0.000126)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000017) * RelBPMData[i]) (-0.000017)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000214) * RelBPMData[i]) (-0.000214)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000069) * RelBPMData[i]) (-0.000069)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000006) * RelBPMData[i]) (-0.000006)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000017) * RelBPMData[i]) (-0.000017)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000327) * RelBPMData[i]) (-0.000327)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000056) * RelBPMData[i]) (0.000056)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000912) * RelBPMData[i]) (0.000912)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000028) * RelBPMData[i]) (0.000028)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000717) * RelBPMData[i]) (0.000717)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000357) * RelBPMData[i]) (0.000357)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000150) * RelBPMData[i]) (-0.000150)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000858) * RelBPMData[i]) (-0.000858)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000180) * RelBPMData[i]) (0.000180)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000492) * RelBPMData[i]) (0.000492)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000292) * RelBPMData[i]) (0.000292)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000419) * RelBPMData[i]) (0.000419)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000573) * RelBPMData[i]) (0.000573)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000078) * RelBPMData[i]) (-0.000078)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000312) * RelBPMData[i]) (0.000312)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000002) * RelBPMData[i]) (-0.000002)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000590) * RelBPMData[i]) (0.000590)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000760) * RelBPMData[i]) (-0.000760)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000663) * RelBPMData[i]) (-0.000663)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000147) * RelBPMData[i]) (-0.000147)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000009) * RelBPMData[i]) (0.000009)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000227) * RelBPMData[i]) (0.000227)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000830) * RelBPMData[i]) (-0.000830)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000669) * RelBPMData[i]) (0.000669)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000484) * RelBPMData[i]) (-0.000484)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000009) * RelBPMData[i]) (-0.000009)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000465) * RelBPMData[i]) (0.000465)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000150) * RelBPMData[i]) (-0.000150)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000349) * RelBPMData[i]) (-0.000349)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000086) * RelBPMData[i]) (-0.000086)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000003) * RelBPMData[i]) (-0.000003)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000346) * RelBPMData[i]) (-0.000346)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000179) * RelBPMData[i]) (0.000179)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000954) * RelBPMData[i]) (-0.000954)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000114) * RelBPMData[i]) (0.000114)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000001) * RelBPMData[i]) (-0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000100) * RelBPMData[i]) (0.000100)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000025) * RelBPMData[i]) (-0.000025)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000098) * RelBPMData[i]) (0.000098)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e01,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (0.000130) * RelBPMData[i]) (0.000130)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000252) * RelBPMData[i]) (0.000252)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000068) * RelBPMData[i]) (0.000068)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000229) * RelBPMData[i]) (-0.000229)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000206) * RelBPMData[i]) (-0.000206)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000198) * RelBPMData[i]) (0.000198)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000261) * RelBPMData[i]) (-0.000261)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000018) * RelBPMData[i]) (-0.000018)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000053) * RelBPMData[i]) (0.000053)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000649) * RelBPMData[i]) (-0.000649)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000133) * RelBPMData[i]) (0.000133)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000016) * RelBPMData[i]) (0.000016)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000032) * RelBPMData[i]) (0.000032)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000069) * RelBPMData[i]) (-0.000069)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000233) * RelBPMData[i]) (-0.000233)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000258) * RelBPMData[i]) (-0.000258)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000336) * RelBPMData[i]) (-0.000336)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000031) * RelBPMData[i]) (0.000031)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000224) * RelBPMData[i]) (0.000224)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000087) * RelBPMData[i]) (0.000087)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000178) * RelBPMData[i]) (-0.000178)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000058) * RelBPMData[i]) (0.000058)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000047) * RelBPMData[i]) (-0.000047)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000196) * RelBPMData[i]) (-0.000196)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000409) * RelBPMData[i]) (-0.000409)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000457) * RelBPMData[i]) (-0.000457)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000085) * RelBPMData[i]) (0.000085)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000594) * RelBPMData[i]) (-0.000594)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000462) * RelBPMData[i]) (0.000462)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000078) * RelBPMData[i]) (-0.000078)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000123) * RelBPMData[i]) (-0.000123)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000078) * RelBPMData[i]) (-0.000078)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000422) * RelBPMData[i]) (-0.000422)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000108) * RelBPMData[i]) (-0.000108)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000302) * RelBPMData[i]) (-0.000302)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000146) * RelBPMData[i]) (-0.000146)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000054) * RelBPMData[i]) (-0.000054)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000407) * RelBPMData[i]) (-0.000407)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000189) * RelBPMData[i]) (-0.000189)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000067) * RelBPMData[i]) (0.000067)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000029) * RelBPMData[i]) (-0.000029)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000047) * RelBPMData[i]) (-0.000047)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000157) * RelBPMData[i]) (-0.000157)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000135) * RelBPMData[i]) (0.000135)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000309) * RelBPMData[i]) (0.000309)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000264) * RelBPMData[i]) (0.000264)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000002) * RelBPMData[i]) (-0.000002)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000110) * RelBPMData[i]) (-0.000110)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000562) * RelBPMData[i]) (-0.000562)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000497) * RelBPMData[i]) (-0.000497)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000446) * RelBPMData[i]) (-0.000446)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000071) * RelBPMData[i]) (-0.000071)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000201) * RelBPMData[i]) (-0.000201)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000354) * RelBPMData[i]) (0.000354)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000105) * RelBPMData[i]) (0.000105)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (-0.000177) * RelBPMData[i]) (-0.000177)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000304) * RelBPMData[i]) (-0.000304)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000331) * RelBPMData[i]) (-0.000331)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000103) * RelBPMData[i]) (-0.000103)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000058) * RelBPMData[i]) (0.000058)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000170) * RelBPMData[i]) (-0.000170)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000171) * RelBPMData[i]) (-0.000171)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000115) * RelBPMData[i]) (-0.000115)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000033) * RelBPMData[i]) (0.000033)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000319) * RelBPMData[i]) (-0.000319)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000111) * RelBPMData[i]) (0.000111)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000072) * RelBPMData[i]) (0.000072)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000135) * RelBPMData[i]) (-0.000135)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000018) * RelBPMData[i]) (0.000018)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000646) * RelBPMData[i]) (-0.000646)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000487) * RelBPMData[i]) (-0.000487)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000252) * RelBPMData[i]) (-0.000252)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000190) * RelBPMData[i]) (0.000190)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000214) * RelBPMData[i]) (0.000214)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000379) * RelBPMData[i]) (-0.000379)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000336) * RelBPMData[i]) (-0.000336)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000134) * RelBPMData[i]) (-0.000134)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000482) * RelBPMData[i]) (-0.000482)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000308) * RelBPMData[i]) (-0.000308)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000072) * RelBPMData[i]) (-0.000072)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000596) * RelBPMData[i]) (-0.000596)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000134) * RelBPMData[i]) (0.000134)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000015) * RelBPMData[i]) (-0.000015)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000154) * RelBPMData[i]) (-0.000154)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000177) * RelBPMData[i]) (0.000177)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000447) * RelBPMData[i]) (-0.000447)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000015) * RelBPMData[i]) (0.000015)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000163) * RelBPMData[i]) (0.000163)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000188) * RelBPMData[i]) (0.000188)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000054) * RelBPMData[i]) (0.000054)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000207) * RelBPMData[i]) (-0.000207)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000096) * RelBPMData[i]) (0.000096)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000154) * RelBPMData[i]) (0.000154)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000262) * RelBPMData[i]) (-0.000262)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000221) * RelBPMData[i]) (0.000221)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000502) * RelBPMData[i]) (-0.000502)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000051) * RelBPMData[i]) (-0.000051)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000269) * RelBPMData[i]) (0.000269)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000308) * RelBPMData[i]) (-0.000308)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.001005) * RelBPMData[i]) (-0.001005)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000106) * RelBPMData[i]) (-0.000106)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000003) * RelBPMData[i]) (-0.000003)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000525) * RelBPMData[i]) (-0.000525)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000422) * RelBPMData[i]) (-0.000422)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000008) * RelBPMData[i]) (-0.000008)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000427) * RelBPMData[i]) (-0.000427)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000039) * RelBPMData[i]) (-0.000039)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000130) * RelBPMData[i]) (-0.000130)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000096) * RelBPMData[i]) (-0.000096)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000045) * RelBPMData[i]) (-0.000045)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e01,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (-0.000128) * RelBPMData[i]) (-0.000128)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000018) * RelBPMData[i]) (0.000018)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000338) * RelBPMData[i]) (0.000338)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000335) * RelBPMData[i]) (0.000335)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000269) * RelBPMData[i]) (-0.000269)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000818) * RelBPMData[i]) (0.000818)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000123) * RelBPMData[i]) (0.000123)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000507) * RelBPMData[i]) (0.000507)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000004) * RelBPMData[i]) (0.000004)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000190) * RelBPMData[i]) (-0.000190)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000012) * RelBPMData[i]) (-0.000012)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000160) * RelBPMData[i]) (-0.000160)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000009) * RelBPMData[i]) (-0.000009)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000005) * RelBPMData[i]) (-0.000005)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000196) * RelBPMData[i]) (-0.000196)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000264) * RelBPMData[i]) (-0.000264)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000106) * RelBPMData[i]) (-0.000106)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.001067) * RelBPMData[i]) (0.001067)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000384) * RelBPMData[i]) (0.000384)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000701) * RelBPMData[i]) (0.000701)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000133) * RelBPMData[i]) (0.000133)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000060) * RelBPMData[i]) (0.000060)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000717) * RelBPMData[i]) (-0.000717)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000451) * RelBPMData[i]) (-0.000451)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000304) * RelBPMData[i]) (0.000304)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.001039) * RelBPMData[i]) (0.001039)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000547) * RelBPMData[i]) (0.000547)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000587) * RelBPMData[i]) (0.000587)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000309) * RelBPMData[i]) (0.000309)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000413) * RelBPMData[i]) (0.000413)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000171) * RelBPMData[i]) (0.000171)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000063) * RelBPMData[i]) (0.000063)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000341) * RelBPMData[i]) (0.000341)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000864) * RelBPMData[i]) (-0.000864)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000049) * RelBPMData[i]) (-0.000049)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000184) * RelBPMData[i]) (-0.000184)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000016) * RelBPMData[i]) (0.000016)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000149) * RelBPMData[i]) (0.000149)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000918) * RelBPMData[i]) (-0.000918)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000406) * RelBPMData[i]) (0.000406)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000429) * RelBPMData[i]) (-0.000429)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000016) * RelBPMData[i]) (0.000016)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000506) * RelBPMData[i]) (0.000506)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000185) * RelBPMData[i]) (-0.000185)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000346) * RelBPMData[i]) (-0.000346)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000118) * RelBPMData[i]) (-0.000118)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000023) * RelBPMData[i]) (-0.000023)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000390) * RelBPMData[i]) (-0.000390)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000013) * RelBPMData[i]) (0.000013)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000885) * RelBPMData[i]) (-0.000885)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000020) * RelBPMData[i]) (0.000020)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000156) * RelBPMData[i]) (0.000156)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000010) * RelBPMData[i]) (0.000010)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000178) * RelBPMData[i]) (0.000178)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (-0.000016) * RelBPMData[i]) (-0.000016)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000008) * RelBPMData[i]) (0.000008)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000536) * RelBPMData[i]) (0.000536)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000373) * RelBPMData[i]) (0.000373)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000048) * RelBPMData[i]) (0.000048)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.001117) * RelBPMData[i]) (0.001117)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000196) * RelBPMData[i]) (0.000196)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000402) * RelBPMData[i]) (0.000402)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000006) * RelBPMData[i]) (0.000006)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000088) * RelBPMData[i]) (-0.000088)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000011) * RelBPMData[i]) (-0.000011)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000171) * RelBPMData[i]) (-0.000171)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000018) * RelBPMData[i]) (0.000018)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000025) * RelBPMData[i]) (0.000025)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000049) * RelBPMData[i]) (-0.000049)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000366) * RelBPMData[i]) (-0.000366)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000055) * RelBPMData[i]) (-0.000055)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000719) * RelBPMData[i]) (0.000719)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000445) * RelBPMData[i]) (0.000445)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000589) * RelBPMData[i]) (0.000589)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000021) * RelBPMData[i]) (0.000021)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000150) * RelBPMData[i]) (0.000150)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.001087) * RelBPMData[i]) (-0.001087)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000437) * RelBPMData[i]) (-0.000437)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000177) * RelBPMData[i]) (0.000177)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000602) * RelBPMData[i]) (0.000602)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000280) * RelBPMData[i]) (0.000280)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000538) * RelBPMData[i]) (0.000538)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000567) * RelBPMData[i]) (0.000567)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000280) * RelBPMData[i]) (0.000280)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000465) * RelBPMData[i]) (0.000465)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000105) * RelBPMData[i]) (-0.000105)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000345) * RelBPMData[i]) (0.000345)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000881) * RelBPMData[i]) (-0.000881)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000240) * RelBPMData[i]) (-0.000240)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000142) * RelBPMData[i]) (-0.000142)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000015) * RelBPMData[i]) (0.000015)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000158) * RelBPMData[i]) (0.000158)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000646) * RelBPMData[i]) (-0.000646)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000537) * RelBPMData[i]) (0.000537)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000673) * RelBPMData[i]) (-0.000673)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000004) * RelBPMData[i]) (0.000004)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000457) * RelBPMData[i]) (0.000457)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000225) * RelBPMData[i]) (-0.000225)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000233) * RelBPMData[i]) (-0.000233)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000132) * RelBPMData[i]) (-0.000132)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000022) * RelBPMData[i]) (-0.000022)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000287) * RelBPMData[i]) (-0.000287)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000081) * RelBPMData[i]) (0.000081)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000937) * RelBPMData[i]) (-0.000937)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000033) * RelBPMData[i]) (0.000033)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000005) * RelBPMData[i]) (0.000005)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000075) * RelBPMData[i]) (0.000075)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000130) * RelBPMData[i]) (0.000130)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000165) * RelBPMData[i]) (0.000165)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (-0.000257) * RelBPMData[i]) (-0.000257)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000049) * RelBPMData[i]) (0.000049)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000251) * RelBPMData[i]) (-0.000251)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000375) * RelBPMData[i]) (0.000375)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000587) * RelBPMData[i]) (-0.000587)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000303) * RelBPMData[i]) (-0.000303)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000164) * RelBPMData[i]) (-0.000164)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000294) * RelBPMData[i]) (-0.000294)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000044) * RelBPMData[i]) (0.000044)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000121) * RelBPMData[i]) (-0.000121)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000138) * RelBPMData[i]) (0.000138)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000176) * RelBPMData[i]) (-0.000176)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000086) * RelBPMData[i]) (-0.000086)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000008) * RelBPMData[i]) (0.000008)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000340) * RelBPMData[i]) (-0.000340)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000086) * RelBPMData[i]) (0.000086)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000248) * RelBPMData[i]) (0.000248)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000081) * RelBPMData[i]) (-0.000081)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000079) * RelBPMData[i]) (-0.000079)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000438) * RelBPMData[i]) (-0.000438)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000157) * RelBPMData[i]) (-0.000157)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000296) * RelBPMData[i]) (-0.000296)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000189) * RelBPMData[i]) (-0.000189)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000355) * RelBPMData[i]) (-0.000355)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000384) * RelBPMData[i]) (-0.000384)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000406) * RelBPMData[i]) (-0.000406)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000499) * RelBPMData[i]) (-0.000499)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000447) * RelBPMData[i]) (-0.000447)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000183) * RelBPMData[i]) (-0.000183)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000013) * RelBPMData[i]) (-0.000013)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000434) * RelBPMData[i]) (0.000434)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000061) * RelBPMData[i]) (-0.000061)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000230) * RelBPMData[i]) (-0.000230)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000166) * RelBPMData[i]) (-0.000166)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000076) * RelBPMData[i]) (0.000076)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000006) * RelBPMData[i]) (0.000006)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000022) * RelBPMData[i]) (-0.000022)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000089) * RelBPMData[i]) (-0.000089)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000386) * RelBPMData[i]) (-0.000386)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000528) * RelBPMData[i]) (-0.000528)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000286) * RelBPMData[i]) (-0.000286)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000017) * RelBPMData[i]) (0.000017)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000502) * RelBPMData[i]) (0.000502)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000294) * RelBPMData[i]) (-0.000294)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000010) * RelBPMData[i]) (-0.000010)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000573) * RelBPMData[i]) (-0.000573)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000020) * RelBPMData[i]) (-0.000020)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000364) * RelBPMData[i]) (-0.000364)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000281) * RelBPMData[i]) (-0.000281)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.001195) * RelBPMData[i]) (-0.001195)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000295) * RelBPMData[i]) (-0.000295)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000023) * RelBPMData[i]) (0.000023)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000101) * RelBPMData[i]) (0.000101)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000027) * RelBPMData[i]) (0.000027)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000487) * RelBPMData[i]) (0.000487)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (0.000146) * RelBPMData[i]) (0.000146)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000238) * RelBPMData[i]) (-0.000238)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000283) * RelBPMData[i]) (0.000283)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000046) * RelBPMData[i]) (-0.000046)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000228) * RelBPMData[i]) (-0.000228)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000353) * RelBPMData[i]) (-0.000353)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000094) * RelBPMData[i]) (-0.000094)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000148) * RelBPMData[i]) (-0.000148)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000066) * RelBPMData[i]) (0.000066)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000147) * RelBPMData[i]) (-0.000147)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000001) * RelBPMData[i]) (-0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000141) * RelBPMData[i]) (-0.000141)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000487) * RelBPMData[i]) (-0.000487)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000028) * RelBPMData[i]) (0.000028)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000280) * RelBPMData[i]) (-0.000280)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000581) * RelBPMData[i]) (-0.000581)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000668) * RelBPMData[i]) (0.000668)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000231) * RelBPMData[i]) (0.000231)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000040) * RelBPMData[i]) (0.000040)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000701) * RelBPMData[i]) (-0.000701)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000741) * RelBPMData[i]) (-0.000741)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000051) * RelBPMData[i]) (-0.000051)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000038) * RelBPMData[i]) (-0.000038)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000147) * RelBPMData[i]) (-0.000147)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000104) * RelBPMData[i]) (-0.000104)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000050) * RelBPMData[i]) (0.000050)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000619) * RelBPMData[i]) (-0.000619)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000503) * RelBPMData[i]) (-0.000503)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000170) * RelBPMData[i]) (-0.000170)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000004) * RelBPMData[i]) (0.000004)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000146) * RelBPMData[i]) (0.000146)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000033) * RelBPMData[i]) (0.000033)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000303) * RelBPMData[i]) (0.000303)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000139) * RelBPMData[i]) (0.000139)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000255) * RelBPMData[i]) (0.000255)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000052) * RelBPMData[i]) (0.000052)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000060) * RelBPMData[i]) (-0.000060)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000035) * RelBPMData[i]) (0.000035)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000072) * RelBPMData[i]) (0.000072)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000149) * RelBPMData[i]) (0.000149)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000051) * RelBPMData[i]) (0.000051)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000014) * RelBPMData[i]) (0.000014)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000295) * RelBPMData[i]) (0.000295)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000308) * RelBPMData[i]) (-0.000308)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000278) * RelBPMData[i]) (0.000278)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000056) * RelBPMData[i]) (-0.000056)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000026) * RelBPMData[i]) (-0.000026)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000233) * RelBPMData[i]) (0.000233)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000487) * RelBPMData[i]) (-0.000487)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000017) * RelBPMData[i]) (0.000017)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000361) * RelBPMData[i]) (-0.000361)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000058) * RelBPMData[i]) (-0.000058)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000031) * RelBPMData[i]) (0.000031)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000130) * RelBPMData[i]) (-0.000130)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000110) * RelBPMData[i]) (0.000110)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e01,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (-0.000015) * RelBPMData[i]) (-0.000015)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000156) * RelBPMData[i]) (0.000156)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000519) * RelBPMData[i]) (0.000519)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000317) * RelBPMData[i]) (0.000317)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000044) * RelBPMData[i]) (0.000044)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000665) * RelBPMData[i]) (0.000665)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000325) * RelBPMData[i]) (0.000325)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000186) * RelBPMData[i]) (0.000186)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000014) * RelBPMData[i]) (-0.000014)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000116) * RelBPMData[i]) (-0.000116)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000093) * RelBPMData[i]) (0.000093)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000296) * RelBPMData[i]) (-0.000296)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000122) * RelBPMData[i]) (-0.000122)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000057) * RelBPMData[i]) (0.000057)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000140) * RelBPMData[i]) (-0.000140)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000356) * RelBPMData[i]) (-0.000356)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000084) * RelBPMData[i]) (0.000084)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.001279) * RelBPMData[i]) (0.001279)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000497) * RelBPMData[i]) (0.000497)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000489) * RelBPMData[i]) (0.000489)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000255) * RelBPMData[i]) (-0.000255)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000386) * RelBPMData[i]) (0.000386)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000617) * RelBPMData[i]) (-0.000617)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000612) * RelBPMData[i]) (-0.000612)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000168) * RelBPMData[i]) (0.000168)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000673) * RelBPMData[i]) (0.000673)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000182) * RelBPMData[i]) (0.000182)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000545) * RelBPMData[i]) (0.000545)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000267) * RelBPMData[i]) (0.000267)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000410) * RelBPMData[i]) (0.000410)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000384) * RelBPMData[i]) (0.000384)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000004) * RelBPMData[i]) (-0.000004)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000398) * RelBPMData[i]) (0.000398)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000559) * RelBPMData[i]) (-0.000559)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000237) * RelBPMData[i]) (-0.000237)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000402) * RelBPMData[i]) (-0.000402)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000016) * RelBPMData[i]) (0.000016)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000069) * RelBPMData[i]) (0.000069)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.001179) * RelBPMData[i]) (-0.001179)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000654) * RelBPMData[i]) (0.000654)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000143) * RelBPMData[i]) (-0.000143)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000011) * RelBPMData[i]) (0.000011)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000403) * RelBPMData[i]) (0.000403)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000242) * RelBPMData[i]) (-0.000242)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000407) * RelBPMData[i]) (-0.000407)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000081) * RelBPMData[i]) (-0.000081)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000050) * RelBPMData[i]) (-0.000050)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000639) * RelBPMData[i]) (-0.000639)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000094) * RelBPMData[i]) (0.000094)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000568) * RelBPMData[i]) (-0.000568)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000301) * RelBPMData[i]) (0.000301)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000014) * RelBPMData[i]) (0.000014)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000128) * RelBPMData[i]) (0.000128)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000173) * RelBPMData[i]) (0.000173)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000262) * RelBPMData[i]) (0.000262)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (-0.000063) * RelBPMData[i]) (-0.000063)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000174) * RelBPMData[i]) (0.000174)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.001029) * RelBPMData[i]) (0.001029)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000322) * RelBPMData[i]) (0.000322)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000125) * RelBPMData[i]) (0.000125)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.001218) * RelBPMData[i]) (0.001218)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000339) * RelBPMData[i]) (0.000339)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000777) * RelBPMData[i]) (0.000777)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000003) * RelBPMData[i]) (-0.000003)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000071) * RelBPMData[i]) (-0.000071)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000020) * RelBPMData[i]) (0.000020)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000169) * RelBPMData[i]) (-0.000169)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000046) * RelBPMData[i]) (-0.000046)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000007) * RelBPMData[i]) (0.000007)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000151) * RelBPMData[i]) (-0.000151)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000361) * RelBPMData[i]) (-0.000361)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000023) * RelBPMData[i]) (0.000023)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000792) * RelBPMData[i]) (0.000792)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000108) * RelBPMData[i]) (0.000108)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000538) * RelBPMData[i]) (0.000538)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000260) * RelBPMData[i]) (-0.000260)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000206) * RelBPMData[i]) (0.000206)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.001467) * RelBPMData[i]) (-0.001467)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000557) * RelBPMData[i]) (-0.000557)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000229) * RelBPMData[i]) (0.000229)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000569) * RelBPMData[i]) (0.000569)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000105) * RelBPMData[i]) (0.000105)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000451) * RelBPMData[i]) (0.000451)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000218) * RelBPMData[i]) (0.000218)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000359) * RelBPMData[i]) (0.000359)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000271) * RelBPMData[i]) (0.000271)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000024) * RelBPMData[i]) (-0.000024)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000629) * RelBPMData[i]) (0.000629)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000477) * RelBPMData[i]) (-0.000477)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000082) * RelBPMData[i]) (-0.000082)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000275) * RelBPMData[i]) (-0.000275)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000011) * RelBPMData[i]) (-0.000011)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000213) * RelBPMData[i]) (0.000213)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000735) * RelBPMData[i]) (-0.000735)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000310) * RelBPMData[i]) (0.000310)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000265) * RelBPMData[i]) (-0.000265)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000010) * RelBPMData[i]) (0.000010)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000501) * RelBPMData[i]) (0.000501)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000263) * RelBPMData[i]) (-0.000263)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000195) * RelBPMData[i]) (-0.000195)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000071) * RelBPMData[i]) (-0.000071)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000012) * RelBPMData[i]) (-0.000012)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000376) * RelBPMData[i]) (-0.000376)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000074) * RelBPMData[i]) (0.000074)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000954) * RelBPMData[i]) (-0.000954)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000004) * RelBPMData[i]) (0.000004)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000003) * RelBPMData[i]) (0.000003)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000109) * RelBPMData[i]) (0.000109)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000062) * RelBPMData[i]) (0.000062)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000070) * RelBPMData[i]) (0.000070)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e08,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+resX (0.000000) + ((RelBPMData[i] (0.000067) * RelBPMData[i]) (0.000067)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000012) * RelBPMData[i]) (0.000012)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000104) * RelBPMData[i]) (0.000104)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000300) * RelBPMData[i]) (0.000300)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000314) * RelBPMData[i]) (-0.000314)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000171) * RelBPMData[i]) (0.000171)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000512) * RelBPMData[i]) (0.000512)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000210) * RelBPMData[i]) (-0.000210)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000016) * RelBPMData[i]) (0.000016)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000100) * RelBPMData[i]) (-0.000100)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000097) * RelBPMData[i]) (0.000097)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000452) * RelBPMData[i]) (-0.000452)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000179) * RelBPMData[i]) (-0.000179)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000023) * RelBPMData[i]) (0.000023)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000437) * RelBPMData[i]) (-0.000437)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000613) * RelBPMData[i]) (-0.000613)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000105) * RelBPMData[i]) (0.000105)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000870) * RelBPMData[i]) (0.000870)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000184) * RelBPMData[i]) (-0.000184)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000040) * RelBPMData[i]) (0.000040)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000005) * RelBPMData[i]) (-0.000005)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000066) * RelBPMData[i]) (0.000066)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000306) * RelBPMData[i]) (0.000306)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000425) * RelBPMData[i]) (-0.000425)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000124) * RelBPMData[i]) (-0.000124)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000166) * RelBPMData[i]) (-0.000166)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000226) * RelBPMData[i]) (-0.000226)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000479) * RelBPMData[i]) (0.000479)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000079) * RelBPMData[i]) (-0.000079)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000441) * RelBPMData[i]) (0.000441)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000080) * RelBPMData[i]) (-0.000080)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000143) * RelBPMData[i]) (-0.000143)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000275) * RelBPMData[i]) (-0.000275)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000022) * RelBPMData[i]) (0.000022)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000121) * RelBPMData[i]) (-0.000121)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000043) * RelBPMData[i]) (-0.000043)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000001) * RelBPMData[i]) (0.000001)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000375) * RelBPMData[i]) (0.000375)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000467) * RelBPMData[i]) (-0.000467)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000260) * RelBPMData[i]) (0.000260)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000490) * RelBPMData[i]) (-0.000490)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000011) * RelBPMData[i]) (-0.000011)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000316) * RelBPMData[i]) (0.000316)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000161) * RelBPMData[i]) (-0.000161)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000053) * RelBPMData[i]) (-0.000053)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000304) * RelBPMData[i]) (-0.000304)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000016) * RelBPMData[i]) (-0.000016)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000219) * RelBPMData[i]) (-0.000219)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000121) * RelBPMData[i]) (0.000121)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (-0.000649) * RelBPMData[i]) (-0.000649)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000310) * RelBPMData[i]) (0.000310)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000009) * RelBPMData[i]) (0.000009)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000194) * RelBPMData[i]) (0.000194)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000031) * RelBPMData[i]) (0.000031)* BPM_pvs_inOC[i] (0.000000))
+resX (0.000000) + ((RelBPMData[i] (0.000291) * RelBPMData[i]) (0.000291)* BPM_pvs_inOC[i] (0.000000))
+
+rmsX: RMS  0.000 microns
+rmsY: RMS  0.000 microns
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr1 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr2 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr3 =[0]
+acquire is now set 
+still in poll loop : CTRL = 0x3f13 StatusRegsiter == 0x3e09,  waiting until it contains = 0x02
+fifo full or half full 0x3e0a, bustin out
+data words read = 16256 status = 0
+Reading boardPtr4 =[0]
+
+]0;root@IOC2400-104:/etc/init.d[root@IOC2400-104 init.d]# 
+Script done on Mon Nov 12 20:53:10 2007

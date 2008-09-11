@@ -1,0 +1,74 @@
+
+record(ao, "BPM$(clsName):x")
+{
+	field(DESC, "SrBpmx $(clsName)")
+	field(DTYP,"Soft Channel")
+	field(EGU, "m")
+	field(HIHI, "$(hhiLimit)")
+	field(HIGH, "$(hiLimit)")
+	field(LOW,  "$(lowLimit)")
+	field(LOLO, "$(llowLimit)")
+	field(FLNK, "BPM$(clsName):x:frmOff")
+	
+}
+
+record(ao, "BPM$(clsName):y")
+{
+	field(DESC, "SrBpmy $(clsName)")
+	field(DTYP,"Soft Channel")
+	field(EGU, "m")
+	field(HIHI, "$(hhiLimit)")
+	field(HIGH, "$(hiLimit)")
+	field(LOW,  "$(lowLimit)")
+	field(LOLO, "$(llowLimit)")
+	field(FLNK, "BPM$(clsName):y:frmOff")	
+	
+}
+
+
+
+record(ao, "BPM$(clsName):x:offset")
+{
+	field(DESC, "SrBpmx $(clsName)")
+	field(DTYP,"Soft Channel")
+	field(EGU, "m")
+	
+}
+
+record(ao, "BPM$(clsName):y:offset")
+{
+	field(DESC, "SrBpmy $(clsName)")
+	field(DTYP,"Soft Channel")
+	field(EGU, "m")
+	
+}
+
+record(bo, "BPM$(clsName):x:inOC")
+{
+	field(DESC, "inc $(clsName) in OC?")
+}
+
+record(bo, "BPM$(clsName):y:inOC")
+{
+	field(DESC, "inc $(clsName) in OC?")
+}
+
+record(calc, "BPM$(clsName):x:frmOff")
+{
+	field(DESC, "$(clsName) from Offset")
+	field(INPA,"BPM$(clsName):x:")
+	field(INPB, "BPM$(clsName):x:offset")
+	field(CALC, "A-B")
+	field(EGU, "m")
+	
+}
+
+record(calc, "BPM$(clsName):y:frmOff")
+{
+	field(DESC, "$(clsName) from Offset")
+	field(INPA,"BPM$(clsName):y")
+	field(INPB, "BPM$(clsName):y:offset")
+	field(CALC, "A-B")
+	field(EGU, "m")
+	
+}

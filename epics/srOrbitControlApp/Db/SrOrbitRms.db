@@ -1,0 +1,29 @@
+
+#placeholder pv for rms orbit
+record(ai, "$(clsName):x:rms")
+{
+	field(DESC, "horiz SR orbit rms")
+}
+
+
+record(ai, "$(clsName):y:rms")
+{
+	field(DESC, "vertical SR orbit rms")
+}
+
+
+record(waveform, "$(clsName):x:refOrbit")
+{
+	field(DESC, "Horiz ref orbit")
+	field(DTYP,"Soft Channel")
+	field(FTVL, "DOUBLE")
+	field(NELM, "48")
+}
+
+record(waveform, "$(clsName):y:refOrbit")
+{
+	field(DESC, "Vert ref orbit")
+	field(DTYP,"Soft Channel")
+	field(FTVL, "DOUBLE")
+	field(NELM, "48")
+}

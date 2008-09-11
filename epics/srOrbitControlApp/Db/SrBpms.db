@@ -1,0 +1,20 @@
+record(waveform, "$(board_name):ArrayData") {
+	field(DESC, "SR Bpm data")
+#	field(DTYP, "Soft Channel")
+#	field(INP, "0")
+	field(SCAN, "Passive")
+	field(FTVL, "DOUBLE")
+    field(NELM, "$(numElem)")
+}
+
+#record(asyn, "$(board_name):ArrayData:raw") {
+#	field(PORT, "$(PORT)")
+#	field(ADDR, "$(ADDR)")
+#	field(SCAN, "Event")
+#	field(TMOD, "Read")
+#	field(IFACE, "asynFloat64")
+#    field(IFMT, "Binary")
+######## FIXME ######################
+#    field(IMAX, "$(numBytes)")
+#    field(FLNK, "$(board_name):ArrayData")
+#}
