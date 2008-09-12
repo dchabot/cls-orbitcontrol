@@ -32,14 +32,14 @@ DioWriteServer(rtems_task_argument arg) {
 	if(dioWriteClientFD < 0) {
 		goto bailout;
 	}
-	
+
 	/* wrap this socket in a stream... */
 	fp = fdopen(dioWriteClientFD, "r+");
 	if(fp==NULL) {
 		syslog(LOG_INFO, "DioWriteServer: fdopen failure -- %s\n", strerror(errno));
 		goto bailout;
 	}
-	
+
 	syslog(LOG_INFO, "DioWriteServer: entering main loop...\n");
 	for(;;) {
 		/* get PS-controller info from client, parse into DioWriteMsg, send to DaqController */
@@ -53,21 +53,21 @@ DioWriteServer(rtems_task_argument arg) {
 		if(len<=1) { continue; }
 		/* replace newline with null-terminator... */
 		cbuf[len-1] = '\0';
-		
+
 		/* parse string into DioWriteMsg fields... */
 		dwMsg.crateID = strtoul(strtok(cbuf," "),NULL,10);
 		dwMsg.vmeBaseAddr = strtoul(strtok(NULL," "),NULL,16);
 		dwMsg.modOffset = strtoul(strtok(NULL," "),NULL,10);
 		dwMsg.pwrSupChan = strtoul(strtok(NULL," "),NULL,10);
 		dwMsg.pwrSupData = strtol(strtok(NULL," "),NULL,10);
-		
+
 		/*syslog(LOG_INFO, "DioWriteServer: crateID=%d vmeBaseAddr=%#x modOffset=%d pwrSupChan=%d pwrSupData=%d",
 							dwMsg.crateID,dwMsg.vmeBaseAddr,dwMsg.modOffset,dwMsg.pwrSupChan,dwMsg.pwrSupData);
 		*/
 		SetPwrSupply(crateArray[dwMsg.crateID]->fd,(dwMsg.vmeBaseAddr+dwMsg.modOffset),dwMsg.pwrSupChan,dwMsg.pwrSupData);
 	} /* end for(;;) */
-	
-bailout:	
+
+bailout:
 	/*resource clean up... */
 	syslog(LOG_INFO,"DioWriteServer: restarting...\n");
 	if(fp != NULL) {
@@ -83,7 +83,7 @@ bailout:
 
 void StartDioWriteServer(void *arg) {
 	rtems_status_code rc;
-	
+
 	rc = rtems_task_create(DioWriteServerName,
 			DefaultPriority+4/*priority*/,
 			RTEMS_MINIMUM_STACK_SIZE*4,
@@ -91,13 +91,16 @@ void StartDioWriteServer(void *arg) {
 			RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),
 			&dioWriteServerTID);
 	TestDirective(rc, "rtems_task_create()");
-	
+
 	rc = rtems_task_start(dioWriteServerTID, DioWriteServer, (rtems_task_argument)arg);
 	TestDirective(rc, "rtems_task_start()");
 }
 
 void DestroyDioWriteServer(void) {
-	
-	if(dioWriteClientFD > 0) { close(dioWriteClientFD); dioWriteClientFD = -1; }
+
+	if(dioWriteClientFD > 0) {
+		close(dioWriteClientFD);
+		dioWriteClientFD = -1;
+	}
 	rtems_task_delete(dioWriteServerTID);
 }

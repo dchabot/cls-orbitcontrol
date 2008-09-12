@@ -1,4 +1,4 @@
-#!../../bin/linux-x86/rtemsOrbCor -d
+#!../../bin/linux-x86/srOrbitControl -d
 
 ## You may have to change rtemsOrbCor to something else
 ## everywhere it appears in this file
