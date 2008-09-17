@@ -2,35 +2,18 @@
 
 #include <sis1100_api.h>
 #include <utils.h> /* tscSpinDelay() */
-
-/*#define DAC_AMP_CONV_FACTOR 42234.31*/
-#define DAC_AMP_CONV_FACTOR 1
-
-#define OUTPUT_REG_OFFSET 0x08
-#define INPUT_REG_OFFSET 0x04
-#define CONTROL_REG_OFFSET 0x02
+#include <psDefs.h>
 
 
 
-#define PS_CHANNEL_OFFSET 24
-#define PS_CHANNEL_MASK 0xF
-
-
-#define PS_LATCH 0x20000000
-#define DROP_PS_LATCH 0xDFFFFFFF
-
-#define UPDATE 0x80000000
-#define DROP_UPDATE 0x7FFFFFFF
-
-
-void SetPwrSupply(int fd, uint32_t vmeAddr, uint32_t channel, uint32_t ampSetPoint) {
+void SetPwrSupply(int fd, uint32_t vmeAddr, uint32_t channel, uint32_t setpoint) {
 	int dacSetPoint;
     uint32_t value = 0;
     int rc;
 
 
-    dacSetPoint = ampSetPoint * DAC_AMP_CONV_FACTOR;
-    
+    dacSetPoint = setpoint * DAC_AMP_CONV_FACTOR;
+
 	value = (channel & PS_CHANNEL_MASK) << PS_CHANNEL_OFFSET;
     value = value | (dacSetPoint & 0xFFFFFF);
 
@@ -63,7 +46,7 @@ void SetPwrSupply(int fd, uint32_t vmeAddr, uint32_t channel, uint32_t ampSetPoi
     }
 	/* wait some time */
 	usecSpinDelay(7);
-    
+
     /* raise the UPDATE bit */
     //VmeWrite_32(mod,vmeAddr,UPDATE);
 	rc=vme_A24D32_write(fd,vmeAddr,UPDATE);
@@ -73,7 +56,7 @@ void SetPwrSupply(int fd, uint32_t vmeAddr, uint32_t channel, uint32_t ampSetPoi
     }
     /* wait some time */
     usecSpinDelay(7);
-         
+
     /* drop the UPDATE bit */
 	//VmeWrite_32(mod,vmeAddr,0x00000000);
     rc=vme_A24D32_write(fd,vmeAddr,0x00000000);

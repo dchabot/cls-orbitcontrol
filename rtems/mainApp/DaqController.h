@@ -10,11 +10,9 @@
 #define DaqThreadPriority DefaultPriority
 #define DaqControllerThreadName		rtems_build_name('D','A','Q','C')
 
-#define NumDaqStates 3
-#define DaqState_Stopped		0
-#define DaqState_Initializing	1
-#define DaqState_Acquiring		2
-
+#define NumDaqStates 4
+enum DaqStates {STOPPED,INITIALIZING,ACQUIRING,CORRECTING};
+static char *DaqStateNames[] = {"STOPPED","INITIALIZING","ACQUIRING","CORRECTING"};
 typedef struct {
 	int state;
 	char *stateName;
