@@ -1,0 +1,15 @@
+# SRBpms.template
+#
+# Created on: Sep 16, 2008
+#     Author: chabotd
+
+record(subArray, "BPM$(clsName):x") {
+	field(INP, "bpm:mux.VAL CP")
+	field(DTYP, "Soft Channel")
+	field(FTVL, "DOUBLE")
+	field(MALM, "108")
+	field(NELM, "1")
+	field(INDX, "$(wfIndex)")
+	field(EGU, "m")
+}
+

@@ -1,0 +1,13 @@
+# BpmArray.db
+#
+# Created on: Sep 16, 2008
+#     Author: chabotd
+
+record(waveform, "bpm:mux") {
+	field(DESC, "SR BPM conglomerate")
+	field(DTYP, "Soft Channel")
+	field(INP, "0")
+	field(SCAN, "Passive")
+	field(FTVL, "DOUBLE")
+    field(NELM, "108")
+}
