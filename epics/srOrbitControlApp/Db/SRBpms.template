@@ -1,9 +1,8 @@
-# SRBpms.template
 #
 # Created on: Sep 16, 2008
 #     Author: chabotd
 
-record(subArray, "BPM$(clsName):y") {
+record(subArray, "BPM$(clsName):$(xORy)") {
 	field(INP, "bpm:mux.VAL CP")
 	field(DTYP, "Soft Channel")
 	field(FTVL, "DOUBLE")
@@ -12,3 +11,4 @@ record(subArray, "BPM$(clsName):y") {
 	field(INDX, "$(wfIndex)")
 	field(EGU, "m")
 }
+
