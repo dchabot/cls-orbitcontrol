@@ -1,4 +1,4 @@
-file SRBpms-x.template {
+file SRBpms.template {
 #                    
     pattern
     {  clsName	wfIndex	xORy}
