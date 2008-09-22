@@ -37,7 +37,7 @@ srOrbitControl_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 #      2)To build sncExample SNCSEQ must be defined in <top>/configure/RELEASE
 
 #The following builds sncExample as a component of srOrbitControl
-srOrbitControl_SRCS += ocFsm.st
+srOrbitControl_SRCS += ocFsm-new.st
 srOrbitControl_LIBS += seq pv
 
 srOrbitControl_LIBS += asyn

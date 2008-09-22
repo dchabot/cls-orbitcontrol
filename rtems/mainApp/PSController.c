@@ -7,8 +7,10 @@
 
 #include <PSController.h> /* #include <vmeDefs.h> */
 #include <psDefs.h>
+#include <ocmDefs.h> /* #define NumOCM */
 #include <utils.h>
 #include <sis1100_api.h>
+#include <vmic2536.h>
 
 #include <string.h>
 
@@ -48,22 +50,24 @@ int isInCorrection(PSController *ctlr, uint8_t *answer) {
 	return 0;
 }
 
-void UpdateSetPoint(VmeModule *mod, uint32_t vmeAddr, uint32_t channel, uint32_t setpoint) {
+void UpdateSetPoint(PSController* ctlr) {
 	int dacSetPoint;
     uint32_t value = 0;
     int rc;
 
 
-    dacSetPoint = setpoint * DAC_AMP_CONV_FACTOR;
+    dacSetPoint = ctlr->setpoint * DAC_AMP_CONV_FACTOR;
 
-	value = (channel & PS_CHANNEL_MASK) << PS_CHANNEL_OFFSET;
+	value = (ctlr->channel & PS_CHANNEL_MASK) << PS_CHANNEL_OFFSET;
     value = value | (dacSetPoint & 0xFFFFFF);
 
     /* write the 32 bits out to the power supply*/
 #ifdef USE_MACRO_VME_ACCESSORS
-    VmeWrite_32(mod,vmeAddr,value);
+    VmeWrite_32(ctlr->mod,VMIC_2536_OUTPUT_REG_OFFSET,value);
 #else
-    rc=vme_A24D32_write(mod->crate->fd,vmeAddr,value);
+    rc=vme_A24D32_write(ctlr->mod->crate->fd,
+						ctlr->mod->vmeBaseAddr+VMIC_2536_OUTPUT_REG_OFFSET,
+						value);
     if(rc) {
     	syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
     	return;
@@ -74,9 +78,11 @@ void UpdateSetPoint(VmeModule *mod, uint32_t vmeAddr, uint32_t channel, uint32_t
 
     /* toggle the PS_LATCH bit */
 #ifdef USE_MACRO_VME_ACCESSORS
-    VmeWrite_32(mod,vmeAddr,(value | PS_LATCH));
+    VmeWrite_32(ctlr->mod,VMIC_2536_OUTPUT_REG_OFFSET,(value | PS_LATCH));
 #else
-    rc=vme_A24D32_write(mod->crate->fd,vmeAddr,(value | PS_LATCH));
+    rc=vme_A24D32_write(ctlr->mod->crate->fd,
+						ctlr->mod->vmeBaseAddr+VMIC_2536_OUTPUT_REG_OFFSET,
+						(value | PS_LATCH));
     if(rc) {
     	syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
     	return;
@@ -87,9 +93,11 @@ void UpdateSetPoint(VmeModule *mod, uint32_t vmeAddr, uint32_t channel, uint32_t
 
     /* drop the PS_LATCH bit and data bits */
 #ifdef USE_MACRO_VME_ACCESSORS
-    VmeWrite_32(mod,vmeAddr,0x00000000);
+    VmeWrite_32(ctlr->mod,VMIC_2536_OUTPUT_REG_OFFSET,0UL);
 #else
-    rc=vme_A24D32_write(mod->crate->fd,vmeAddr,0x00000000);
+    rc=vme_A24D32_write(ctlr->mod->crate->fd,
+						ctlr->mod->vmeBaseAddr+VMIC_2536_OUTPUT_REG_OFFSET,
+						0UL);
     if(rc) {
     	syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
     	return;
@@ -99,14 +107,16 @@ void UpdateSetPoint(VmeModule *mod, uint32_t vmeAddr, uint32_t channel, uint32_t
 	usecSpinDelay(7);
 }
 
-void ToggleUpdateBit(VmeModule *mod, uint32_t vmeAddr, uint32_t channel, uint32_t setpoint) {
+void ToggleUpdateBit(VmeModule* mod) {
 	int rc;
 
 	/* raise the UPDATE bit */
 #ifdef USE_MACRO_VME_ACCESSORS
-    VmeWrite_32(mod,vmeAddr,UPDATE);
+    VmeWrite_32(mod,VMIC_2536_OUTPUT_REG_OFFSET,UPDATE);
 #else
-	rc=vme_A24D32_write(mod->crate->fd,vmeAddr,UPDATE);
+	rc=vme_A24D32_write(mod->crate->fd,
+						mod->vmeBaseAddr+VMIC_2536_OUTPUT_REG_OFFSET,
+						UPDATE);
     if(rc) {
     	syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
     	return;
@@ -117,12 +127,27 @@ void ToggleUpdateBit(VmeModule *mod, uint32_t vmeAddr, uint32_t channel, uint32_
 
     /* drop the UPDATE bit */
 #ifdef USE_MACRO_VME_ACCESSORS
-	VmeWrite_32(mod,vmeAddr,0x00000000);
+	VmeWrite_32(mod,VMIC_2536_OUTPUT_REG_OFFSET,0UL);
 #else
-    rc=vme_A24D32_write(mod->crate->fd,vmeAddr,0x00000000);
+	rc=vme_A24D32_write(mod->crate->fd,
+						mod->vmeBaseAddr+VMIC_2536_OUTPUT_REG_OFFSET,
+						0UL);
 	if(rc) {
     	syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
     	return;
     }
 #endif
+}
+
+void InitializePSControllers(VmeModule **modArray) {
+	int i,j;
+	const int numDioMods = 4;
+
+	for(i=0; i<numDioMods; i++) {
+		for(j=0; j<NumOCM; j++) {
+			if(modArray[i]->crate->id == psCtlrArray[j].crateId) {
+				psCtlrArray[j].mod = modArray[i];
+			}
+		}
+	}
 }

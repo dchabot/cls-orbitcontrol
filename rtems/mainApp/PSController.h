@@ -20,6 +20,7 @@ typedef struct {
 	uint8_t channel;
 	uint8_t inCorrection;
 	uint32_t crateId;
+	VmeModule *mod;
 }PSController;
 
 int getId(PSController* ctlr, char** id);
@@ -34,6 +35,7 @@ int setChannel(PSController* ctlr, uint8_t ch);
 
 int isInCorrection(PSController* ctlr, uint8_t* answer);
 
-void UpdateSetPoint(VmeModule* mod, uint32_t vmeAddr, uint32_t channel, uint32_t setpoint);
-void ToggleUpdateBit(VmeModule* mod, uint32_t vmeAddr, uint32_t channel, uint32_t setpoint);
+void UpdateSetPoint(PSController* ctlr);
+void ToggleUpdateBit(VmeModule* mod);
+void InitializePSControllers(VmeModule** modArray);
 #endif /* PSCONTROLLER_H_ */

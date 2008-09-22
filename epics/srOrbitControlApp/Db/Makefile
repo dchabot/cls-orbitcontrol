@@ -11,18 +11,19 @@ include $(TOP)/configure/CONFIG
 # Create and install (or just install) into <top>/db
 # databases, templates, substitutions like this
 DB += SRBpms.db
-DB += SrBpmOrbit.db
+#DB += SrBpmOrbit.db
 #DB += SrOrbitRms.db
 
 DB += SrOC2408-01.db SrOC2404-05.db SrOC2406-01.db SrOC2406-03.db 
 DB += SrChicane2408-01.db  
 
 DB += BpmArray.db
+DB += OcmArray.db
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
 # <anyname>_template = <templatename>
-SrBpmOrbit_TEMPLATES += SrBpmOrbit.template
+#SrBpmOrbit_TEMPLATES += SrBpmOrbit.template
 SrOC_TEMPLATES += SrOC.template
 BPM_TEMPLATES += SRBpms.template
 
@@ -51,8 +52,8 @@ vpath %.template
 ../O.Common/SrChicane2408-01.db: ../SrChicane2408-01.sub $(SrOC_TEMPLATES)
 	msi -S ../SrChicane2408-01.sub > ../O.Common/SrChicane2408-01.db
 	
-../O.Common/SrBpmOrbit.db: ../SrBpmOrbit.sub $(SrBpmOrbit_TEMPLATES)
-	msi -S ../SrBpmOrbit.sub > ../O.Common/SrBpmOrbit.db
+#../O.Common/SrBpmOrbit.db: ../SrBpmOrbit.sub $(SrBpmOrbit_TEMPLATES)
+#	msi -S ../SrBpmOrbit.sub > ../O.Common/SrBpmOrbit.db
 	
 ../O.Common/SRBpms.db: ../SRBpms.sub $(BPM_TEMPLATES)
 	msi -S ../SRBpms.sub > $@	 

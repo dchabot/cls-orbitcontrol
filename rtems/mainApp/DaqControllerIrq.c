@@ -19,7 +19,8 @@
 #include "AdcDataServer.h"
 #include "DioWriteServer.h"
 #include "DioReadServer.h"
-
+#include <ocmDefs.h>
+#include <OcmSetpointServer.h>
 
 /* number of DIO modules will vary:
  * 	experimental config uses 4,
@@ -117,6 +118,7 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	static ReaderThreadArg *rdrArray[NumReaderThreads];
 	RawDataSegment rdSegments[NumReaderThreads];
 	rtems_id rawDataQID = 0;
+	rtems_id ocmSetpointQID = 0;
 	rtems_id dataHandlerTID = 0;
 	rtems_status_code rc;
 	rtems_event_set rdrSyncEvents = 0;
@@ -214,6 +216,11 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 		syslog(LOG_INFO, "DaqController: can't open %s -- %s\n","adc_1.dat",strerror(errno));
 	}*/
 
+	/* get qid for OCM setpoint updates */
+	InitializePSControllers(dioArray);
+	StartOcmSetpointServer(NULL);
+	rc = rtems_message_queue_ident(OcmSetpointServerName, RTEMS_LOCAL, ocmSetpointQID);
+
 	/* start ADC acquistion on the "edge" of a rtems_clock_tick()...*/
 	rtems_task_wake_after(1);
 	/* enable acquire at the ADCz */
@@ -267,12 +274,28 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 			break;
 		}
 
-		/* If we have PowerSupply setpoints to demux, do that now.
-		 *
-		 * First, demux setpoints and toggle the LATCH of each ps-channel:
-		 */
+		/* If we have PowerSupply setpoints to demux, do that now. */
+		uint32_t ocmSetpointMQpending = 0;
+		rc = rtems_message_queue_get_number_pending(ocmSetpointQID, &ocmSetpointMQpending);
+		TestDirective(rc, "rtems_message_queue_get_number_pending");
+		if(ocmSetpointMQpending > 0) {
+			int32_t *spBuf;
+			size_t spBufSize;
 
-		/* Finally, toggle the UPDATE for each ps-controller (4 total) */
+			rc = rtems_message_queue_receive(ocmSetpointQID, spBuf, &spBufSize, RTEMS_NO_WAIT, RTEMS_NO_TIMEOUT);
+			TestDirective(rc, "rtems_message_queue_receive");
+			/* update the global PSController psControllerArray[NumOCM] */
+			for(i=0; i<NumOCM; i++) {
+				psCtlrArray[i].setpoint = spBuf[i];
+				/* Demux setpoints and toggle the LATCH of each ps-channel: */
+				NewUpdateSetPoint(&psCtlrArray[i]);
+			}
+			/* Finally, toggle the UPDATE for each ps-controller (4 total) */
+			for(i=0; i<NumDioModules; i++) {
+				ToggleUpdateBit(dioArray[i]);
+			}
+			free(spBuf);
+		}
 
 	} /* end main acquisition-loop */
 	AdcStopAcquisition(adcArray, NumAdcModules);
