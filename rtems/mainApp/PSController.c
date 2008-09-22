@@ -5,7 +5,7 @@
  *      Author: djc
  */
 
-#include <PSController.h>
+#include <PSController.h> /* #include <vmeDefs.h> */
 #include <psDefs.h>
 #include <utils.h>
 #include <sis1100_api.h>

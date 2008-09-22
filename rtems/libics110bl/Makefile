@@ -54,7 +54,7 @@ CLEAN_ADDITIONS += $(OBJNAME)
 CLOBBER_ADDITIONS += Depends-o-optimize
 
 ifndef RTEMS_SITE_INSTALLDIR
-RTEMS_SITE_INSTALLDIR = /export/tftpboot/epics/IOC2400-104
+RTEMS_SITE_INSTALLDIR = /export/tftpboot/epics/IOC0000-032
 endif
 
 all:	${ARCH} $(SRCS) $(LIB)
@@ -72,6 +72,6 @@ install:  all
 	$(INSTALL_VARIANT) -m 644 $(LIB) $(LIBDIR)
 # copy to tftp server bootfile location
 installremote: all install
-	scp $(OBJNAME) epics@css1021-102:$(RTEMS_SITE_INSTALLDIR)
+	scp $(OBJNAME) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
 	
 	

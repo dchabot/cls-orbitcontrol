@@ -14,6 +14,8 @@ C_PIECES+=AdcReaderThread
 C_PIECES+=DaqControllerUtils 
 C_PIECES+=DaqControllerIrq
 C_PIECES+=DataHandler
+C_PIECES+=PSController
+
 C_FILES=$(C_PIECES:%=%.c)
 C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
 
@@ -50,7 +52,7 @@ CFLAGS+= -I ./
 
 
 ifndef RTEMS_SITE_INSTALLDIR
-	RTEMS_SITE_INSTALLDIR = /export/tftpboot/epics/IOC2400-104
+	RTEMS_SITE_INSTALLDIR = /export/tftpboot/epics/IOC0000-032
 endif
 
 #
@@ -73,4 +75,4 @@ install:  all
 
 # copy to tftp server bootfile location
 installremote: all install
-	scp $(OBJNAME) epics@css1021-102:$(RTEMS_SITE_INSTALLDIR)
+	scp $(PGMS) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
