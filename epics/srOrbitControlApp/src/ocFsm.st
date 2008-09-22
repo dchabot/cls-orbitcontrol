@@ -1,4 +1,4 @@
-program ocFsm-new
+program ocFsm
 
 #include "bpmPvs_exp.h"
 

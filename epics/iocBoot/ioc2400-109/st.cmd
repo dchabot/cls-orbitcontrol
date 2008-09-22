@@ -52,4 +52,4 @@ cd ${TOP}/iocBoot/${IOC}
 iocInit()
 
 ## Start any sequence programs
-seq ocFsm-new "hostName=ioc0000-032,portNum=24742"
+seq ocFsm "hostName=ioc0000-032,portNum=24742"
