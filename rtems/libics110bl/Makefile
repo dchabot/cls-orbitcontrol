@@ -71,7 +71,8 @@ install:  all
 	$(INSTALL_VARIANT) -m 644 $(OBJNAME) $(LIBDIR)
 	$(INSTALL_VARIANT) -m 644 $(LIB) $(LIBDIR)
 # copy to tftp server bootfile location
-installremote: all install
 	scp $(OBJNAME) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
+	
+
 	
 	

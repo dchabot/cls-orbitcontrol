@@ -5,6 +5,7 @@
 #include <rtems.h>
 #include <vmeDefs.h>
 #include <sis1100_api.h>
+#include <vmic2536.h>
 
 #define DefaultPriority 50
 #define DaqThreadPriority DefaultPriority
@@ -26,7 +27,26 @@ typedef struct {
 
 #define AdcDefaultFrequency 10.0
 
-#define NumDioModules 5
+#define NumDioModules 4
+/* number of DIO modules will vary:
+ * 	experimental config uses 4,
+ * 	production config uses 5
+ */
+typedef struct {
+	uint32_t baseAddr;
+	uint32_t vmeCrateID;
+} DioConfig;
+
+static DioConfig dioConfig[] = {
+		{VMIC_2536_DEFAULT_BASE_ADDR,0},
+		{VMIC_2536_DEFAULT_BASE_ADDR,1},
+		{VMIC_2536_DEFAULT_BASE_ADDR,2},
+		{VMIC_2536_DEFAULT_BASE_ADDR,3}
+#if NumDioModules==5
+		,{VMIC_2536_DEFAULT_BASE_ADDR+0x10,3}
+#endif
+};
+
 
 /* prototypes */
 void InitializeVmeCrates(VmeCrate *crateArray[], int numCrates);

@@ -13,7 +13,7 @@
 #include "DaqController.h"
 #include "DataHandler.h"
 #include "dataDefs.h"
-#include <ocmDefs.h>
+#include "PSController.h" /*for NumOCM definition */
 
 static int ocmSetpointClientFD;
 static rtems_id ocmSetpointServerTID;
@@ -22,13 +22,10 @@ static rtems_id ocmSetpointQID;
 static rtems_task
 OcmSetpointServer(rtems_task_argument arg) {
 	PSController **psp = (PSController **)arg;
+	spMsg msg;
 	rtems_status_code rc = 0;
 	ssize_t n = 0;
 	static int32_t data[NumOCM], *ip;
-
-	rc = rtems_message_queue_create(OcmSetpointQueueName,
-			1,sizeof(int32_t*), RTEMS_LOCAL|RTEMS_FIFO, &ocmSetpointQID);
-	TestDirective(rc, "rtems_message_queue_create()");
 
 	syslog(LOG_INFO, "OcmSetpointServer: waiting for client...\n");
 	/* block-waiting for client to connect */
@@ -36,6 +33,10 @@ OcmSetpointServer(rtems_task_argument arg) {
 	if(ocmSetpointClientFD < 0) {
 		goto bailout;
 	}
+	/* instantiate a msgQ for comm with DaqController */
+	rc = rtems_message_queue_create(OcmSetpointQueueName,
+			1,sizeof(spMsg), RTEMS_LOCAL|RTEMS_FIFO, &ocmSetpointQID);
+	TestDirective(rc, "rtems_message_queue_create()");
 
 	syslog(LOG_INFO, "OcmSetpointServer: entering main loop...\n");
 	for(;;) {
@@ -44,7 +45,7 @@ OcmSetpointServer(rtems_task_argument arg) {
 			syslog(LOG_INFO, "OcmSetpointServer: error reading -- %s\n",strerror(errno));
 			goto bailout;
 		}
-		if(n != NumOCM) {
+		if(n != sizeof(int32_t)*NumOCM) {
 			syslog(LOG_INFO, "OcmSetpointServer: error only read %d bytes!!\n",n);
 			goto bailout;
 		}
@@ -70,7 +71,9 @@ OcmSetpointServer(rtems_task_argument arg) {
 */
 
 		/* Let the DaqController know new OCM setpoints need to be applied. */
-		rc = rtems_message_queue_send(ocmSetpointQID, ip, sizeof(int32_t*));
+		msg.buf = ip;
+		msg.numsp = NumOCM;
+		rc = rtems_message_queue_send(ocmSetpointQID, &msg, sizeof(spMsg));
 		TestDirective(rc, "rtems_message_queue_send");
 	} /* end for(;;) */
 

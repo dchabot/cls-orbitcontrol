@@ -19,28 +19,8 @@
 #include "AdcDataServer.h"
 #include "DioWriteServer.h"
 #include "DioReadServer.h"
-#include <ocmDefs.h>
+#include "PSController.h"
 #include <OcmSetpointServer.h>
-
-/* number of DIO modules will vary:
- * 	experimental config uses 4,
- * 	production config uses 5
- */
-typedef struct {
-	uint32_t baseAddr;
-	uint32_t vmeCrateID;
-} DioConfig;
-
-DioConfig dioConfig[] = {
-		{VMIC_2536_DEFAULT_BASE_ADDR,0},
-		{VMIC_2536_DEFAULT_BASE_ADDR,1},
-		{VMIC_2536_DEFAULT_BASE_ADDR,2},
-		{VMIC_2536_DEFAULT_BASE_ADDR,3}
-#if NumDioModules==5
-		,{VMIC_2536_DEFAULT_BASE_ADDR+0x10,3}
-#endif
-};
-
 
 
 typedef struct {
@@ -136,6 +116,7 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	/* setup software-to-hardware objects */
 	InitializeVmeCrates(crateArray, NumVmeCrates);
 
+	/** Init the ics1100-bl ADC modules */
 	if(adcFrequency==0.0) {
 		/* use default */
 		adcFrequency = AdcDefaultFrequency;
@@ -146,11 +127,6 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 		syslog(LOG_INFO, "Adc[%d] rate is %.6f kHz\n",i,adcTrueFrequency);
 	}
 	adcFramesPerTick = (int)ceil((adcTrueFrequency*HzPerkHz)/((double)rtemsTicksPerSecond));
-
-	for(i=0; i<NumDioModules; i++) {
-		dioArray[i] = InitializeDioModule(crateArray[dioConfig[i].vmeCrateID], dioConfig[i].baseAddr);
-		syslog(LOG_INFO, "Initialized VMIC2536 DIO module[%d]\n",i);
-	}
 
 	/* register ADC interrupt service routines with sis1100 driver... */
 	for(i=0; i<NumAdcModules; i++) {
@@ -206,6 +182,13 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 
 	/* fire up the AdcDataServer,DioWriteServer,DioReadServer interfaces */
 	StartAdcDataServer();
+
+	/** Init the vmic2536 DIO modules */
+	for(i=0; i<NumDioModules; i++) {
+		dioArray[i] = InitializeDioModule(crateArray[dioConfig[i].vmeCrateID], dioConfig[i].baseAddr);
+		syslog(LOG_INFO, "Initialized VMIC2536 DIO module[%d]\n",i);
+	}
+
 	StartDioWriteServer(crateArray);
 	/* FIXME -- unused! OCM feedback channel is via serial links... */
 	StartDioReadServer(crateArray);
@@ -219,7 +202,8 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	/* get qid for OCM setpoint updates */
 	InitializePSControllers(dioArray);
 	StartOcmSetpointServer(NULL);
-	rc = rtems_message_queue_ident(OcmSetpointServerName, RTEMS_LOCAL, ocmSetpointQID);
+	/*rc = rtems_message_queue_ident(OcmSetpointQueueName, RTEMS_LOCAL, &ocmSetpointQID);
+	TestDirective(rc, "rtems_message_queue_ident");*/
 
 	/* start ADC acquistion on the "edge" of a rtems_clock_tick()...*/
 	rtems_task_wake_after(1);
@@ -274,27 +258,32 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 			break;
 		}
 
-		/* If we have PowerSupply setpoints to demux, do that now. */
-		uint32_t ocmSetpointMQpending = 0;
-		rc = rtems_message_queue_get_number_pending(ocmSetpointQID, &ocmSetpointMQpending);
-		TestDirective(rc, "rtems_message_queue_get_number_pending");
-		if(ocmSetpointMQpending > 0) {
-			int32_t *spBuf;
-			size_t spBufSize;
+		/* chk if the OcmSetpointQueue is available for queries: */
+		rc = rtems_message_queue_ident(OcmSetpointQueueName, RTEMS_LOCAL, &ocmSetpointQID);
+		if(rc == RTEMS_SUCCESSFUL) {
+			uint32_t ocmSetpointMQpending = 0;
+			rc = rtems_message_queue_get_number_pending(ocmSetpointQID, &ocmSetpointMQpending);
+			if(TestDirective(rc, "rtems_message_queue_get_number_pending")) {
+				break;
+			}
+			/* If we have PowerSupply setpoints to demux, do that now. */
+			if(ocmSetpointMQpending > 0) {
+				spMsg msg;
+				size_t spBufSize;
 
-			rc = rtems_message_queue_receive(ocmSetpointQID, spBuf, &spBufSize, RTEMS_NO_WAIT, RTEMS_NO_TIMEOUT);
-			TestDirective(rc, "rtems_message_queue_receive");
-			/* update the global PSController psControllerArray[NumOCM] */
-			for(i=0; i<NumOCM; i++) {
-				psCtlrArray[i].setpoint = spBuf[i];
-				/* Demux setpoints and toggle the LATCH of each ps-channel: */
-				NewUpdateSetPoint(&psCtlrArray[i]);
+				rc = rtems_message_queue_receive(ocmSetpointQID, &msg, &spBufSize, RTEMS_NO_WAIT, RTEMS_NO_TIMEOUT);
+				TestDirective(rc, "rtems_message_queue_receive");
+				for(i=0; i<3; i++) {
+					syslog(LOG_INFO, "msg.buf[%i] = %d\n",i,msg.buf[i]);
+				}
+				/* update the global PSController psControllerArray[NumOCM] */
+				UpdateSetPoints(msg.buf);
+				/* Finally, toggle the UPDATE for each ps-controller (4 total) */
+				for(i=0; i<NumDioModules; i++) {
+					ToggleUpdateBit(dioArray[i]);
+				}
+				free(msg.buf);
 			}
-			/* Finally, toggle the UPDATE for each ps-controller (4 total) */
-			for(i=0; i<NumDioModules; i++) {
-				ToggleUpdateBit(dioArray[i]);
-			}
-			free(spBuf);
 		}
 
 	} /* end main acquisition-loop */
@@ -311,7 +300,7 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 
 	/* shut down interrupt generation/handling */
 	for(i=0; i<NumAdcModules; i++) {
-		rc = vme_disable_irq_level(crateArray[i]->fd, (1<<adcArray[i]->irqLevel));
+		rc = vme_disable_irq_level(crateArray[i]->fd, adcArray[i]->irqLevel);
 		if(rc) {
 			syslog(LOG_INFO, "DaqControllerIrq: failed to IRQ-mask for Adc[%d], rc=%d\n",crateArray[i]->fd,rc);
 		}
@@ -340,10 +329,12 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	DestroyAdcDataServer();
 	DestroyDioWriteServer();
 	DestroyDioReadServer();
+	DestroyOcmSetpointServer();
 	/* clean up self */
 	/* FIXME -- rtems_region_delete(rawDataRID);*/
 	syslog(LOG_INFO, "daqControllerIrq exiting... loop iterations=%d\n",x);
-	rtems_task_restart(DaqControllerTID, 0);
+	rtems_task_delete(RTEMS_SELF);
+	//rtems_task_restart(DaqControllerTID, 0);
 	/*if(fp) {
 		fflush(fp);
 		fclose(fp);

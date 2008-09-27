@@ -7,7 +7,7 @@
 
 void FatalErrorHandler(FatalErrorCallback cb) {
 	rtems_interval tps;
-	
+
 	if(cb) {
 		(*cb)();
 	}

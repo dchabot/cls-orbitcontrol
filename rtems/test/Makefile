@@ -5,7 +5,9 @@
 PGMS=${ARCH}/tests.obj
 
 # C source names, if any, go here -- minus the .c
-C_PIECES=readoutTest irqTest mmapTest delayTest  adcAcquireTest SpawnTask adcFifoTest spinTest
+#C_PIECES=readoutTest irqTest mmapTest delayTest
+#C_PIECES+=adcAcquireTest SpawnTask adcFifoTest spinTest
+C_PIECES=dioDemuxTest
 C_FILES=$(C_PIECES:%=%.c)
 C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
 
@@ -62,10 +64,10 @@ RTEMS_SITE_INSTALLDIR = /export/tftpboot/epics/IOC0000-032
 endif
 
 install:  all
-	    $(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_MAKEFILE_PATH)/lib
-
+	$(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_MAKEFILE_PATH)/lib
 # copy to tftp server bootfile location
-installremote: all install
-	scp $(OBJNAME) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
+	scp $(PGMS) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
+	
+
 
 

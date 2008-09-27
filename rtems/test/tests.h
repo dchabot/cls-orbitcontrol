@@ -14,16 +14,17 @@
 
 #define numVmeCrates 4
 #define numAdcModules 4
-static VmeCrate VmeCrates[numVmeCrates];
+static VmeCrate *VmeCrates[numVmeCrates];
 static VmeModule *AdcModules[numAdcModules];
 
+#if 0
 static void InitializeVmeCrates(void) {
 	int i;
-	
+
 	for(i=0; i<numVmeCrates; i++) {
 		int fd;
 		char devName[64];
-		
+
 		VmeCrates[i].id = i;
 		sprintf(devName, "/dev/sis1100_%d",i);
 		fd = open(devName, O_RDWR, 0);
@@ -37,11 +38,11 @@ static void InitializeVmeCrates(void) {
 
 static void ShutdownVmeCrates(void) {
 	int i;
-	
+
 	for(i=0; i<numVmeCrates; i++) {
 		VmeCrates[i].id = 0;
 		close(VmeCrates[i].fd);
 	}
 }
-
+#endif
 #endif /*TESTS_H_*/

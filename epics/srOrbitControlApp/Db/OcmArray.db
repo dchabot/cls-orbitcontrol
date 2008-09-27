@@ -7,21 +7,9 @@
 
 record(waveform, "ocm:array") {
 	field(DESC, "mux'd OCM setpoints")
-	field(DYPE, "Soft Channel")
+	field(DTYP, "Soft Channel")
 	field(SCAN, "Passive")
 	field(INP, "0")
-	field(SCAN, "Passive")
 	field(FTVL, "LONG") #data-type of OCM setpoints
 	field(NELM, "48")
-	field(FLNK, "ocm:array:tcp")
-}
-
-record(asyn, "ocm:array:tcp") {
-	field(PORT, "$(PORT)")
-	field(ADDR, "$(ADDR)")
-	field(SCAN, "Passive")
-	field(TMOD, "Write")
-	field(OFMT, "Binary")
-	field(IFMT, "Binary")
-	field(BOUT, "ocm:array.VAL")
 }

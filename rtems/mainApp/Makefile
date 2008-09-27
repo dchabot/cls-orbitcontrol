@@ -25,7 +25,11 @@ CC_PIECES=
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
-H_FILES=
+H_PIECES=ADCdefs
+H_PIECES+=bpmDefs dataDefs psDefs AdcDataServer AdcReaderThread DaqController
+H_PIECES+=DaqServerUtils DataHandler DioReadServer DioWriteServer OcmSetpointServer
+H_PIECES+=PSController
+H_FILES=$(H_PIECES:%=%.h)
 
 # Assembly source names, if any, go here -- minus the .S
 S_PIECES=
@@ -49,7 +53,7 @@ include $(RTEMS_ROOT)/make/leaf.cfg
 #
 # (OPTIONAL) Add local stuff here using +=
 #
-CFLAGS+= -I ./
+CFLAGS+= -I ./ -I $(RTEMS_MAKEFILE_PATH)/lib/include
 
 
 ifndef RTEMS_SITE_INSTALLDIR
@@ -73,7 +77,7 @@ $(filter %.obj, $(PGMS)): ${OBJS}
 
 install:  all
 	$(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_MAKEFILE_PATH)/lib
-
 # copy to tftp server bootfile location
-installremote: all install
 	scp $(PGMS) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
+	
+

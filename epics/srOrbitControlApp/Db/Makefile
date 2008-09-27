@@ -13,11 +13,13 @@ include $(TOP)/configure/CONFIG
 DB += SRBpms.db
 #DB += SrBpmOrbit.db
 #DB += SrOrbitRms.db
-
+# For control (setpoint) of individual OCM pwr supplies
 DB += SrOC2408-01.db SrOC2404-05.db SrOC2406-01.db SrOC2406-03.db 
 DB += SrChicane2408-01.db  
 
+# for bulk distribution of BPM avgs (automatic via subArray record-type) 
 DB += BpmArray.db
+# for bulk distribution of OCM setpoints 
 DB += OcmArray.db
 
 #----------------------------------------------------
@@ -37,23 +39,23 @@ vpath %.template
 	cp $< $@
 	chmod 664 $@
 	
-../O.Common/SrOC2408-01.db: ../SrOC2408-01.sub $(SrOC_TEMPLATES)
-	msi -S ../SrOC2408-01.sub > ../O.Common/SrOC2408-01.db
+../O.Common/SrOC2408-01.db: ../SrOC2408-01_exp.sub $(SrOC_TEMPLATES)
+	msi -S ../SrOC2408-01_exp.sub > ../O.Common/SrOC2408-01.db
 
-../O.Common/SrOC2404-05.db: ../SrOC2404-05.sub $(SrOC_TEMPLATES)
-	msi -S ../SrOC2404-05.sub > ../O.Common/SrOC2404-05.db
+../O.Common/SrOC2404-05.db: ../SrOC2404-05_exp.sub $(SrOC_TEMPLATES)
+	msi -S ../SrOC2404-05_exp.sub > ../O.Common/SrOC2404-05.db
 
-../O.Common/SrOC2406-01.db: ../SrOC2406-01.sub $(SrOC_TEMPLATES)
-	msi -S ../SrOC2406-01.sub > ../O.Common/SrOC2406-01.db
+../O.Common/SrOC2406-01.db: ../SrOC2406-01_exp.sub $(SrOC_TEMPLATES)
+	msi -S ../SrOC2406-01_exp.sub > ../O.Common/SrOC2406-01.db
 
-../O.Common/SrOC2406-03.db: ../SrOC2406-03.sub $(SrOC_TEMPLATES)
-	msi -S ../SrOC2406-03.sub > ../O.Common/SrOC2406-03.db
+../O.Common/SrOC2406-03.db: ../SrOC2406-03_exp.sub $(SrOC_TEMPLATES)
+	msi -S ../SrOC2406-03_exp.sub > ../O.Common/SrOC2406-03.db
 
-../O.Common/SrChicane2408-01.db: ../SrChicane2408-01.sub $(SrOC_TEMPLATES)
-	msi -S ../SrChicane2408-01.sub > ../O.Common/SrChicane2408-01.db
+../O.Common/SrChicane2408-01.db: ../SrChicane2408-01_exp.sub $(SrOC_TEMPLATES)
+	msi -S ../SrChicane2408-01_exp.sub > ../O.Common/SrChicane2408-01.db
 	
-#../O.Common/SrBpmOrbit.db: ../SrBpmOrbit.sub $(SrBpmOrbit_TEMPLATES)
-#	msi -S ../SrBpmOrbit.sub > ../O.Common/SrBpmOrbit.db
+#../O.Common/SrBpmOrbit.db: ../SrBpmOrbit_exp.sub $(SrBpmOrbit_TEMPLATES)
+#	msi -S ../SrBpmOrbit_exp.sub > ../O.Common/SrBpmOrbit.db
 	
-../O.Common/SRBpms.db: ../SRBpms.sub $(BPM_TEMPLATES)
-	msi -S ../SRBpms.sub > $@	 
+../O.Common/SRBpms.db: ../SRBpms_exp.sub $(BPM_TEMPLATES)
+	msi -S ../SRBpms_exp.sub > $@	 
