@@ -70,7 +70,7 @@ install:  all
 	$(INSTALL_VARIANT) -m 644 $(OBJNAME) $(LIBDIR)
 	$(INSTALL_VARIANT) -m 644 $(LIB) $(LIBDIR)
 # copy to tftp server bootfile location
-	scp $(OBJNAME) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
+	scp $(OBJNAME) epics@css1021-102:$(RTEMS_SITE_INSTALLDIR)
 	
 
 
