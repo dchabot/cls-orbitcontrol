@@ -7,8 +7,8 @@
 #define DataHandlerThreadName 		rtems_build_name('D','H','T','N')
 #define RawDataQueueName 			rtems_build_name('R','A','W','q')
 
-#define SamplesPerAvg	5000 /* 0.5 seconds */
-#define ShiftFactor		256.0 /* (num>>8)==num/256 */
+static uint32_t SamplesPerAvg=5000; /* 0.5 seconds @ fs=10^4 Hz */
+//#define ShiftFactor		256.0 /* (num>>8)==num/256 */
 
 rtems_id StartDataHandler(uint32_t numReaderThreads);
 uint32_t getMaxMsgs(void);

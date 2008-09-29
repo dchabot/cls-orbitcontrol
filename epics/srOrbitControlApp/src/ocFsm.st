@@ -58,91 +58,6 @@ int numOcmChannels;
 
 
 /* start */
-ss PublishOCMValues {
-	state init {
-		when(){
-			n=0;
-			%%numOcmChannels = sizeof(ocmdata)/sizeof(ocmdata[0]);
-			%%numBytesPerOcmArray = sizeof(int)*numOcmChannels;
-			printf("numOcmChannels=%d\tnumBytesPerOcmArray=%d\n",numOcmChannels,numBytesPerOcmArray);
-			tmp = macValueGet("ocmPort");
-			%%ocmPort = (unsigned short)strtoul(tmp,NULL,0);
-			if(ocmPort==0) {
-				fprintf(stderr, "Error: ocmPort is NULL!!\n");
-				exit(1);
-			}
-			printf("ocFsm: using ocmPort=%hd\n",ocmPort);
-		}state getOcmSocket
-	}
-
-	state getOcmSocket {
-		entry {
-			printf("ocFsm.st: state getOcmSocket{}...\n");
-		}
-		when() {
-			if ((ocmSockFd = socket (AF_INET, SOCK_STREAM, 0)) < 0 ) {
-				perror("socket() failed");
-				exit(1);
-			}
-			hostName = macValueGet("hostName");
-			ocmHost = gethostbyname(hostName);
-			if (ocmHost == NULL) {
-				perror("gethostbyname()");
-				exit(3);
-			}
-
-			%%ocmServer.sin_family = ocmHost->h_addrtype;
-			%%memcpy (&ocmServer.sin_addr, ocmHost->h_addr_list[0], ocmHost->h_length);
-			%%ocmServer.sin_port = htons((short)ocmPort);
-		} state tcpConnect /* end when() */
-	}
-
-	state tcpConnect { /* FIXME loop here 'til socket is connected */
-		entry { printf("OCM: In entry{}, state tcpConnect{}...\n"); }
-
-		when() {
-			for(;;) {
-				%%isOcmConnected = connect(ocmSockFd, (struct sockaddr *)&ocmServer, sizeof ocmServer);
-				if (isOcmConnected < 0 ) {
-					printf("OCM: Waiting to connect...\n");
-					sleep(1.0);
-					continue;
-				}
-				else { /* yes! we're connected */
-					printf("OCM: We're connected to %s...\n",inet_ntoa(ocmServer.sin_addr));
-					break;
-				}
-			}
-		} state waitForOcmUpdate /* end when() */
-
-		exit { efTestAndClear(ocmflag); }
-	}
-
-	state waitForOcmUpdate {
-		when(efTestAndClear(ocmflag)) {
-			printf("ocFsm.st: OCM setpoint array was updated\n");
-		} state writeSocket
-	}
-
-	state writeSocket {
-		entry {
-			%%m = write(ocmSockFd, ocmdata, numBytesPerOcmArray);
-		}
-
-		when(m == numBytesPerOcmArray) {  /*success*/
-			printf("ocFsm.st : updated OCM setpoint Server...\n");
-		} state waitForOcmUpdate
-
-		when(n < numBytesPerOcmArray) { /*failure*/
-			printf("ocFsm.st : OCM write returned %d,was expecting %d\n",m,numBytesPerOcmArray);
-			printf("\t\tAttempting to reconnect...\n\n");
-			%%close(ocmSockFd);
-		} state getOcmSocket
-
-	}
-
-}
-
 
 ss PublishBpmValues {
 	state init {
@@ -235,5 +150,91 @@ ss PublishBpmValues {
 		} state readSocket
 	}
 } /*end state-set PublishBPMValues */
+
+
+ss PublishOCMValues {
+	state init {
+		when(){
+			n=0;
+			%%numOcmChannels = sizeof(ocmdata)/sizeof(ocmdata[0]);
+			%%numBytesPerOcmArray = sizeof(int)*numOcmChannels;
+			printf("numOcmChannels=%d\tnumBytesPerOcmArray=%d\n",numOcmChannels,numBytesPerOcmArray);
+			tmp = macValueGet("ocmPort");
+			%%ocmPort = (unsigned short)strtoul(tmp,NULL,0);
+			if(ocmPort==0) {
+				fprintf(stderr, "Error: ocmPort is NULL!!\n");
+				exit(1);
+			}
+			printf("ocFsm: using ocmPort=%hd\n",ocmPort);
+		}state getOcmSocket
+	}
+
+	state getOcmSocket {
+		entry {
+			printf("ocFsm.st: state getOcmSocket{}...\n");
+		}
+		when() {
+			if ((ocmSockFd = socket (AF_INET, SOCK_STREAM, 0)) < 0 ) {
+				perror("socket() failed");
+				exit(1);
+			}
+			hostName = macValueGet("hostName");
+			ocmHost = gethostbyname(hostName);
+			if (ocmHost == NULL) {
+				perror("gethostbyname()");
+				exit(3);
+			}
+
+			%%ocmServer.sin_family = ocmHost->h_addrtype;
+			%%memcpy (&ocmServer.sin_addr, ocmHost->h_addr_list[0], ocmHost->h_length);
+			%%ocmServer.sin_port = htons((short)ocmPort);
+		} state tcpConnect /* end when() */
+	}
+
+	state tcpConnect { /* FIXME loop here 'til socket is connected */
+		entry { printf("OCM: In entry{}, state tcpConnect{}...\n"); }
+
+		when() {
+			for(;;) {
+				%%isOcmConnected = connect(ocmSockFd, (struct sockaddr *)&ocmServer, sizeof ocmServer);
+				if (isOcmConnected < 0 ) {
+					printf("OCM: Waiting to connect...\n");
+					sleep(1.0);
+					continue;
+				}
+				else { /* yes! we're connected */
+					printf("OCM: We're connected to %s...\n",inet_ntoa(ocmServer.sin_addr));
+					break;
+				}
+			}
+		} state waitForOcmUpdate /* end when() */
+
+		exit { efTestAndClear(ocmflag); }
+	}
+
+	state waitForOcmUpdate {
+		when(efTestAndClear(ocmflag)) {
+			printf("ocFsm.st: OCM setpoint array was updated\n");
+		} state writeSocket
+	}
+
+	state writeSocket {
+		entry {
+			%%m = write(ocmSockFd, ocmdata, numBytesPerOcmArray);
+		}
+
+		when(m == numBytesPerOcmArray) {  /*success*/
+			printf("ocFsm.st : updated OCM setpoint Server...\n");
+		} state waitForOcmUpdate
+
+		when(n < numBytesPerOcmArray) { /*failure*/
+			printf("ocFsm.st : OCM write returned %d,was expecting %d\n",m,numBytesPerOcmArray);
+			printf("\t\tAttempting to reconnect...\n\n");
+			%%close(ocmSockFd);
+		} state getOcmSocket
+
+	}
+
+}
 
 

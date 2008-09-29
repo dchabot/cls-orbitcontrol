@@ -39,10 +39,10 @@ int adc4ChMap[adc4ChMap_LENGTH] = {0*2,1*2,2*2,3*2,4*2,5*2,6*2,7*2,8*2};
 #define NumBpmChannels  2*TOTAL_BPMS
 
 /* accounts for the voltage-divider losses of an LPF aft of each Bergoz unit */
-#define LOWPASS_FILTER_FACTOR   1.015
-#define mmPerMeter              1000
+//#define LOWPASS_FILTER_FACTOR   1.015
+//#define mmPerMeter              1000
 #include <ics110bl.h>   /* need the definition of ADC_PER_VOLT */
-#define mmScaleFactor   LOWPASS_FILTER_FACTOR/(SamplesPerAvg*ShiftFactor*ADC_PER_VOLT*mmPerMeter)
+//#define mmScaleFactor   LOWPASS_FILTER_FACTOR/(SamplesPerAvg*ShiftFactor*ADC_PER_VOLT*mmPerMeter)
 
 static uint32_t maxMsgs = 0;
 
@@ -50,6 +50,10 @@ static uint32_t maxMsgs = 0;
 static void SortBpmData(double *sortedArray, double *sumArray) {
 	int i,j;
 	int nthAdc = 0;/*index into sumArray*/
+	const int mmPerMeter = 1000;
+	const int ShiftFactor = 256;
+	const double LOWPASS_FILTER_FACTOR = 1.015;
+	double mmScaleFactor = LOWPASS_FILTER_FACTOR/(SamplesPerAvg*ShiftFactor*ADC_PER_VOLT*mmPerMeter);
 
 	/* Adc[0]-->chMaps 0*/
 	for(i=0,j=0; j<adc0ChMap_LENGTH; i++,j++) {
@@ -142,6 +146,7 @@ static rtems_task DataHandler(rtems_task_argument arg) {
 	static RawDataSegment rdSegments[NumAdcModules];
 	static double sums[NumAdcModules*AdcChannelsPerFrame];
 	int numSegs = 0;
+	uint32_t localSamplesPerAvg = SamplesPerAvg;
 
 	rc = rtems_message_queue_ident(RawDataQueueName, RTEMS_LOCAL, &rawDataQID);
 	TestDirective(rc, "DataHandler: rtems_message_queue_ident()");
@@ -180,9 +185,11 @@ static rtems_task DataHandler(rtems_task_argument arg) {
 			if(numSamplesSummed==SamplesPerAvg) {
 				/* pass the avg'd BPM data on to the CS-interface */
 				TransmitAvgs(sums);
-				/* zero the array of running-sums && reset the counter */
+				/* zero the array of running-sums,reset counter, update num pts in avg */
 				memset(sums, 0, sizeof(double)*sizeof(sums)/sizeof(sums[0]));
 				numSamplesSummed=0;
+				/* XXX - SamplesPerAvg is set via BpmSamplesPerAvgServer (UI) */
+				localSamplesPerAvg = SamplesPerAvg;
 			}
 
 		}

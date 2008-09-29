@@ -21,22 +21,22 @@ asynOctetSetOutputEos("L1",0,"\n")
 #asynSetTraceMask("L1",0,0x9)
 #asynSetTraceIOMask("L1",0,0x2)
 
-### connect to the RTEMS OcmSetpointServer... ##################
-#drvAsynIPPortConfigure("L2","ioc0000-032:24745 TCP")
+### connect to the RTEMS BPM samples/avg setpoint control... ##################
+drvAsynIPPortConfigure("L2","ioc0000-032:24750 TCP")
 
 ## set "End Of String" characters here: #####################
-#asynOctetSetOutputEos("L2",0,"\n")
+asynOctetSetOutputEos("L2",0,"\n")
 
 ## Asyn debugging messages... ###############################
 #asynSetTraceMask("L2",0,0x9)
 #asynSetTraceIOMask("L2",0,0x2)
 
 ## Load record instances ####################################
-#dbLoadRecords("db/SrOC2404-05.db", "PORT=L1,ADDR=0")
-#dbLoadRecords("db/SrOC2406-01.db", "PORT=L1,ADDR=0")
-#dbLoadRecords("db/SrOC2406-03.db", "PORT=L1,ADDR=0")
-#dbLoadRecords("db/SrOC2408-01.db", "PORT=L1,ADDR=0")
-#dbLoadRecords("db/SrChicane2408-01.db", "PORT=L1,ADDR=0")
+dbLoadRecords("db/SrOC2404-05.db", "PORT=L1,ADDR=0")
+dbLoadRecords("db/SrOC2406-01.db", "PORT=L1,ADDR=0")
+dbLoadRecords("db/SrOC2406-03.db", "PORT=L1,ADDR=0")
+dbLoadRecords("db/SrOC2408-01.db", "PORT=L1,ADDR=0")
+dbLoadRecords("db/SrChicane2408-01.db", "PORT=L1,ADDR=0")
 
 ### contains the mux'd bpm fbk data ######################
 dbLoadRecords("db/BpmArray.db")
