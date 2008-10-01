@@ -21,6 +21,8 @@ DB += SrChicane2408-01.db
 DB += BpmArray.db
 # for bulk distribution of OCM setpoints 
 DB += OcmArray.db
+# control of BPM mux/demux update rate
+DB += SamplesPerAvg.db
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add

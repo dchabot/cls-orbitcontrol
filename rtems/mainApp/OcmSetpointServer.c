@@ -10,8 +10,7 @@
 #include <utils.h>
 #include "DaqServerUtils.h"
 #include <OcmSetpointServer.h>
-#include "DaqController.h"
-#include "DataHandler.h"
+#include "DaqController.h" /* needed for DefaultPriority def'n */
 #include "dataDefs.h"
 #include "PSController.h" /*for NumOCM definition */
 
