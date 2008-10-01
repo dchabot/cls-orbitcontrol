@@ -1,5 +1,5 @@
-#ifndef DIOREADSERVER_H_
-#define DIOREADSERVER_H_
+#ifndef BPMSSAMPLESPERAVGSERVER_
+#define BPMSSAMPLESPERAVGSERVER_
 
 #include <rtems.h>
 #include "DataHandler.h"
@@ -10,4 +10,4 @@
 void  StartBpmSamplesPerAvgServer(void *arg);
 void DestroyBpmSamplesPerAvgServer(void);
 
-#endif /*DIOREADSERVER_H_*/
+#endif /*BPMSSAMPLESPERAVGSERVER_*/

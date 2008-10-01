@@ -20,7 +20,8 @@
 #include "DioWriteServer.h"
 #include "DioReadServer.h"
 #include "PSController.h"
-#include <OcmSetpointServer.h>
+#include "OcmSetpointServer.h"
+#include "BpmSamplesPerAvgServer.h"
 
 
 typedef struct {
@@ -205,6 +206,8 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	/*rc = rtems_message_queue_ident(OcmSetpointQueueName, RTEMS_LOCAL, &ocmSetpointQID);
 	TestDirective(rc, "rtems_message_queue_ident");*/
 
+	StartBpmSamplesPerAvgServer(NULL);
+
 	/* start ADC acquistion on the "edge" of a rtems_clock_tick()...*/
 	rtems_task_wake_after(1);
 	/* enable acquire at the ADCz */
@@ -330,6 +333,7 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	DestroyDioWriteServer();
 	DestroyDioReadServer();
 	DestroyOcmSetpointServer();
+	DestroyBpmSamplesPerAvgServer();
 	/* clean up self */
 	/* FIXME -- rtems_region_delete(rawDataRID);*/
 	syslog(LOG_INFO, "daqControllerIrq exiting... loop iterations=%d\n",x);

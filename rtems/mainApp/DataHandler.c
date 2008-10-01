@@ -46,8 +46,12 @@ int adc4ChMap[adc4ChMap_LENGTH] = {0*2,1*2,2*2,3*2,4*2,5*2,6*2,7*2,8*2};
 
 static uint32_t maxMsgs = 0;
 
+/* FIXME -- GLOBAL */
+uint32_t SamplesPerAvg=5000; /* 0.5 seconds @ fs=10^4 Hz */
+
 /* This ugly: no easy way around that though... */
 static void SortBpmData(double *sortedArray, double *sumArray) {
+	extern uint32_t SamplesPerAvg;
 	int i,j;
 	int nthAdc = 0;/*index into sumArray*/
 	const int mmPerMeter = 1000;
@@ -145,7 +149,9 @@ static rtems_task DataHandler(rtems_task_argument arg) {
 	int32_t numSamplesSummed=0;
 	static RawDataSegment rdSegments[NumAdcModules];
 	static double sums[NumAdcModules*AdcChannelsPerFrame];
+	//static double sumsSqrd[NumAdcModules*AdcChannelsPerFrame];
 	int numSegs = 0;
+	extern uint32_t SamplesPerAvg;
 	uint32_t localSamplesPerAvg = SamplesPerAvg;
 
 	rc = rtems_message_queue_ident(RawDataQueueName, RTEMS_LOCAL, &rawDataQID);
@@ -177,19 +183,25 @@ static rtems_task DataHandler(rtems_task_argument arg) {
 
 				for(nthChannel=0; nthChannel<AdcChannelsPerFrame; nthChannel++) { /* for each channel of this frame... */
 					sums[nthAdcOffset+nthChannel] += (double)(rdSegments[nthAdc].buf[nthFrameOffset+nthChannel]);
+					//sumsSqrd[nthAdcOffset+nthChannel] += (sums[nthAdcOffset+nthChannel]*sums[nthAdcOffset+nthChannel]);
 				}
 
 			}
 			numSamplesSummed++;
 
-			if(numSamplesSummed==SamplesPerAvg) {
+			if(numSamplesSummed==localSamplesPerAvg) {
 				/* pass the avg'd BPM data on to the CS-interface */
 				TransmitAvgs(sums);
 				/* zero the array of running-sums,reset counter, update num pts in avg */
 				memset(sums, 0, sizeof(double)*sizeof(sums)/sizeof(sums[0]));
+				//memset(sumsSqrd, 0, sizeof(double)*sizeof(sumsSqrd)/sizeof(sumsSqrd[0]));
 				numSamplesSummed=0;
 				/* XXX - SamplesPerAvg is set via BpmSamplesPerAvgServer (UI) */
-				localSamplesPerAvg = SamplesPerAvg;
+				if(localSamplesPerAvg != SamplesPerAvg) {
+					syslog(LOG_INFO, "DataHandler: changing localSamplesPerAvg=%d to\n\tSamplesPerAvg=%d\n",
+							localSamplesPerAvg,SamplesPerAvg);
+					localSamplesPerAvg = SamplesPerAvg;
+				}
 			}
 
 		}

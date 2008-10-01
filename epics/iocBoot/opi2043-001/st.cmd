@@ -28,8 +28,8 @@ drvAsynIPPortConfigure("L2","ioc0000-032:24750 TCP")
 asynOctetSetOutputEos("L2",0,"\n")
 
 ## Asyn debugging messages... ###############################
-#asynSetTraceMask("L2",0,0x9)
-#asynSetTraceIOMask("L2",0,0x2)
+asynSetTraceMask("L2",0,0x9)
+asynSetTraceIOMask("L2",0,0x2)
 
 ## Load record instances ####################################
 dbLoadRecords("db/SrOC2404-05.db", "PORT=L1,ADDR=0")
@@ -46,7 +46,7 @@ dbLoadRecords("db/SRBpms.db")
 dbLoadRecords("db/OcmArray.db")#, "PORT=L2,ADDR=0")
 ### orbit RMS info ##########################################
 #dbLoadRecords("db/SrOrbitRms.db", "clsName=SrBPMs")
-
+dbLoadRecords("db/SamplesPerAvg.db","PORT=L2,ADDR=0")
 
 cd ${TOP}/iocBoot/${IOC}
 iocInit()

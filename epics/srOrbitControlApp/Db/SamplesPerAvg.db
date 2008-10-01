@@ -13,8 +13,8 @@ record(ao, "BPM:samplesperavg") {
 }
 
 record(asyn, "BPM:samplesperavg:tcp") {
-	field(PORT, "$(port)")
-	field(ADDR, "$(addr)")
+	field(PORT, "$(PORT)")
+	field(ADDR, "$(ADDR)")
 	field(SCAN, "Passive")
 	field(TMOD, "Write")
 }

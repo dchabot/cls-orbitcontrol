@@ -13,16 +13,19 @@
 #include "DaqController.h"
 #include "DataHandler.h"
 #include "dataDefs.h"
+#include "BpmSamplesPerAvgServer.h"
+
 
 static int bpmSamplesPerAvgFD;
 static rtems_id bpmSamplesPerAvgServerTID;
 
 static rtems_task
 BpmSamplesPerAvgServer(rtems_task_argument arg) {
+	extern uint32_t SamplesPerAvg;
 	rtems_status_code rc = 0;
 	FILE *fp = NULL;
 	const int bufsize=512;
-	char cbuf[bufsize] = {0};
+	char cbuf[bufsize];
 	int len = 0;
 	uint32_t data = 0;
 	uint8_t numBytes = 0;
@@ -56,8 +59,8 @@ BpmSamplesPerAvgServer(rtems_task_argument arg) {
 		/* replace newline with null-terminator... */
 		cbuf[len-1] = '\0';
 
-		uint32_t tmp = strtoul(cbuf);
-		if(1000 < tmp && tmp < 10000) { /* i.e. between 0.1 and 1.0 seconds per BPM avg */
+		uint32_t tmp = strtoul(cbuf,NULL,0);
+		if(1000 <= tmp && tmp <= 10000) { /* i.e. between 0.1 and 1.0 seconds per BPM avg */
 			SamplesPerAvg = tmp;
 			memset(cbuf,'\0',len);
 			syslog(LOG_INFO, "BpmSamplesPerAvgServer: setting SamplesPerAvg=%d\n", tmp);
