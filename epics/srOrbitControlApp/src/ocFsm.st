@@ -1,6 +1,6 @@
 program ocFsm
 
-#include "bpmPvs_exp.h"
+#include "bpmPvs.h"
 
 %%#include <string.h>
 %%#include <math.h>

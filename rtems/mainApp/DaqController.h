@@ -27,7 +27,7 @@ typedef struct {
 
 #define AdcDefaultFrequency 10.0
 
-#define NumDioModules 4
+#define NumDioModules 5
 /* number of DIO modules will vary:
  * 	experimental config uses 4,
  * 	production config uses 5

@@ -16,7 +16,6 @@ C_PIECES+=DaqControllerIrq
 C_PIECES+=DataHandler
 C_PIECES+=PSController
 C_PIECES+=OcmSetpointServer
-C_PIECES+=BpmSamplesPerAvgServer
 
 C_FILES=$(C_PIECES:%=%.c)
 C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
@@ -58,7 +57,7 @@ CFLAGS+= -I ./ -I $(RTEMS_MAKEFILE_PATH)/lib/include
 
 
 ifndef RTEMS_SITE_INSTALLDIR
-	RTEMS_SITE_INSTALLDIR = /export/tftpboot/epics/IOC0000-032
+	RTEMS_SITE_INSTALLDIR = /export/tftpboot/epics/IOC2400-104
 endif
 
 #
@@ -79,6 +78,6 @@ $(filter %.obj, $(PGMS)): ${OBJS}
 install:  all
 	$(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_MAKEFILE_PATH)/lib
 # copy to tftp server bootfile location
-	scp $(PGMS) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
+	scp $(PGMS) epics@css1021-102:$(RTEMS_SITE_INSTALLDIR)
 	
 
