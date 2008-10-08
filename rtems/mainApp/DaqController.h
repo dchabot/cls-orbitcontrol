@@ -27,11 +27,12 @@ typedef struct {
 
 #define AdcDefaultFrequency 10.0
 
-#define NumDioModules 5
 /* number of DIO modules will vary:
  * 	experimental config uses 4,
  * 	production config uses 5
  */
+#define NumDioModules 5
+
 typedef struct {
 	uint32_t baseAddr;
 	uint32_t vmeCrateID;
