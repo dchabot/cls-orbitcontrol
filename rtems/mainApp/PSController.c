@@ -4,12 +4,10 @@
  *  Created on: Sep 21, 2008
  *      Author: djc
  */
-
-/* TODO -- replace sis1100 API calls with libvmic2536 API */
+#include <syslog.h>
 
 #include <psDefs.h>
 #include <utils.h>
-#include <sis1100_api.h>
 #include <vmic2536.h>
 
 #include <string.h>
@@ -168,38 +166,20 @@ void UpdateSetPoints(int32_t *spArray) {
 		value = value | (dacSetPoint & 0xFFFFFF);
 
 		/* write the 32 bits out to the power supply*/
-	#ifdef USE_MACRO_VME_ACCESSORS
-		VmeWrite_32(ctlr->mod,VMIC_2536_OUTPUT_REG_OFFSET,value);
-	#else
-		rc=vme_A24D32_write(ctlr->mod->crate->fd,
-							ctlr->mod->vmeBaseAddr+VMIC_2536_OUTPUT_REG_OFFSET,
-							value);
+		rc = VMIC2536_setOutput(ctlr->mod, value);
 		if(rc) { goto bailout; }
-	#endif
 		/* added for Milan G IE Power 04/08/2002*/
 		usecSpinDelay(30);
 
 		/* toggle the PS_LATCH bit */
-	#ifdef USE_MACRO_VME_ACCESSORS
-		VmeWrite_32(ctlr->mod,VMIC_2536_OUTPUT_REG_OFFSET,(value | PS_LATCH));
-	#else
-		rc=vme_A24D32_write(ctlr->mod->crate->fd,
-							ctlr->mod->vmeBaseAddr+VMIC_2536_OUTPUT_REG_OFFSET,
-							(value | PS_LATCH));
+		rc = VMIC2536_setOutput(ctlr->mod, (value | PS_LATCH));
 		if(rc) { goto bailout; }
-	#endif
 		/* wait some time */
 		usecSpinDelay(7);
 
 		/* drop the PS_LATCH bit and data bits */
-	#ifdef USE_MACRO_VME_ACCESSORS
-		VmeWrite_32(ctlr->mod,VMIC_2536_OUTPUT_REG_OFFSET,0UL);
-	#else
-		rc=vme_A24D32_write(ctlr->mod->crate->fd,
-							ctlr->mod->vmeBaseAddr+VMIC_2536_OUTPUT_REG_OFFSET,
-							0UL);
+		rc = VMIC2536_setOutput(ctlr->mod, 0UL);
 		if(rc) { goto bailout; }
-	#endif
 		/* wait some time */
 		usecSpinDelay(7);
 		continue;
@@ -214,38 +194,29 @@ void ToggleUpdateBit(VmeModule* mod) {
 	int rc;
 
 	/* raise the UPDATE bit */
-#ifdef USE_MACRO_VME_ACCESSORS
-    VmeWrite_32(mod,VMIC_2536_OUTPUT_REG_OFFSET,UPDATE);
-#else
-	rc=vme_A24D32_write(mod->crate->fd,
-						mod->vmeBaseAddr+VMIC_2536_OUTPUT_REG_OFFSET,
-						UPDATE);
+	rc = VMIC2536_setOutput(mod, UPDATE);
     if(rc) {
     	syslog(LOG_INFO, "ToggleUpdateBit: failed VME write--%#x\n",rc);
     	return;
     }
-#endif
     /* wait some time */
     usecSpinDelay(7);
 
     /* drop the UPDATE bit */
-#ifdef USE_MACRO_VME_ACCESSORS
-	VmeWrite_32(mod,VMIC_2536_OUTPUT_REG_OFFSET,0UL);
-#else
-	rc=vme_A24D32_write(mod->crate->fd,
-						mod->vmeBaseAddr+VMIC_2536_OUTPUT_REG_OFFSET,
-						0UL);
+    rc = VMIC2536_setOutput(mod, 0UL);
 	if(rc) {
     	syslog(LOG_INFO, "ToggleUpdateBit: failed VME write--%#x\n",rc);
     	return;
     }
-#endif
 }
 
 /* FIXME -- this loop assumes one DIO module per crate !!!
  *
- * As soon as the SOA14xx-yy:X||Y magnet pwr supplies that assumption will
- * break... :-(
+ * As soon as the SOA14xx-yy:X||Y magnet pwr supplies are added to
+ * the orbit correction schema that assumption will break... :-(
+ *
+ * The simplest thing to do here is to statically initialize psCtlrArray[i].mod
+ * with a similarly statically initialized dioArray[j].
  */
 void InitializePSControllers(VmeModule **modArray) {
 	int i,j;
