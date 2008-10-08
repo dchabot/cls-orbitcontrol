@@ -30,7 +30,7 @@ typedef struct {
 	int32_t *buf;
 }spMsg;
 
-#define NumOCM 48
+#define NumOCM 48*2
 
 /*int getId(PSController* ctlr, char** id);
 int setId(PSController* ctlr, char** id);

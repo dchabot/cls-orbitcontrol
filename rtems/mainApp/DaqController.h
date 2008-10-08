@@ -37,16 +37,6 @@ typedef struct {
 	uint32_t vmeCrateID;
 } DioConfig;
 
-static DioConfig dioConfig[] = {
-		{VMIC_2536_DEFAULT_BASE_ADDR,0},
-		{VMIC_2536_DEFAULT_BASE_ADDR,1},
-		{VMIC_2536_DEFAULT_BASE_ADDR,2},
-		{VMIC_2536_DEFAULT_BASE_ADDR,3}
-#if NumDioModules==5
-		,{VMIC_2536_DEFAULT_BASE_ADDR+0x10,3}
-#endif
-};
-
 
 /* prototypes */
 void InitializeVmeCrates(VmeCrate *crateArray[], int numCrates);

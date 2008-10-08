@@ -13,7 +13,6 @@
 #include "../mainApp/PSController.h"
 #include "../mainApp/DaqController.h"
 
-
 void StartDioDemuxTest(int numIters) {
 	VmeModule *dioArray[NumDioModules];
 	extern double tscTicksPerSecond;

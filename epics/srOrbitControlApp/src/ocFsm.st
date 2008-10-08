@@ -38,7 +38,7 @@ int numBpmChannels;
 /* End BPM related variables */
 
 /* Begin OCM-related variables */
-int ocmdata[48];
+int ocmdata[96];
 assign ocmdata to "ocm:array";
 monitor ocmdata;
 evflag ocmflag;
