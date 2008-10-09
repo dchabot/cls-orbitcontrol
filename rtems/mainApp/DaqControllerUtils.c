@@ -14,19 +14,19 @@
 
 #include "DaqController.h"
 
-/* FIXME -- refactor (extract method) to init a *single* crate 
- * 
+/* FIXME -- refactor (extract method) to init a *single* crate
+ *
  * Assumes one sis1100/3100 per crate
  * AND that the VME-PCI devices have been initialized
  */
 void InitializeVmeCrates(VmeCrate *crateArray[], int numCrates) {
 	int i;
 	extern int errno;
-	
+
 	for(i=0; i<numCrates; i++) {
 		int fd;
 		char devName[64];
-		
+
 		crateArray[i] = (VmeCrate *)calloc(1,sizeof(VmeCrate));
 		if(crateArray[i]==NULL) {
 			syslog(LOG_INFO, "Failed to allocate vme crate[%d]:\n\t%s",i,strerror(errno));
@@ -68,20 +68,20 @@ void ShutdownVmeCrates(VmeCrate *crateArray[], int numCrates) {
 /* FIXME -- refactor (extract method) to init a *single* module */
 VmeModule* InitializeAdcModule(VmeCrate *vmeCrate,
 							uint32_t baseAddr,
-							double targetFrameRate, 
+							double targetFrameRate,
 							int numChannelsPerFrame,
 							double *trueFrameRate)
 {
 	VmeModule *pmod;
 	double actualRate = 0.0;
 	int rc;
-		
+
 	pmod = (VmeModule *)calloc(1, sizeof(VmeModule));
 	if(pmod == NULL) {
 		syslog(LOG_INFO, "Failed to allocated ADC Module!\n");
 		FatalErrorHandler(0);
 	}
-	/* insert essential info here...*/ 
+	/* insert essential info here...*/
 	pmod->crate = vmeCrate;
 	pmod->vmeBaseAddr = baseAddr;
 	pmod->type = "ics-110bl";
@@ -89,16 +89,16 @@ VmeModule* InitializeAdcModule(VmeCrate *vmeCrate,
 	pmod->irqVector = ICS110B_DEFAULT_IRQ_VECTOR;
 #ifdef USE_MACRO_VME_ACCESSORS
 	pmod->pcBaseAddr = vmeCrate->a24BaseAddr;
-#endif		
+#endif
 	rc = InitICS110BL(pmod, targetFrameRate, &actualRate,
-						INTERNAL_CLOCK, ICS110B_INTERNAL, 
+						INTERNAL_CLOCK, ICS110B_INTERNAL,
 						numChannelsPerFrame);
 	if(rc) {
 		syslog(LOG_INFO, "Failed to initialize Adc !!\n");
 		FatalErrorHandler(0);
 	}
 	*trueFrameRate = actualRate;
-	
+
 	return pmod;
 }
 
@@ -112,7 +112,7 @@ void ShutdownAdcModules(VmeModule *modArray[], int numModules) {
 
 void AdcStartAcquisition(VmeModule *modArray[], int numModules) {
 	int i;
-	
+
 	for(i=0; i<numModules; i++) {
 		int rc = ICS110BStartAcquisition(modArray[i]);
 		if(rc) {
@@ -124,7 +124,7 @@ void AdcStartAcquisition(VmeModule *modArray[], int numModules) {
 
 void AdcStopAcquisition(VmeModule *modArray[], int numModules) {
 	int i;
-	
+
 	for(i=0; i<numModules; i++) {
 		int rc = ICS110BStopAcquisition(modArray[i]);
 		if(rc) {
@@ -136,8 +136,8 @@ void AdcStopAcquisition(VmeModule *modArray[], int numModules) {
 /* XXX -- still need to set the correct VME interrupt level to be "fully armed"... */
 void AdcInstallIsr(VmeModule *mod, sis1100VmeISR isr, void *isrArg) {
 	rtems_status_code rc;
-	
-	rc = vme_set_isr(mod->crate->fd, 
+
+	rc = vme_set_isr(mod->crate->fd,
 						mod->irqVector/*vector*/,
 						isr/*handler*/,
 						isrArg/*handler arg*/);
@@ -159,42 +159,10 @@ void AdcRemoveIsr(VmeModule *mod) {
 	}
 }
 
-VmeModule* InitializeDioModule(VmeCrate* vmeCrate, uint32_t baseAddr) {
-	int rc;
-	VmeModule *pmod = NULL;
-	
-		
-	pmod = (VmeModule *)calloc(1,sizeof(VmeModule));
-	if(pmod==NULL) {
-		syslog(LOG_INFO, "Can't allocate mem for VMIC-2536\n");
-		FatalErrorHandler(0);
-	}
-	pmod->crate = vmeCrate;
-	pmod->type = "VMIC-2536";
-	pmod->vmeBaseAddr = baseAddr;
-	pmod->pcBaseAddr = vmeCrate->a24BaseAddr;
-	
-	rc = VMIC2536_Init(pmod);
-	if(rc) {
-		syslog(LOG_INFO, "Failed to initialize VMIC-2536: rc=%d",rc);
-		FatalErrorHandler(0);
-	}
-	
-	return pmod;
-}
-
-void ShutdownDioModules(VmeModule *modArray[], int numModules) {
-	int i;
-		
-	for(i=0; i<numModules; i++) {
-		free(modArray[i]);
-	}
-}
-
 void StartDaqController(rtems_task_entry entryPoint) {
 	rtems_id tid;
 	rtems_status_code rc;
-	
+
 	rc = rtems_task_create(DaqControllerThreadName,
 							DaqThreadPriority,/*priority*/
 							RTEMS_MINIMUM_STACK_SIZE*8,

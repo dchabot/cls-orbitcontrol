@@ -5,7 +5,6 @@
 #include <rtems.h>
 #include <vmeDefs.h>
 #include <sis1100_api.h>
-#include <vmic2536.h>
 
 #define DefaultPriority 50
 #define DaqThreadPriority DefaultPriority
@@ -29,18 +28,6 @@ typedef struct {
 
 #define AdcDefaultFrequency 10.0
 
-/* number of DIO modules will vary:
- * 	experimental config uses 4,
- * 	production config uses 5
- */
-#define NumDioModules 5
-
-typedef struct {
-	uint32_t baseAddr;
-	uint32_t vmeCrateID;
-} DioConfig;
-
-
 /* prototypes */
 void InitializeVmeCrates(VmeCrate *crateArray[], int numCrates);
 void ShutdownVmeCrates(VmeCrate *crateArray[], int numCrates);
@@ -50,8 +37,6 @@ void AdcStartAcquisition(VmeModule *modArray[], int numModules);
 void AdcStopAcquisition(VmeModule *modArray[], int numModules);
 void AdcInstallIsr(VmeModule *mod, sis1100VmeISR isr, void *isrArg);
 void AdcRemoveIsr(VmeModule *mod);
-VmeModule* InitializeDioModule(VmeCrate* vmeCrate, uint32_t baseAddr);
-void ShutdownDioModules(VmeModule *DioModules[], int numModules);
 void StartDaqController(rtems_task_entry entryPoint);
 
 /*rtems_task daqControllerPeriodic(rtems_task_argument arg);*/
