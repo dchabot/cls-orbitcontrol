@@ -58,7 +58,7 @@ CFLAGS+= -I ./ -I $(RTEMS_MAKEFILE_PATH)/lib/include
 
 
 ifndef RTEMS_SITE_INSTALLDIR
-	RTEMS_SITE_INSTALLDIR = /export/tftpboot/epics/IOC0000-032
+	RTEMS_SITE_INSTALLDIR = /export/tftpboot/epics/IOC1009-109
 endif
 
 #

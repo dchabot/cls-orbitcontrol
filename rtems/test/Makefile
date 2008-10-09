@@ -60,7 +60,7 @@ $(filter %.obj, $(PGMS)): ${OBJS}
 #	$(RANLIB) o-optimize/libtest.a
 
 ifndef RTEMS_SITE_INSTALLDIR
-RTEMS_SITE_INSTALLDIR = /export/tftpboot/epics/IOC0000-032
+RTEMS_SITE_INSTALLDIR = /export/tftpboot/epics/IOC1009-109
 endif
 
 install:  all

@@ -12,7 +12,7 @@ dbLoadDatabase("dbd/srOrbitControl.dbd",0,0)
 srOrbitControl_registerRecordDeviceDriver(pdbbase)
 
 ### connect to the RTEMS DioWriteServer... ##################
-drvAsynIPPortConfigure("L1","ioc0000-032:24743 TCP")
+drvAsynIPPortConfigure("L1","ioc1009-109:24743 TCP")
 
 ## set "End Of String" characters here: #####################
 asynOctetSetOutputEos("L1",0,"\n")
@@ -22,7 +22,7 @@ asynOctetSetOutputEos("L1",0,"\n")
 #asynSetTraceIOMask("L1",0,0x2)
 
 ### connect to the RTEMS BPM samples/avg setpoint control... ##################
-drvAsynIPPortConfigure("L2","ioc0000-032:24750 TCP")
+drvAsynIPPortConfigure("L2","ioc1009-109:24750 TCP")
 
 ## set "End Of String" characters here: #####################
 asynOctetSetOutputEos("L2",0,"\n")
@@ -52,4 +52,4 @@ cd ${TOP}/iocBoot/${IOC}
 iocInit()
 
 ## Start any sequence programs
-seq ocFsm "hostName=ioc0000-032,bpmPort=24742,ocmPort=24745"
+seq ocFsm "hostName=ioc1009-109,bpmPort=24742,ocmPort=24745"
