@@ -7,6 +7,7 @@
 #include <stdlib.h> /*for mrand48, at least...*/
 #include <math.h>
 
+#include <vmic2536.h>
 #include <tscDefs.h>
 
 #include "tests.h"
@@ -14,6 +15,15 @@
 #include "../mainApp/DaqController.h"
 
 void StartDioDemuxTest(int numIters) {
+	static DioConfig dioConfig[] = {
+			{VMIC_2536_DEFAULT_BASE_ADDR,0},
+			{VMIC_2536_DEFAULT_BASE_ADDR,1},
+			{VMIC_2536_DEFAULT_BASE_ADDR,2},
+			{VMIC_2536_DEFAULT_BASE_ADDR,3}
+	#if NumDioModules==5
+			,{VMIC_2536_DEFAULT_BASE_ADDR+0x10,3}
+	#endif
+	};
 	VmeModule *dioArray[NumDioModules];
 	extern double tscTicksPerSecond;
 	uint64_t now, then, tmp;

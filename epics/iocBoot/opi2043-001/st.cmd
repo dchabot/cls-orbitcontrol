@@ -28,8 +28,8 @@ drvAsynIPPortConfigure("L2","ioc1009-109:24750 TCP")
 asynOctetSetOutputEos("L2",0,"\n")
 
 ## Asyn debugging messages... ###############################
-asynSetTraceMask("L2",0,0x9)
-asynSetTraceIOMask("L2",0,0x2)
+#asynSetTraceMask("L2",0,0x9)
+#asynSetTraceIOMask("L2",0,0x2)
 
 ## Load record instances ####################################
 dbLoadRecords("db/SrOC2404-05.db", "PORT=L1,ADDR=0")
