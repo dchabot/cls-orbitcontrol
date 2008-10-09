@@ -22,6 +22,7 @@ typedef struct {
 	uint8_t channel;
 	uint8_t inCorrection;
 	uint32_t crateId;
+	uint32_t modAddr;
 	VmeModule *mod;
 }PSController;
 
@@ -31,6 +32,18 @@ typedef struct {
 }spMsg;
 
 #define NumOCM 48*2
+
+/* number of DIO modules will vary:
+ * 	experimental config uses 4,
+ * 	production config uses 5
+ */
+#define NumDioModules 4
+
+typedef struct {
+	uint32_t baseAddr;
+	uint32_t vmeCrateID;
+} DioConfig;
+
 
 /*int getId(PSController* ctlr, char** id);
 int setId(PSController* ctlr, char** id);
@@ -46,5 +59,7 @@ int isInCorrection(PSController* ctlr, uint8_t* answer);
 
 void UpdateSetPoints(int32_t* spBuf);
 void ToggleUpdateBit(VmeModule* mod);
-void InitializePSControllers(VmeModule** modArray);
+VmeModule* InitializeDioModule(VmeCrate* vmeCrate, uint32_t baseAddr);
+void ShutdownDioModules(VmeModule *DioModules[], int numModules);
+void InitializePSControllers(VmeCrate** crateArray);
 #endif /* PSCONTROLLER_H_ */

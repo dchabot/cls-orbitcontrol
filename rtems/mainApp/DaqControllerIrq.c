@@ -23,16 +23,6 @@
 #include "OcmSetpointServer.h"
 #include "BpmSamplesPerAvgServer.h"
 
-static DioConfig dioConfig[] = {
-		{VMIC_2536_DEFAULT_BASE_ADDR,0},
-		{VMIC_2536_DEFAULT_BASE_ADDR,1},
-		{VMIC_2536_DEFAULT_BASE_ADDR,2},
-		{VMIC_2536_DEFAULT_BASE_ADDR,3}
-#if NumDioModules==5
-		,{VMIC_2536_DEFAULT_BASE_ADDR+0x10,3}
-#endif
-};
-
 typedef struct {
 	VmeModule *adc;
 	rtems_id controllerTID;
@@ -103,7 +93,6 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	int adcFramesPerTick;
 	double adcFrequency = 0.0;
 	double adcTrueFrequency = 0.0;
-	VmeModule *dioArray[NumDioModules];
 	AdcIsrArg *IsrArgList[NumAdcModules];
 	static ReaderThreadArg *rdrArray[NumReaderThreads];
 	RawDataSegment rdSegments[NumReaderThreads];
@@ -192,13 +181,6 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 
 	/* fire up the AdcDataServer,DioWriteServer,DioReadServer interfaces */
 	StartAdcDataServer();
-
-	/** Init the vmic2536 DIO modules */
-	for(i=0; i<NumDioModules; i++) {
-		dioArray[i] = InitializeDioModule(crateArray[dioConfig[i].vmeCrateID], dioConfig[i].baseAddr);
-		syslog(LOG_INFO, "Initialized VMIC2536 DIO module[%d]\n",i);
-	}
-
 	StartDioWriteServer(crateArray);
 	/* FIXME -- unused! OCM feedback channel is via serial links... */
 	StartDioReadServer(crateArray);
@@ -210,7 +192,7 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	}*/
 
 	/* get qid for OCM setpoint updates */
-	InitializePSControllers(dioArray);
+	InitializePSControllers(crateArray);
 	StartOcmSetpointServer(NULL);
 	/*rc = rtems_message_queue_ident(OcmSetpointQueueName, RTEMS_LOCAL, &ocmSetpointQID);
 	TestDirective(rc, "rtems_message_queue_ident");*/
@@ -291,9 +273,9 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 				/* update the global PSController psControllerArray[NumOCM] */
 				UpdateSetPoints(msg.buf);
 				/* Finally, toggle the UPDATE for each ps-controller (4 total) */
-				for(i=0; i<NumDioModules; i++) {
+				/*for(i=0; i<NumDioModules; i++) {
 					ToggleUpdateBit(dioArray[i]);
-				}
+				}*/
 				free(msg.buf);
 			}
 		}
@@ -326,7 +308,6 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	//rtems_task_suspend(DaqControllerTID);
 	/* clean up resources */
 	ShutdownAdcModules(adcArray, NumAdcModules);
-	ShutdownDioModules(dioArray, NumDioModules);
 	ShutdownVmeCrates(crateArray, NumVmeCrates);
 	for(i=0; i<NumReaderThreads; i++) {
 		rtems_message_queue_delete(rdrArray[i]->rawDataQID);
