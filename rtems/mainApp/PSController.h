@@ -31,7 +31,7 @@ typedef struct {
 	int32_t *buf;
 }spMsg;
 
-#define NumOCM 48*2
+#define NumOCM 48+12
 
 /* number of DIO modules will vary:
  * 	experimental config uses 4,
