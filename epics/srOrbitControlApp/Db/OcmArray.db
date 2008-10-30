@@ -11,5 +11,5 @@ record(waveform, "ocm:array") {
 	field(SCAN, "Passive")
 	field(INP, "0")
 	field(FTVL, "LONG") #data-type of OCM setpoints
-	field(NELM, "96")
+	field(NELM, "48")
 }
