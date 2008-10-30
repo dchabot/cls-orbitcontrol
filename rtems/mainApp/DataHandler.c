@@ -3,6 +3,7 @@
 #include <string.h>
 #include <rtems.h>
 #include <syslog.h>
+#include <math.h>
 
 #include <utils.h>
 #include "dataDefs.h"
@@ -183,7 +184,7 @@ static rtems_task DataHandler(rtems_task_argument arg) {
 
 				for(nthChannel=0; nthChannel<AdcChannelsPerFrame; nthChannel++) { /* for each channel of this frame... */
 					sums[nthAdcOffset+nthChannel] += (double)(rdSegments[nthAdc].buf[nthFrameOffset+nthChannel]);
-					//sumsSqrd[nthAdcOffset+nthChannel] += (sums[nthAdcOffset+nthChannel]*sums[nthAdcOffset+nthChannel]);
+					//sumsSqrd[nthAdcOffset+nthChannel] += pow(sums[nthAdcOffset+nthChannel],2);
 				}
 
 			}

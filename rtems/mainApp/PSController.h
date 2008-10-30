@@ -31,7 +31,7 @@ typedef struct {
 	int32_t *buf;
 }spMsg;
 
-#define NumOCM 48*2
+#define NumOCM 48
 
 /* number of DIO modules will vary:
  * 	experimental config uses 4,
@@ -57,8 +57,10 @@ int setChannel(PSController* ctlr, uint8_t ch);
 
 int isInCorrection(PSController* ctlr, uint8_t* answer);
 
-void UpdateSetPoints(int32_t* spBuf);
+void DistributeSetpoints(int32_t* spBuf);
 void ToggleUpdateBit(VmeModule* mod);
+void ToggleUpdateBits();
+void UpdateSetpoints(int32_t *spBuf);
 VmeModule* InitializeDioModule(VmeCrate* vmeCrate, uint32_t baseAddr);
 void ShutdownDioModules(VmeModule *DioModules[], int numModules);
 void InitializePSControllers(VmeCrate** crateArray);
