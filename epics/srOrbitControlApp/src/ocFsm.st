@@ -38,7 +38,7 @@ int numBpmChannels;
 /* End BPM related variables */
 
 /* Begin OCM-related variables */
-int ocmdata[96];
+int ocmdata[48];
 assign ocmdata to "ocm:array";
 monitor ocmdata;
 evflag ocmflag;
@@ -224,7 +224,7 @@ ss PublishOCMValues {
 		}
 
 		when(m == numBytesPerOcmArray) {  /*success*/
-			printf("ocFsm.st : updated OCM setpoint Server...\n");
+			printf("ocFsm.st : wrote %d bytes to OCM setpoint Server...\n",m);
 		} state waitForOcmUpdate
 
 		when(n < numBytesPerOcmArray) { /*failure*/

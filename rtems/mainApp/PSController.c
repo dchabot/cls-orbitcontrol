@@ -32,102 +32,102 @@ static PSController psCtlrArray[] = {
 	/* id, setpoint, feedback, channel, inCorrection, crateId, modAddr, VmeModule*   */
 	/* first, the horizontal controllers (OCH14xx-xx): */
 	{"OCH1401-01",0,0,9,1,0,0x00700000,NULL},
-	{"SOA1401-01:X",0,0,2,1,0,0x00700020,NULL},/*added SOA magnets to orbit ctl */
-	{"SOA1401-02:X",0,0,3,1,0,0x00700020,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1401-01:X",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1401-02:X",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCH1401-02",0,0,12,1,0,0x00700000,NULL},
-	{"OCH1402-01",0,0,5,1,0,0x00700020,NULL},
-	{"SOA1402-01:X",0,0,4,1,0,0x00700020,NULL},/*added SOA magnets to orbit ctl */
-	{"SOA1402-02:X",0,0,11,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	{"OCH1402-02",0,0,6,1,0,0x00700020,NULL},
+	{"OCH1402-01",0,0,13,1,0,0x00700000,NULL},
+//	{"SOA1402-01:X",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1402-02:X",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+	{"OCH1402-02",0,0,14,1,0,0x00700000,NULL},
 	{"OCH1403-01",0,0,1,1,1,0x00700000,NULL},
-	//{"SOA1403-01:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1403-02:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1403-01:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1403-02:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCH1403-02",0,0,2,1,1,0x00700000,NULL},
 	{"OCH1404-01",0,0,3,1,1,0x00700000,NULL},
-	//{"SOA1404-01:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1404-02:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1404-01:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1404-02:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCH1404-02",0,0,4,1,1,0x00700000,NULL},
 	{"OCH1405-01",0,0,5,1,1,0x00700000,NULL},
-	//{"SOA1405-01:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1405-02:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1405-01:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1405-02:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCH1405-02",0,0,6,1,1,0x00700000,NULL},
 	{"OCH1406-01",0,0,7,1,2,0x00700000,NULL},
-	//{"SOA1406-01:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1406-02:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1406-01:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1406-02:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCH1406-02",0,0,8,1,2,0x00700000,NULL},
 	{"OCH1407-01",0,0,9,1,2,0x00700000,NULL},
-	//{"SOA1407-01:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1407-02:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1407-01:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1407-02:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCH1407-02",0,0,12,1,2,0x00700000,NULL},
 	{"OCH1408-01",0,0,13,1,2,0x00700000,NULL},
-	//{"SOA1408-01:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1408-02:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1408-01:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1408-02:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCH1408-02",0,0,14,1,2,0x00700000,NULL},
 	{"OCH1409-01",0,0,7,1,3,0x00700000,NULL},
-	//{"SOA1409-01:X",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1409-02:X",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1409-01:X",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1409-02:X",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCH1409-02",0,0,8,1,3,0x00700000,NULL},
 	{"OCH1410-01",0,0,9,1,3,0x00700000,NULL},
-	//{"SOA1410-01:X",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1410-02:X",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1410-01:X",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1410-02:X",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCH1410-02",0,0,12,1,3,0x00700000,NULL},
 	{"OCH1411-01",0,0,13,1,3,0x00700000,NULL},
-	//{"SOA1411-01:X",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1411-02:X",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1411-01:X",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1411-02:X",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCH1411-02",0,0,14,1,3,0x00700000,NULL},
 	{"OCH1412-01",0,0,7,1,0,0x00700000,NULL},
-	{"SOA1412-01:X",0,0,0,1,0,0x00700020,NULL},/*added SOA magnets to orbit ctl */
-	{"SOA1412-02:X",0,0,1,1,0,0x00700020,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1412-01:X",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1412-02:X",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCH1412-02",0,0,8,1,0,0x00700000,NULL},
 
 	/* next, the vertical correctors (OCVxx-xx): */
 	{"OCV1401-01",0,0,3,1,0,0x00700000,NULL},
-	{"SOA1401-01:Y",0,0,13,1,0,0x00700020,NULL},/*added SOA magnets to orbit ctl */
-	{"SOA1401-02:Y",0,0,14,1,0,0x00700020,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1401-01:Y",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1401-02:Y",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCV1401-02",0,0,4,1,0,0x00700000,NULL},
 	{"OCV1402-01",0,0,5,1,0,0x00700000,NULL},
-	{"SOA1402-01:Y",0,0,15,1,0,0x00700020,NULL},/*added SOA magnets to orbit ctl */
-	{"SOA1402-02:Y",0,0,10,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1402-01:Y",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1402-02:Y",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCV1402-02",0,0,6,1,0,0x00700000,NULL},
 	{"OCV1403-01",0,0,1,1,1,0x00700000,NULL},
-	//{"SOA1403-01:Y",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1403-02:Y",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1403-01:Y",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1403-02:Y",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCV1403-02",0,0,2,1,1,0x00700000,NULL},
 	{"OCV1404-01",0,0,3,1,1,0x00700000,NULL},
-	//{"SOA1404-01:Y",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1404-02:Y",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1404-01:Y",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1404-02:Y",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCV1404-02",0,0,4,1,1,0x00700000,NULL},
 	{"OCV1405-01",0,0,5,1,1,0x00700000,NULL},
-	//{"SOA1405-01:Y",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1405-02:Y",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1405-01:Y",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1405-02:Y",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCV1405-02",0,0,6,1,1,0x00700000,NULL},
 	{"OCV1406-01",0,0,1,1,2,0x00700000,NULL},
-	//{"SOA1406-01:Y",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1406-02:Y",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1406-01:Y",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1406-02:Y",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCV1406-02",0,0,2,1,2,0x00700000,NULL},
 	{"OCV1407-01",0,0,3,1,2,0x00700000,NULL},
-	//{"SOA1407-01:Y",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1407-02:Y",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1407-01:Y",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1407-02:Y",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCV1407-02",0,0,4,1,2,0x00700000,NULL},
 	{"OCV1408-01",0,0,5,1,2,0x00700000,NULL},
-	//{"SOA1408-01:Y",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1408-02:Y",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1408-01:Y",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1408-02:Y",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCV1408-02",0,0,6,1,2,0x00700000,NULL},
 	{"OCV1409-01",0,0,1,1,3,0x00700000,NULL},
-	//{"SOA1409-01:Y",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1409-02:Y",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1409-01:Y",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1409-02:Y",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCV1409-02",0,0,2,1,3,0x00700000,NULL},
 	{"OCV1410-01",0,0,3,1,3,0x00700000,NULL},
-	//{"SOA1410-01:Y",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1410-02:Y",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1410-01:Y",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1410-02:Y",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCV1410-02",0,0,4,1,3,0x00700000,NULL},
 	{"OCV1411-01",0,0,5,1,3,0x00700000,NULL},
-	//{"SOA1411-01:Y",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	//{"SOA1411-02:Y",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1411-01:Y",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1411-02:Y",0,0,9,1,3,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCV1411-02",0,0,6,1,3,0x00700000,NULL},
 	{"OCV1412-01",0,0,1,1,0,0x00700000,NULL},
-	{"SOA1412-01:Y",0,0,11,1,0,0x00700020,NULL},/*added SOA magnets to orbit ctl */
-	{"SOA1412-02:Y",0,0,12,1,0,0x00700020,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1412-01:Y",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
+//	{"SOA1412-02:Y",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCV1412-02",0,0,2,1,0,0x00700000,NULL}
 };
 
@@ -166,7 +166,7 @@ int isInCorrection(PSController *ctlr, uint8_t *answer) {
 	return 0;
 }
 
-void UpdateSetPoints(int32_t *spArray) {
+void DistributeSetpoints(int32_t *spArray) {
 	int dacSetPoint;
     uint32_t value = 0;
     int i,rc;
@@ -198,7 +198,7 @@ void UpdateSetPoints(int32_t *spArray) {
 		usecSpinDelay(7);
 		continue;
 bailout:
-		syslog(LOG_INFO, "UpdateSetPoint: failed VME write--%#d\n\tid=%s\n",rc,ctlr->id);
+		syslog(LOG_INFO, "UpdateSetPoint: failed VME write--%#x\n\tid=%s\n",rc,ctlr->id);
 		return;
     }
 
@@ -209,19 +209,29 @@ void ToggleUpdateBit(VmeModule* mod) {
 
 	/* raise the UPDATE bit */
 	rc = VMIC2536_setOutput(mod, UPDATE);
-    if(rc) {
-    	syslog(LOG_INFO, "ToggleUpdateBit: failed VME write--%#x\n",rc);
-    	return;
-    }
+	if(rc) { goto bailout; }
     /* wait some time */
     usecSpinDelay(7);
 
     /* drop the UPDATE bit */
     rc = VMIC2536_setOutput(mod, 0UL);
-	if(rc) {
-    	syslog(LOG_INFO, "ToggleUpdateBit: failed VME write--%#x\n",rc);
-    	return;
-    }
+    if(rc) { goto bailout; }
+    return;
+bailout:
+	syslog(LOG_INFO, "ToggleUpdateBit: failed VME write--rc=%#x,crate=%d,vmeAddr=%#x\n",rc,mod->crate->id,mod->vmeBaseAddr);
+}
+
+void ToggleUpdateBits() {
+	int i;
+
+	for(i=0; i<NumDioModules; i++) {
+		ToggleUpdateBit(dioArray[i]);
+	}
+}
+
+void UpdateSetpoints(int32_t *spBuf) {
+	DistributeSetpoints(spBuf);
+	ToggleUpdateBits();
 }
 
 VmeModule* InitializeDioModule(VmeCrate* vmeCrate, uint32_t baseAddr) {
