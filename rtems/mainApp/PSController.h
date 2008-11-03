@@ -37,7 +37,7 @@ typedef struct {
  * 	experimental config uses 4,
  * 	production config uses 5
  */
-#define NumDioModules 4
+#define NumDioModules 5
 
 typedef struct {
 	uint32_t baseAddr;
