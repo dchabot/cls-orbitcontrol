@@ -268,7 +268,8 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 				rc = rtems_message_queue_receive(ocmSetpointQID, &msg, &spBufSize, RTEMS_NO_WAIT, RTEMS_NO_TIMEOUT);
 				TestDirective(rc, "rtems_message_queue_receive");
 				/* update the global PSController psControllerArray[NumOCM] */
-				UpdateSetpoints(msg.buf);
+				//UpdateSetpoints(msg.buf);
+				DistributeSetpoints(msg.buf);
 				/*
 				for(i=0; i<NumOCM; i++) {
 					syslog(LOG_INFO, "msg.buf[%i] = %d\n",i,msg.buf[i]);

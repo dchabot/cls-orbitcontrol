@@ -23,8 +23,9 @@ static DioConfig dioConfig[] = {
 		{VMIC_2536_DEFAULT_BASE_ADDR,2},
 		//{VMIC_2536_DEFAULT_BASE_ADDR+0x20,2},
 		{VMIC_2536_DEFAULT_BASE_ADDR,3},
-		{VMIC_2536_DEFAULT_BASE_ADDR+0x10,3},
-		//{VMIC_2536_DEFAULT_BASE_ADDR+0x20,3}
+		//{VMIC_2536_DEFAULT_BASE_ADDR+0x20,3},
+		/* this oddball module controls chicane pwr supplies. Must be last in struct!! */
+		{VMIC_2536_DEFAULT_BASE_ADDR+0x10,3}
 };
 
 static VmeModule *dioArray[NumDioModules];
@@ -184,19 +185,19 @@ void DistributeSetpoints(int32_t *spArray) {
 		rc = VMIC2536_setOutput(ctlr->mod, value);
 		if(rc) { goto bailout; }
 		/* added for Milan G IE Power 04/08/2002*/
-		usecSpinDelay(30);
+		usecSpinDelay(10);
 
 		/* toggle the PS_LATCH bit */
 		rc = VMIC2536_setOutput(ctlr->mod, (value | PS_LATCH));
 		if(rc) { goto bailout; }
 		/* wait some time */
-		usecSpinDelay(7);
+		usecSpinDelay(10);
 
 		/* drop the PS_LATCH bit and data bits */
 		rc = VMIC2536_setOutput(ctlr->mod, 0UL);
 		if(rc) { goto bailout; }
 		/* wait some time */
-		usecSpinDelay(7);
+		usecSpinDelay(10);
 		continue;
 bailout:
 		syslog(LOG_INFO, "UpdateSetPoint: failed VME write--%#x\n\tid=%s\n",rc,ctlr->id);
@@ -212,11 +213,12 @@ void ToggleUpdateBit(VmeModule* mod) {
 	rc = VMIC2536_setOutput(mod, UPDATE);
 	if(rc) { goto bailout; }
     /* wait some time */
-    usecSpinDelay(7);
+    usecSpinDelay(10);
 
     /* drop the UPDATE bit */
     rc = VMIC2536_setOutput(mod, 0UL);
     if(rc) { goto bailout; }
+    usecSpinDelay(10);
     return;
 bailout:
 	syslog(LOG_INFO, "ToggleUpdateBit: failed VME write--rc=%#x,crate=%d,vmeAddr=%#x\n",rc,mod->crate->id,mod->vmeBaseAddr);
@@ -225,7 +227,8 @@ bailout:
 void ToggleUpdateBits() {
 	int i;
 
-	for(i=0; i<NumDioModules; i++) {
+	/* NOTE: count is NumDioModules-1 because we omit the chicane supply from this op */
+	for(i=0; i<NumDioModules-1; i++) {
 		ToggleUpdateBit(dioArray[i]);
 	}
 }

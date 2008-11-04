@@ -25,7 +25,7 @@ void SetPwrSupply(int fd, uint32_t vmeAddr, uint32_t channel, uint32_t setpoint)
     	return;
     }
     /* added for Milan G IE Power 04/08/2002*/
-    usecSpinDelay(30);
+    usecSpinDelay(10);
 
     /* raise the PS_LATCH bit */
     //VmeWrite_32(mod,vmeAddr,(value | PS_LATCH));
@@ -35,7 +35,7 @@ void SetPwrSupply(int fd, uint32_t vmeAddr, uint32_t channel, uint32_t setpoint)
     	return;
     }
     /* wait some time */
-    usecSpinDelay(7);
+    usecSpinDelay(10);
 
     /* drop the PS_LATCH bit and data bits */
     //VmeWrite_32(mod,vmeAddr,0x00000000);
@@ -45,7 +45,7 @@ void SetPwrSupply(int fd, uint32_t vmeAddr, uint32_t channel, uint32_t setpoint)
     	return;
     }
 	/* wait some time */
-	usecSpinDelay(7);
+	usecSpinDelay(10);
 
     /* raise the UPDATE bit */
     //VmeWrite_32(mod,vmeAddr,UPDATE);
@@ -55,7 +55,7 @@ void SetPwrSupply(int fd, uint32_t vmeAddr, uint32_t channel, uint32_t setpoint)
     	return;
     }
     /* wait some time */
-    usecSpinDelay(7);
+    usecSpinDelay(10);
 
     /* drop the UPDATE bit */
 	//VmeWrite_32(mod,vmeAddr,0x00000000);
@@ -64,4 +64,6 @@ void SetPwrSupply(int fd, uint32_t vmeAddr, uint32_t channel, uint32_t setpoint)
     	syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
     	return;
     }
+	/* wait some time */
+	usecSpinDelay(10);
 }

@@ -16,6 +16,7 @@ C_PIECES+=DaqControllerIrq
 C_PIECES+=DataHandler
 C_PIECES+=PSController
 C_PIECES+=OcmSetpointServer
+C_PIECES+=BpmSamplesPerAvgServer
 
 C_FILES=$(C_PIECES:%=%.c)
 C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
