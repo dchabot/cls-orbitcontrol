@@ -24,4 +24,6 @@
 #define UPDATE 0x80000000
 #define DROP_UPDATE 0x7FFFFFFF
 
+#define ISO_DELAY 10 /* i.e. delay in microseconds for writes to optically isolated circuits */
+
 #endif /* PSDEFS_H_ */

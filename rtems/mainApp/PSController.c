@@ -182,19 +182,19 @@ void DistributeSetpoints(int32_t *spArray) {
 		rc = VMIC2536_setOutput(ctlr->mod, value);
 		if(rc) { goto bailout; }
 		/* added for Milan G IE Power 04/08/2002*/
-		usecSpinDelay(30);
+		usecSpinDelay(ISO_DELAY);
 
 		/* toggle the PS_LATCH bit */
 		rc = VMIC2536_setOutput(ctlr->mod, (value | PS_LATCH));
 		if(rc) { goto bailout; }
 		/* wait some time */
-		usecSpinDelay(7);
+		usecSpinDelay(ISO_DELAY);
 
 		/* drop the PS_LATCH bit and data bits */
 		rc = VMIC2536_setOutput(ctlr->mod, 0UL);
 		if(rc) { goto bailout; }
 		/* wait some time */
-		usecSpinDelay(7);
+		usecSpinDelay(ISO_DELAY);
 		continue;
 bailout:
 		syslog(LOG_INFO, "UpdateSetPoint: failed VME write--%#x\n\tid=%s\n",rc,ctlr->id);
@@ -210,11 +210,12 @@ void ToggleUpdateBit(VmeModule* mod) {
 	rc = VMIC2536_setOutput(mod, UPDATE);
 	if(rc) { goto bailout; }
     /* wait some time */
-    usecSpinDelay(7);
+    usecSpinDelay(ISO_DELAY);
 
     /* drop the UPDATE bit */
     rc = VMIC2536_setOutput(mod, 0UL);
     if(rc) { goto bailout; }
+    usecSpinDelay(ISO_DELAY);
     return;
 bailout:
 	syslog(LOG_INFO, "ToggleUpdateBit: failed VME write--rc=%#x,crate=%d,vmeAddr=%#x\n",rc,mod->crate->id,mod->vmeBaseAddr);
