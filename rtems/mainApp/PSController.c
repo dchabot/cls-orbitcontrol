@@ -41,18 +41,18 @@ static PSController psCtlrArray[] = {
 //	{"SOA1402-01:X",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 //	{"SOA1402-02:X",0,0,9,1,0,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 	{"OCH1402-02",0,0,14,1,0,0x00700000,NULL},
-	{"OCH1403-01",0,0,1,1,1,0x00700000,NULL},
+	{"OCH1403-01",0,0,7,1,1,0x00700000,NULL},
 //	{"SOA1403-01:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 //	{"SOA1403-02:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	{"OCH1403-02",0,0,2,1,1,0x00700000,NULL},
-	{"OCH1404-01",0,0,3,1,1,0x00700000,NULL},
+	{"OCH1403-02",0,0,8,1,1,0x00700000,NULL},
+	{"OCH1404-01",0,0,9,1,1,0x00700000,NULL},
 //	{"SOA1404-01:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 //	{"SOA1404-02:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	{"OCH1404-02",0,0,4,1,1,0x00700000,NULL},
-	{"OCH1405-01",0,0,5,1,1,0x00700000,NULL},
+	{"OCH1404-02",0,0,12,1,1,0x00700000,NULL},
+	{"OCH1405-01",0,0,13,1,1,0x00700000,NULL},
 //	{"SOA1405-01:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 //	{"SOA1405-02:X",0,0,9,1,1,0x00700000,NULL},/*added SOA magnets to orbit ctl */
-	{"OCH1405-02",0,0,6,1,1,0x00700000,NULL},
+	{"OCH1405-02",0,0,14,1,1,0x00700000,NULL},
 	{"OCH1406-01",0,0,7,1,2,0x00700000,NULL},
 //	{"SOA1406-01:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
 //	{"SOA1406-02:X",0,0,9,1,2,0x00700000,NULL},/*added SOA magnets to orbit ctl */
