@@ -45,6 +45,8 @@ void InitializeVmeCrates(VmeCrate *crateArray[], int numCrates) {
 								0x39/*AM*/,0xFF010800/*hdr*/,
 								(1<<24)-1,&(crateArray[i]->a24BaseAddr));
 		TestDirective(rc, "vme_set_mmap_entry()");
+		syslog(LOG_INFO, "crate# %d, VME A24 base-address=%p",
+				i,crateArray[i]->a24BaseAddr);
 #endif
 		/* do a VME System-Reset */
 		vmesysreset(fd);

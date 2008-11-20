@@ -69,8 +69,9 @@ install:  all
 #	$(CP) $(LIB) $(OBJNAME) ../../lib
 	$(INSTALL_VARIANT) -m 644 $(OBJNAME) $(LIBDIR)
 	$(INSTALL_VARIANT) -m 644 $(LIB) $(LIBDIR)
+	$(INSTALL_VARIANT) -m 644 $(OBJNAME) /home/chabotd/ioc1009-109
 # copy to tftp server bootfile location
-	scp $(OBJNAME) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
+#	scp $(OBJNAME) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
 	
 
 

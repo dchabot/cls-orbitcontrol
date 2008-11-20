@@ -6,7 +6,7 @@
  */
 #include <syslog.h>
 
-#include <psDefs.h>
+#include "psDefs.h"
 #include <utils.h>
 #include <vmic2536.h>
 
@@ -165,44 +165,63 @@ int isInCorrection(PSController *ctlr, uint8_t *answer) {
 	return 0;
 }
 
+/* UpdateSetpoint will change a single PS channel's setpoint, BUT toggling
+ * the UPDATE bit is still req'd to affect a physical change in channel's current.
+ */
+int UpdateSetpoint(PSController* ctlr, int32_t setpoint) {
+	uint32_t value = 0;
+	int32_t dacSetPoint = 0;
+	int rc;
+
+	ctlr->setpoint = setpoint;
+	dacSetPoint = ctlr->setpoint * DAC_AMP_CONV_FACTOR;
+
+	value = (ctlr->channel & PS_CHANNEL_MASK) << PS_CHANNEL_OFFSET;
+	value = value | (dacSetPoint & 0xFFFFFF);
+
+	/* write the 32 bits out to the power supply*/
+	rc = VMIC2536_setOutput(ctlr->mod, value);
+	if(rc) { goto bailout; }
+	/* added for Milan G IE Power 04/08/2002*/
+	usecSpinDelay(ISO_DELAY);
+
+	/* toggle the PS_LATCH bit */
+	rc = VMIC2536_setOutput(ctlr->mod, (value | PS_LATCH));
+	if(rc) { goto bailout; }
+	usecSpinDelay(ISO_DELAY);
+
+	/* drop the PS_LATCH bit and data bits */
+	rc = VMIC2536_setOutput(ctlr->mod, 0UL);
+	if(rc) { goto bailout; }
+	usecSpinDelay(ISO_DELAY);
+	return 0;
+
+bailout:
+	syslog(LOG_INFO, "UpdateSetPoint: failed VME write--%#x\n\tid=%s\n",rc,ctlr->id);
+	return -1;
+}
+
 void DistributeSetpoints(int32_t *spArray) {
-	int dacSetPoint;
-    uint32_t value = 0;
     int i,rc;
 
     for(i=0; i<NumOCM; i++) {
-    	psCtlrArray[i].setpoint = spArray[i];
-    	PSController *ctlr = &psCtlrArray[i];
-		dacSetPoint = ctlr->setpoint * DAC_AMP_CONV_FACTOR;
+    	rc = UpdateSetpoint(&psCtlrArray[i], spArray[i]);
+    	if(rc != 0) {
+    		syslog(LOG_INFO, "UpdateSetPoint: failed VME write--%#x\n\tid=%s\n",
+    				rc, psCtlrArray[i].id);
+    	}
 
-		value = (ctlr->channel & PS_CHANNEL_MASK) << PS_CHANNEL_OFFSET;
-		value = value | (dacSetPoint & 0xFFFFFF);
-
-		/* write the 32 bits out to the power supply*/
-		rc = VMIC2536_setOutput(ctlr->mod, value);
-		if(rc) { goto bailout; }
-		/* added for Milan G IE Power 04/08/2002*/
-		usecSpinDelay(ISO_DELAY);
-
-		/* toggle the PS_LATCH bit */
-		rc = VMIC2536_setOutput(ctlr->mod, (value | PS_LATCH));
-		if(rc) { goto bailout; }
-		/* wait some time */
-		usecSpinDelay(ISO_DELAY);
-
-		/* drop the PS_LATCH bit and data bits */
-		rc = VMIC2536_setOutput(ctlr->mod, 0UL);
-		if(rc) { goto bailout; }
-		/* wait some time */
-		usecSpinDelay(ISO_DELAY);
-		continue;
-bailout:
-		syslog(LOG_INFO, "UpdateSetPoint: failed VME write--%#x\n\tid=%s\n",rc,ctlr->id);
-		return;
     }
 
 }
 
+/* FIXME!!!
+ * NOTE: this routine's argument is VmeModule*, reflecting the idea that
+ * 			an UPDATE should be performed ONCE per Power Supply Bulk !!
+ *
+ * NOTE: this also implies each bulk is serviced by exactly ONE vmic2536.
+ *		This assumption will be broken once the pwrSupply upgrades are complete...
+ */
 void ToggleUpdateBit(VmeModule* mod) {
 	int rc;
 
@@ -218,7 +237,8 @@ void ToggleUpdateBit(VmeModule* mod) {
     usecSpinDelay(ISO_DELAY);
     return;
 bailout:
-	syslog(LOG_INFO, "ToggleUpdateBit: failed VME write--rc=%#x,crate=%d,vmeAddr=%#x\n",rc,mod->crate->id,mod->vmeBaseAddr);
+	syslog(LOG_INFO, "ToggleUpdateBit: failed VME write--rc=%#x,crate=%d,vmeAddr=%#x\n",
+			rc,mod->crate->id,mod->vmeBaseAddr);
 }
 
 void ToggleUpdateBits() {
@@ -232,6 +252,69 @@ void ToggleUpdateBits() {
 void UpdateSetpoints(int32_t *spBuf) {
 	DistributeSetpoints(spBuf);
 	ToggleUpdateBits();
+}
+
+/* SetSingleSetpoint() will update PS channel setpoint AND toggle
+ * the UPDATE bit to affect the change.
+ *
+ * NOTE: we bypass the vmic2536 API and use the sis1100 API directly here
+ * 			because USE_MACRO_VME_ACCESSORS may be defined AND this routine
+ * 			could be called asynchronously. Thus we invoke thread-safe routines
+ * 			to avoid clobbering any concurrent VME block-transfers.
+ */
+void SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
+	int dacSetPoint;
+	uint32_t value = 0;
+	int rc, fd;
+	uint32_t vmeAddr;
+
+	dacSetPoint = setpoint * DAC_AMP_CONV_FACTOR;
+
+	value = (ctlr->channel & PS_CHANNEL_MASK) << PS_CHANNEL_OFFSET;
+	value = value | (dacSetPoint & 0xFFFFFF);
+
+	fd = ctlr->mod->crate->fd;
+	vmeAddr = ctlr->modAddr;
+	/* write the 32 bits out to the power supply*/
+	rc=vme_A24D32_write(fd,vmeAddr,value);
+	if(rc) {
+		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
+		return;
+	}
+	/* added for Milan G IE Power 04/08/2002*/
+	usecSpinDelay(ISO_DELAY);
+
+	/* raise the PS_LATCH bit */
+	rc=vme_A24D32_write(fd,vmeAddr,(value | PS_LATCH));
+	if(rc) {
+		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
+		return;
+	}
+	usecSpinDelay(ISO_DELAY);
+
+	/* drop the PS_LATCH bit and data bits */
+	rc=vme_A24D32_write(fd,vmeAddr,0x00000000);
+	if(rc) {
+		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
+		return;
+	}
+	usecSpinDelay(ISO_DELAY);
+
+	/* raise the UPDATE bit */
+	rc=vme_A24D32_write(fd,vmeAddr,UPDATE);
+	if(rc) {
+		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
+		return;
+	}
+	usecSpinDelay(ISO_DELAY);
+
+	/* drop the UPDATE bit */
+	rc=vme_A24D32_write(fd,vmeAddr,0x00000000);
+	if(rc) {
+		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
+		return;
+	}
+	usecSpinDelay(ISO_DELAY);
 }
 
 VmeModule* InitializeDioModule(VmeCrate* vmeCrate, uint32_t baseAddr) {

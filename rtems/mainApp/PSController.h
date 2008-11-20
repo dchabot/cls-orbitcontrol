@@ -61,6 +61,7 @@ void DistributeSetpoints(int32_t* spBuf);
 void ToggleUpdateBit(VmeModule* mod);
 void ToggleUpdateBits();
 void UpdateSetpoints(int32_t *spBuf);
+void SetSingleSetpoint(PSController* ctlr, int32_t setpoint);
 VmeModule* InitializeDioModule(VmeCrate* vmeCrate, uint32_t baseAddr);
 void ShutdownDioModules(VmeModule *DioModules[], int numModules);
 void InitializePSControllers(VmeCrate** crateArray);

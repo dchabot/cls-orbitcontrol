@@ -40,10 +40,12 @@ dbLoadRecords("db/SrChicane2408-01.db", "PORT=L1,ADDR=0")
 
 ### contains the mux'd bpm fbk data ######################
 dbLoadRecords("db/BpmArray.db")
+dbLoadRecords("db/BpmArrayTest.db")
 ### contains the bpm fbk records #########################
 dbLoadRecords("db/SRBpms.db")
 ### contains the mux'd OCM setpoint record (waveform) #### 
-dbLoadRecords("db/OcmArray.db")#, "PORT=L2,ADDR=0")
+dbLoadRecords("db/OcmArray.db")
+dbLoadRecords("db/OcmSetpoint.db")
 ### orbit RMS info ##########################################
 #dbLoadRecords("db/SrOrbitRms.db", "clsName=SrBPMs")
 dbLoadRecords("db/SamplesPerAvg.db","PORT=L2,ADDR=0")

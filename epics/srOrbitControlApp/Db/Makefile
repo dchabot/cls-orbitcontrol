@@ -24,6 +24,9 @@ DB += OcmArray.db
 # control of BPM mux/demux update rate
 DB += SamplesPerAvg.db
 
+# custom device support:
+DB += BpmArrayTest.db
+DB += OcmSetpoint.db
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
 # <anyname>_template = <templatename>

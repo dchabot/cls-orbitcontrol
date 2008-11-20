@@ -6,9 +6,9 @@ PGMS=${ARCH}/daq.obj
 
 # C source names, if any, go here -- minus the .c
 C_PIECES=DaqServerUtils
-C_PIECES+=DioWriteServer
+#C_PIECES+=DioWriteServer
 C_PIECES+=DioReadServer
-C_PIECES+=SetPwrSupply
+#C_PIECES+=SetPwrSupply
 C_PIECES+=AdcDataServer
 C_PIECES+=AdcReaderThread 
 C_PIECES+=DaqControllerUtils 
@@ -58,7 +58,7 @@ CFLAGS+= -I ./ -I $(RTEMS_MAKEFILE_PATH)/lib/include
 
 
 ifndef RTEMS_SITE_INSTALLDIR
-	RTEMS_SITE_INSTALLDIR = /export/tftpboot/epics/IOC1009-109
+	RTEMS_SITE_INSTALLDIR = /home/chabotd/ioc1009-109
 endif
 
 #
@@ -78,7 +78,8 @@ $(filter %.obj, $(PGMS)): ${OBJS}
 
 install:  all
 	$(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_MAKEFILE_PATH)/lib
+	$(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_SITE_INSTALLDIR)
 # copy to tftp server bootfile location
-	scp $(PGMS) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
+#	scp $(PGMS) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
 	
 

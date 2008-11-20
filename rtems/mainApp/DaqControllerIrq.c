@@ -23,6 +23,8 @@
 #include "OcmSetpointServer.h"
 #include "BpmSamplesPerAvgServer.h"
 
+static rtems_id DaqControllerTID;
+
 typedef struct {
 	VmeModule *adc;
 	rtems_id controllerTID;
@@ -43,6 +45,39 @@ static void AdcIsr(void *arg, uint8_t vector) {
 	ICS110BInterruptControl(parg->adc, ICS110B_IRQ_DISABLE);
 	/* inform the DaqController of this event */
 	NotifyDaqController(parg);
+}
+
+static void RegisterAdcIsr(VmeModule* adc, rtems_event_set* ev) {
+	int rc;
+	static int x = 0;
+	rtems_event_set event;
+	AdcIsrArg *parg = NULL;
+
+	event = (1<<(24+x));
+	*ev |= event;
+	parg = (AdcIsrArg *)calloc(1,sizeof(AdcIsrArg));
+	if(parg==NULL) {
+		syslog(LOG_INFO, "Failed to allocated AdcIsrArg[%d]\n",x);
+		FatalErrorHandler(0);
+	}
+	parg->adc = adc;
+	parg->controllerTID = DaqControllerTID;
+	parg->irqEvent = event;
+	rc = vme_set_isr(adc->crate->fd,
+						adc->irqVector/*vector*/,
+						AdcIsr/*handler*/,
+						parg/*handler arg*/);
+	if(rc) {
+		syslog(LOG_INFO, "Failed to set ADC Isr\n");
+		FatalErrorHandler(0);
+	}
+	ICS110BSetIrqVector(adc, adc->irqVector);
+	/* arm the appropriate VME interrupt level at each sis3100 & ADC... */
+	rc = vme_enable_irq_level(adc->crate->fd, adc->irqLevel);
+	TestDirective(rc, "vme_enable_irq_level()");
+	ICS110BInterruptControl(adc,ICS110B_IRQ_ENABLE);
+
+	x++;
 }
 
 static int RendezvousPoint(rtems_event_set syncEvents) {
@@ -87,7 +122,6 @@ writeToFile(FILE* f, void* buf, size_t size) {
 
 rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	extern int errno;
-	static rtems_id DaqControllerTID;
 	VmeCrate *crateArray[NumVmeCrates];
 	VmeModule *adcArray[NumAdcModules];
 	int adcFramesPerTick;
@@ -122,14 +156,19 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	}
 
 	for(i=0; i<NumAdcModules; i++) {
-		adcArray[i] = InitializeAdcModule(crateArray[i], ICS110B_DEFAULT_BASEADDR, adcFrequency, AdcChannelsPerFrame, &adcTrueFrequency);
+		adcArray[i] = InitializeAdcModule(crateArray[i],
+											ICS110B_DEFAULT_BASEADDR,
+											adcFrequency,
+											AdcChannelsPerFrame,
+											&adcTrueFrequency);
 		syslog(LOG_INFO, "Adc[%d] rate is %.6f kHz\n",i,adcTrueFrequency);
 	}
 	adcFramesPerTick = (int)ceil((adcTrueFrequency*HzPerkHz)/((double)rtemsTicksPerSecond));
 
 	/* register ADC interrupt service routines with sis1100 driver... */
 	for(i=0; i<NumAdcModules; i++) {
-		rtems_event_set event = 0;
+		RegisterAdcIsr(adcArray[i], &isrSyncEvents);
+		/*rtems_event_set event = 0;
 		AdcIsrArg *parg = NULL;
 
 		event = (1<<(24+i));
@@ -144,18 +183,18 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 		parg->irqEvent = event;
 		//AdcInstallIsr(adcArray[i], AdcIsr, parg);
 		rc = vme_set_isr(crateArray[i]->fd,
-							adcArray[i]->irqVector/*vector*/,
-							AdcIsr/*handler*/,
-							parg/*handler arg*/);
+							adcArray[i]->irqVectorvector,
+							AdcIsrhandler,
+							parghandler arg);
 		if(rc) {
 			syslog(LOG_INFO, "Failed to set ADC Isr\n");
 			FatalErrorHandler(0);
 		}
 		ICS110BSetIrqVector(adcArray[i], adcArray[i]->irqVector);
-		/* arm the appropriate VME interrupt level at each sis3100 & ADC... */
+		 arm the appropriate VME interrupt level at each sis3100 & ADC...
 		rc = vme_enable_irq_level(crateArray[i]->fd, adcArray[i]->irqLevel);
 		TestDirective(rc, "vme_enable_irq_level()");
-		ICS110BInterruptControl(adcArray[i],ICS110B_IRQ_ENABLE);
+		ICS110BInterruptControl(adcArray[i],ICS110B_IRQ_ENABLE);*/
 	}
 
 
@@ -181,9 +220,9 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 
 	/* fire up the AdcDataServer,DioWriteServer,DioReadServer interfaces */
 	StartAdcDataServer();
-	StartDioWriteServer(crateArray);
+	//StartDioWriteServer(crateArray);
 	/* FIXME -- unused! OCM feedback channel is via serial links... */
-	StartDioReadServer(crateArray);
+	//StartDioReadServer(crateArray);
 
 	/* FIXME -- testing: offload data to host over NFS */
 	/*fp = getOutputFile("adc_1.dat");
@@ -200,12 +239,12 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	StartBpmSamplesPerAvgServer(NULL);
 
 	/* start ADC acquistion on the "edge" of a rtems_clock_tick()...*/
-	rtems_task_wake_after(1);
+	rtems_task_wake_after(2);
 	/* enable acquire at the ADCz */
 	AdcStartAcquisition(adcArray, NumAdcModules);
 
 	/* main acquisition loop */
-	for(;;) {
+	for(x=0; x<1000;x++) {
 		/* Wait for notification of ADC "fifo-half-full" event... */
 		if(RendezvousPoint(isrSyncEvents)) {
 			break; /* restart */
@@ -316,8 +355,8 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	rtems_message_queue_delete(rawDataQID);
 	/* kill servers */
 	DestroyAdcDataServer();
-	DestroyDioWriteServer();
-	DestroyDioReadServer();
+	//DestroyDioWriteServer();
+	//DestroyDioReadServer();
 	DestroyOcmSetpointServer();
 	DestroyBpmSamplesPerAvgServer();
 	/* clean up self */

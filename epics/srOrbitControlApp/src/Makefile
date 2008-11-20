@@ -25,6 +25,10 @@ srOrbitControl_SRCS += srOrbitControl_registerRecordDeviceDriver.cpp
 srOrbitControl_SRCS_DEFAULT += srOrbitControlMain.cpp
 srOrbitControl_SRCS_vxWorks += -nil-
 
+# custom device support:
+srOrbitControl_SRCS += devSupBPMAvgs.c
+srOrbitControl_SRCS += devSupOCMSetpoint.c
+
 #The following adds support from base/src/vxWorks
 srOrbitControl_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
