@@ -244,7 +244,7 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	AdcStartAcquisition(adcArray, NumAdcModules);
 
 	/* main acquisition loop */
-	for(x=0; x<1000;x++) {
+	for(;;) {
 		/* Wait for notification of ADC "fifo-half-full" event... */
 		if(RendezvousPoint(isrSyncEvents)) {
 			break; /* restart */
