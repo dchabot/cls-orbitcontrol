@@ -8,6 +8,6 @@
 #ifndef DEVSUPBPMWAVEFORM_H_
 #define DEVSUPBPMWAVEFORM_H_
 
-#include "../../../rtems/mainApp/dataDefs.h"
+#include <dataDefs.h>
 
 #endif /* DEVSUPBPMWAVEFORM_H_ */

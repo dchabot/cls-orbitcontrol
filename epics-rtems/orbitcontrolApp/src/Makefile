@@ -8,9 +8,9 @@ include $(TOP)/configure/CONFIG
 #=============================
 # Build the IOC application
 
-USR_CFLAGS += -g
-USR_CXXFLAGS += -g
-USR_LDFLAGS += -g
+USR_CFLAGS_RTEMS += -g -I ../../../../rtems/include
+USR_CXXFLAGS_RTEMS += -g -I ../../../../rtems/include
+USR_LDFLAGS_RTEMS += -g
 
 PROD_IOC_RTEMS = orbitcontrol
 # orbitcontrol.dbd will be created and installed

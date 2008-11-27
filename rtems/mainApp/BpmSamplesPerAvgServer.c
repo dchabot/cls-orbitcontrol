@@ -8,12 +8,12 @@
 #include <sis1100_api.h>
 #include <vmeDefs.h>
 #include <utils.h>
-#include "DaqServerUtils.h"
-#include "DioReadServer.h"
-#include "DaqController.h"
-#include "DataHandler.h"
-#include "dataDefs.h"
-#include "BpmSamplesPerAvgServer.h"
+#include <DaqServerUtils.h>
+#include <DioReadServer.h>
+#include <DaqController.h>
+#include <DataHandler.h>
+#include <dataDefs.h>
+#include <BpmSamplesPerAvgServer.h>
 
 
 static int bpmSamplesPerAvgFD;

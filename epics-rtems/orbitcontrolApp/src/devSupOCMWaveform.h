@@ -9,7 +9,7 @@
 #define DEVSUPOCMWAVEFORM_H_
 
 #ifdef __rtems__
-#include "../../../rtems/mainApp/PSController.h"
+#include <PSController.h>
 #endif
 
 #endif /* DEVSUPOCMWAVEFORM_H_ */

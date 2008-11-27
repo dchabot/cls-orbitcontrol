@@ -8,6 +8,6 @@
 #ifndef DEVSUPOCMSETPOINT_H_
 #define DEVSUPOCMSETPOINT_H_
 
-#include "../../../rtems/mainApp/PSController.h"
+#include <PSController.h>
 
 #endif /* DEVSUPOCMSETPOINT_H_ */

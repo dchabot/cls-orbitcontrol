@@ -39,9 +39,8 @@ include $(RTEMS_ROOT)/make/lib.cfg
 #
 # Add local stuff here using +=
 #
-INCLUDE_DIR=${LIBDIR}/include
-#CFLAGS += -I ${INCLUDE_DIR}
-
+INCLUDE_DIR= ../include
+CFLAGS += -I ${INCLUDE_DIR}
 #
 # Add your list of files to delete here.  The config files
 #  already know how to delete some stuff, so you may want
@@ -65,8 +64,7 @@ $(LIB): ${OBJS}
 # for include files, just use $(INSTALL_CHANGE)
 install:  all
 	test -d "${INCLUDE_DIR}" || mkdir ${INCLUDE_DIR}
-#	$(CP) ${H_FILES} ${INCLUDE_DIR}
-#	$(CP) $(LIB) $(OBJNAME) ../../lib
+	$(INSTALL_VARIANT) -m 644 ${H_FILES} ${INCLUDE_DIR}
 	$(INSTALL_VARIANT) -m 644 $(OBJNAME) $(LIBDIR)
 	$(INSTALL_VARIANT) -m 644 $(LIB) $(LIBDIR)
 	$(INSTALL_VARIANT) -m 644 $(OBJNAME) /home/chabotd/ioc1009-109

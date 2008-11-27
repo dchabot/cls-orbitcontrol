@@ -3,7 +3,7 @@
 #
 
 PGMS=${ARCH}/daq.obj
-
+INCLUDE_DIR=../include
 # C source names, if any, go here -- minus the .c
 C_PIECES+=AdcReaderThread 
 C_PIECES+=DaqControllerUtils 
@@ -19,9 +19,10 @@ CC_PIECES=
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
-H_PIECES=ADCdefs
-H_PIECES+=bpmDefs dataDefs psDefs AdcReaderThread DaqController
-H_PIECES+=DataHandler PSController
+
+H_PIECES=${INCLUDE_DIR}/bpmDefs
+H_PIECES+=${INCLUDE_DIR}/AdcReaderThread ${INCLUDE_DIR}/DaqController
+H_PIECES+=${INCLUDE_DIR}/DataHandler ${INCLUDE_DIR}/PSController
 H_FILES=$(H_PIECES:%=%.h)
 
 # Assembly source names, if any, go here -- minus the .S
@@ -46,7 +47,7 @@ include $(RTEMS_ROOT)/make/leaf.cfg
 #
 # (OPTIONAL) Add local stuff here using +=
 #
-CFLAGS+= -I ./ -I $(RTEMS_MAKEFILE_PATH)/lib/include
+CFLAGS+= -I ../include -I $(RTEMS_MAKEFILE_PATH)/lib/include
 
 
 ifndef RTEMS_SITE_INSTALLDIR

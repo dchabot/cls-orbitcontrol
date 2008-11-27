@@ -12,11 +12,11 @@
 #include <utils.h> /*TestDirective()*/
 
 //#include <rtems-gdb-stub.h>
-#include "DaqController.h"
-#include "dataDefs.h"
-#include "AdcReaderThread.h"
-#include "DataHandler.h"
-#include "PSController.h"
+#include <DaqController.h>
+#include <dataDefs.h>
+#include <AdcReaderThread.h>
+#include <DataHandler.h>
+#include <PSController.h>
 
 static rtems_id DaqControllerTID;
 /*FIXME -- global var */
@@ -267,9 +267,9 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 				if(TestDirective(rc, "rtems_message_queue_receive")) { break; }
 				/* update the global PSController psControllerArray[NumOCM] */
 				SimultaneousSetpointUpdate(msg.buf);
-				for(i=0; i<NumOCM; i++) {
+				/*for(i=0; i<NumOCM; i++) {
 					syslog(LOG_INFO, "msg.buf[%i] = %d\n",i,msg.buf[i]);
-				}
+				}*/
 				free(msg.buf);
 			}
 		}

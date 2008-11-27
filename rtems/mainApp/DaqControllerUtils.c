@@ -12,7 +12,7 @@
 #include <vmic2536.h>
 #include <utils.h> /*TestDirective()*/
 
-#include "DaqController.h"
+#include <DaqController.h>
 
 /* FIXME -- refactor (extract method) to init a *single* crate
  *

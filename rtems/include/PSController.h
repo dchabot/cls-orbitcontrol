@@ -14,6 +14,24 @@
 
 #include <vmeDefs.h>
 
+/*#define DAC_AMP_CONV_FACTOR 42234.31*/
+#define DAC_AMP_CONV_FACTOR 1
+
+#define OUTPUT_REG_OFFSET 0x08
+#define INPUT_REG_OFFSET 0x04
+#define CONTROL_REG_OFFSET 0x02
+
+#define PS_CHANNEL_OFFSET 24
+#define PS_CHANNEL_MASK 0xF
+
+#define PS_LATCH 0x20000000
+#define DROP_PS_LATCH 0xDFFFFFFF
+
+#define UPDATE 0x80000000
+#define DROP_UPDATE 0x7FFFFFFF
+
+#define ISO_DELAY 30 /* i.e. delay in microseconds for writes to optically isolated circuits */
+
 #define PSCONTROLLER_ID_SIZE 40
 
 typedef struct {

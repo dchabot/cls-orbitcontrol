@@ -6,9 +6,9 @@
 #include <math.h>
 
 #include <utils.h>
-#include "dataDefs.h"
-#include "DaqController.h"
-#include "DataHandler.h"
+#include <dataDefs.h>
+#include <DaqController.h>
+#include <DataHandler.h>
 #include <bpmDefs.h> /* contains x/y channel scaling factors */
 
 
