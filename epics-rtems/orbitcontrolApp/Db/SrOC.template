@@ -1,0 +1,22 @@
+record(longout, "$(clsName):dac_x") {
+	field(DESC, "PwrSupply $(channel) setpoint")
+	field(DTYP, "PwrSupply Setpoint")
+	field(OUT, "@$(crateId) $(vmeBaseAddr) $(channel)")
+	field(SCAN, "Passive")
+	field(HOPR, "7602176")
+	field(HIHI, "7602176")
+	field(HIGH, "7601176")
+	field(LOW, "-7601176")
+	field(LOLO, "-7602176")
+	field(LOPR, "-7602176")
+	field(EGU, "DAC")
+	field(FLNK, "$(clsName):dac_x:fbk")
+}
+
+record(longin, "$(clsName):dac_x:fbk") {
+	field(DESC, "PwrSupply $(channel) setpoint fbk")
+	field(DTYP, "Soft Channel")
+	field(SCAN, "Passive")
+	field(INP, "$(clsName):dac_x NPP")
+}
+

@@ -1,0 +1,17 @@
+#
+# Created on: Sep 16, 2008
+#     Author: chabotd
+
+record(subArray, "BPM$(clsName):$(xORy)") {
+	field(DTYP, "BPM SubArray")
+	field(INP, "bpm:mux")
+	field(SCAN, "Event")
+	field(EVNT, "$(event)")
+	field(PHAS, "$(phase)")
+	field(FTVL, "DOUBLE")
+	field(MALM, "1")
+	field(NELM, "1")
+	field(INDX, "$(wfIndex)")
+	field(EGU, "m")
+}
+

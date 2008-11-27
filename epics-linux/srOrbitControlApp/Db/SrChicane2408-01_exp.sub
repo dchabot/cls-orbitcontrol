@@ -1,0 +1,17 @@
+
+#  hopr & lopr unused.
+#   
+#
+
+file SrOC.template
+{
+#                    
+    pattern
+    {  clsName     	crateId  vmeBaseAddr	channel    }
+
+    {  x_BID1408-02		3	0x00700010		5		}
+    {  x_BID1411-02		3	0x00700010		6		}
+    {  x_BID1410-03		3   0x00700010   	7		}
+    
+}    
+

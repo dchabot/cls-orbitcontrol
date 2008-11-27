@@ -5,18 +5,11 @@
 PGMS=${ARCH}/daq.obj
 
 # C source names, if any, go here -- minus the .c
-C_PIECES=DaqServerUtils
-#C_PIECES+=DioWriteServer
-C_PIECES+=DioReadServer
-#C_PIECES+=SetPwrSupply
-C_PIECES+=AdcDataServer
 C_PIECES+=AdcReaderThread 
 C_PIECES+=DaqControllerUtils 
 C_PIECES+=DaqControllerIrq
 C_PIECES+=DataHandler
 C_PIECES+=PSController
-C_PIECES+=OcmSetpointServer
-C_PIECES+=BpmSamplesPerAvgServer
 
 C_FILES=$(C_PIECES:%=%.c)
 C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
@@ -27,9 +20,8 @@ CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
 H_PIECES=ADCdefs
-H_PIECES+=bpmDefs dataDefs psDefs AdcDataServer AdcReaderThread DaqController
-H_PIECES+=DaqServerUtils DataHandler DioReadServer DioWriteServer OcmSetpointServer
-H_PIECES+=PSController
+H_PIECES+=bpmDefs dataDefs psDefs AdcReaderThread DaqController
+H_PIECES+=DataHandler PSController
 H_FILES=$(H_PIECES:%=%.h)
 
 # Assembly source names, if any, go here -- minus the .S

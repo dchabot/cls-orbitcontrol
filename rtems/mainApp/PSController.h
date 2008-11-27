@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <vmeDefs.h>
 
@@ -20,12 +21,13 @@ typedef struct {
 	int32_t setpoint;
 	int32_t feedback;
 	uint8_t channel;
-	uint8_t inCorrection;
+	bool inCorrection;
 	uint32_t crateId;
 	uint32_t modAddr;
 	VmeModule *mod;
 }PSController;
 
+#define OcmSetpointQueueCapacity	1
 typedef struct {
 	uint32_t numsp;
 	int32_t *buf;
@@ -55,13 +57,14 @@ int getFeedback(PSController* ctlr, int32_t* fbk);*/
 int getChannel(PSController* ctlr, uint8_t* ch);
 int setChannel(PSController* ctlr, uint8_t ch);
 
-int isInCorrection(PSController* ctlr, uint8_t* answer);
+bool isInCorrection(PSController* ctlr);
 
+PSController* getPSControllerByName(char* ctlrName);
 void DistributeSetpoints(int32_t* spBuf);
 void ToggleUpdateBit(VmeModule* mod);
 void ToggleUpdateBits();
-void UpdateSetpoints(int32_t *spBuf);
-void SetSingleSetpoint(PSController* ctlr, int32_t setpoint);
+void SimultaneousSetpointUpdate(int32_t *spBuf);
+int SetSingleSetpoint(PSController* ctlr, int32_t setpoint);
 VmeModule* InitializeDioModule(VmeCrate* vmeCrate, uint32_t baseAddr);
 void ShutdownDioModules(VmeModule *DioModules[], int numModules);
 void InitializePSControllers(VmeCrate** crateArray);

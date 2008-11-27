@@ -11,6 +11,7 @@ typedef struct {
 	int32_t *buf;
 }RawDataSegment;
 
+#define ProcessedDataQueueCapacity 10
 typedef struct {
 	uint32_t numElements;
 	double *buf;

@@ -1,0 +1,16 @@
+# BpmArrayTest.db
+#
+# Created on: Nov 18, 2008
+#     Author: chabotd
+
+#### FIXME -- set $(P) and EVNT via sub-file #####
+record(waveform, "bpm:mux:test") {
+	field(DESC, "SR BPM Array")
+	field(DTYP, "BPM Array")
+	field(INP, "@averages")
+	field(SCAN, "Event")
+	field(EVNT, "13")
+	field(PRIO, "MEDIUM")
+	field(FTVL, "DOUBLE")
+	field(NELM, "108")
+}

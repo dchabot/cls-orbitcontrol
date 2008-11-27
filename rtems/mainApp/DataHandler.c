@@ -9,11 +9,9 @@
 #include "dataDefs.h"
 #include "DaqController.h"
 #include "DataHandler.h"
-#include "AdcDataServer.h"
 #include <bpmDefs.h> /* contains x/y channel scaling factors */
 
-#include <assert.h>
-#define NDEBUG
+
 
 /* lifted from devICS110BlSrBpms.c */
 /* here are the ADC channel mappings based on the current drawings*/
@@ -39,7 +37,7 @@ int adc4ChMap[adc4ChMap_LENGTH] = {0*2,1*2,2*2,3*2,4*2,5*2,6*2,7*2,8*2};
 #define TOTAL_BPMS      (adc0ChMap_LENGTH + adc1ChMap_LENGTH + adc2ChMap_LENGTH + adc3ChMap_LENGTH + adc4ChMap_LENGTH)
 #define NumBpmChannels  2*TOTAL_BPMS
 
-/* accounts for the voltage-divider losses of an LPF aft of each Bergoz unit */
+
 //#define LOWPASS_FILTER_FACTOR   1.015
 //#define mmPerMeter              1000
 #include <ics110bl.h>   /* need the definition of ADC_PER_VOLT */
@@ -49,68 +47,67 @@ static uint32_t maxMsgs = 0;
 
 /* FIXME -- GLOBAL */
 uint32_t SamplesPerAvg=5000; /* 0.5 seconds @ fs=10^4 Hz */
+rtems_id ProcessedDataQueueId=0;
 
-/* This ugly: no easy way around that though... */
-static void SortBpmData(double *sortedArray, double *sumArray) {
-	extern uint32_t SamplesPerAvg;
-	int i,j;
-	int nthAdc = 0;/*index into sumArray*/
+static void scaleBPMAverages(double* buf, uint32_t numSamples)
+{
+	int i;
 	const int mmPerMeter = 1000;
-	const int ShiftFactor = 256;
-	const double LOWPASS_FILTER_FACTOR = 1.015;
-	double mmScaleFactor = LOWPASS_FILTER_FACTOR/(SamplesPerAvg*ShiftFactor*ADC_PER_VOLT*mmPerMeter);
+	/* accounts for 24-bits of adc-data stuffed into the 3 MSB of a 32-bit word*/
+	const int ShiftFactor = (1<<8);
+	/* accounts for the voltage-divider losses of an LPF aft of each Bergoz unit */
+	const double LPF_Factor = 1.015;
+	double mmScaleFactor = LPF_Factor/(numSamples*ShiftFactor*ADC_PER_VOLT*mmPerMeter);
 
-	/* Adc[0]-->chMaps 0*/
+    for(i=0; i<TOTAL_BPMS; i++) {
+		buf[i] *= (mmScaleFactor/XBPM_convFactor[i]);
+		buf[i+TOTAL_BPMS] *= (mmScaleFactor/YBPM_convFactor[i]);
+	}
+}
+
+/*
+ * This routine will sort the BPM data from the internal representation
+ * to a single array in (storage ring) cell-order, with the top-half of
+ * the array occupied by horizontal (x) BPM values and the bottom-half
+ * occupied by vertical (y) values.
+ */
+static void sortBPMData(double *sortedArray, double *rawArray) {
+	int i,j;
+	int nthAdc = 0;
+
 	for(i=0,j=0; j<adc0ChMap_LENGTH; i++,j++) {
 		/* bpmX*/
-		sortedArray[i] = sumArray[nthAdc+adc0ChMap[j]];
+		sortedArray[i] = rawArray[nthAdc+adc0ChMap[j]];
 		/* bpmY*/
-		sortedArray[i+TOTAL_BPMS] = sumArray[nthAdc+adc0ChMap[j]+1];
+		sortedArray[i+TOTAL_BPMS] = rawArray[nthAdc+adc0ChMap[j]+1];
 	}
-	assert(i=4);
-	/* Adc[1]*/
-	nthAdc += AdcChannelsPerFrame;
-	for(j=0; j<adc1ChMap_LENGTH; i++,j++) {
+    nthAdc += AdcChannelsPerFrame;
+    for(j=0; j<adc1ChMap_LENGTH; i++,j++) {
 		/* bpmX */
-		sortedArray[i] = sumArray[nthAdc+adc1ChMap[j]];
+		sortedArray[i] = rawArray[nthAdc+adc1ChMap[j]];
 		/* bpmY */
-		sortedArray[i+TOTAL_BPMS] = sumArray[nthAdc+adc1ChMap[j]+1];
+		sortedArray[i+TOTAL_BPMS] = rawArray[nthAdc+adc1ChMap[j]+1];
 	}
-	assert(i==18);
-	/* Adc[2] */
-	nthAdc += AdcChannelsPerFrame;
-	for(j=0; j<adc2ChMap_LENGTH; i++,j++) {
+    nthAdc += AdcChannelsPerFrame;
+    for(j=0; j<adc2ChMap_LENGTH; i++,j++) {
 		/* bpmX */
-		sortedArray[i] = sumArray[nthAdc+adc2ChMap[j]];
+		sortedArray[i] = rawArray[nthAdc+adc2ChMap[j]];
 		/* bpmY*/
-		sortedArray[i+TOTAL_BPMS] = sumArray[nthAdc+adc2ChMap[j]+1];
+		sortedArray[i+TOTAL_BPMS] = rawArray[nthAdc+adc2ChMap[j]+1];
 	}
-	assert(i==32);
-	/* Adc[3] */
-	nthAdc += AdcChannelsPerFrame;
-	for(j=0; j<adc3ChMap_LENGTH; i++,j++) {
+    nthAdc += AdcChannelsPerFrame;
+    for(j=0; j<adc3ChMap_LENGTH; i++,j++) {
 		/* bpmX */
-		sortedArray[i] = sumArray[nthAdc+adc3ChMap[j]];
+		sortedArray[i] = rawArray[nthAdc+adc3ChMap[j]];
 		/* bpmY*/
-		sortedArray[i+TOTAL_BPMS] = sumArray[nthAdc+adc3ChMap[j]+1];
+		sortedArray[i+TOTAL_BPMS] = rawArray[nthAdc+adc3ChMap[j]+1];
 	}
-	assert(i==45);
-	/* Adc[0]-->chMap 4...Again!! */
-	nthAdc = 0;
-	for(j=0; j<adc4ChMap_LENGTH; i++,j++) {
+    nthAdc = 0;
+    for(j=0; j<adc4ChMap_LENGTH; i++,j++) {
 		/* bpmX */
-		sortedArray[i] = sumArray[nthAdc+adc4ChMap[j]];
+		sortedArray[i] = rawArray[nthAdc+adc4ChMap[j]];
 		/* bpmY */
-		sortedArray[i+TOTAL_BPMS] = sumArray[nthAdc+adc4ChMap[j]+1];
-	}
-	/* sanity chk... */
-	assert(i==TOTAL_BPMS);
-	/*XXX scale all the now-sorted values (final dimensions of [m]) */
-	for(i=0; i<TOTAL_BPMS; i++) {
-		/*sortedArray[i] *= mmScaleFactor;
-		sortedArray[i+TOTAL_BPMS] *= mmScaleFactor;*/
-		sortedArray[i] *= (mmScaleFactor/XBPM_convFactor[i]);
-		sortedArray[i+TOTAL_BPMS] *= (mmScaleFactor/YBPM_convFactor[i]);
+		sortedArray[i+TOTAL_BPMS] = rawArray[nthAdc+adc4ChMap[j]+1];
 	}
 }
 
@@ -119,24 +116,31 @@ static void TransmitAvgs(double *sumArray) {
 	static double sortedArray[NumBpmChannels];
 	rtems_status_code rc;
 	rtems_id qid;
+	extern uint32_t SamplesPerAvg;
+	extern rtems_id ProcessedDataQueueId;
+	rtems_name qname;
 
 	memset(sortedArray,0,sizeof(double)*NumBpmChannels);
-	SortBpmData(sortedArray, sumArray);
+	sortBPMData(sortedArray, sumArray);
+	scaleBPMAverages(sortedArray, SamplesPerAvg);
 
 	/* check if we've got a queue yet to dump data into... */
-	rc = rtems_message_queue_ident(ProcessedDataQueueName, RTEMS_LOCAL, &qid);
+	rc= rtems_object_get_classic_name(ProcessedDataQueueId, &qname);
 	if(rc==RTEMS_SUCCESSFUL) {
-		/* ship the avg'd ADC data off to AdcDataServer */
-		pds.buf = (double *)calloc(1, sizeof(double)*NumBpmChannels);
-		if(pds.buf==NULL) {
-			syslog(LOG_INFO, "DataHandler: failed to allocate ProcessedDataSegment\n");
-			FatalErrorHandler(0);
-		}
-		pds.numElements = NumBpmChannels;
-		memcpy(pds.buf, sortedArray, pds.numElements*sizeof(double));
+		rc = rtems_message_queue_ident(qname, RTEMS_LOCAL, &qid);
+		if(rc==RTEMS_SUCCESSFUL) {
+			/* ship the avg'd ADC data off to AdcDataServer */
+			pds.buf = (double *)calloc(1, sizeof(double)*NumBpmChannels);
+			if(pds.buf==NULL) {
+				syslog(LOG_INFO, "DataHandler: failed to allocate ProcessedDataSegment\n");
+				FatalErrorHandler(0);
+			}
+			pds.numElements = NumBpmChannels;
+			memcpy(pds.buf, sortedArray, pds.numElements*sizeof(double));
 
-		rc = rtems_message_queue_send(qid, &pds, sizeof(ProcessedDataSegment));
-		TestDirective(rc, "DataHandler: rtems_message_queue_send()");
+			rc = rtems_message_queue_send(qid, &pds, sizeof(ProcessedDataSegment));
+			TestDirective(rc, "DataHandler: rtems_message_queue_send()");
+		}
 	}
 	/* just silently keep going if the queue is unavailable */
 }

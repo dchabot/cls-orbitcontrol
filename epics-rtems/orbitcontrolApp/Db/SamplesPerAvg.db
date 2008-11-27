@@ -1,0 +1,20 @@
+#SamplesPerAvg.db
+#
+# Created on: Sep 29, 2008
+#     Author: chabotd
+
+
+record(ao, "BPM:samplesperavg") {
+	field(DESC, "Set BPM samples/avg")
+	field(DOL, "0")
+	field(OUT, "BPM:samplesperavg:tcp.AOUT PP")
+#	field(FLNK, "BPM:samplesperavg:tcp")
+	field(EGU, "samples/avg")
+}
+
+record(asyn, "BPM:samplesperavg:tcp") {
+	field(PORT, "$(PORT)")
+	field(ADDR, "$(ADDR)")
+	field(SCAN, "Passive")
+	field(TMOD, "Write")
+}

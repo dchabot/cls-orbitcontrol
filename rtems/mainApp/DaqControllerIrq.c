@@ -16,14 +16,11 @@
 #include "dataDefs.h"
 #include "AdcReaderThread.h"
 #include "DataHandler.h"
-#include "AdcDataServer.h"
-#include "DioWriteServer.h"
-#include "DioReadServer.h"
 #include "PSController.h"
-#include "OcmSetpointServer.h"
-#include "BpmSamplesPerAvgServer.h"
 
 static rtems_id DaqControllerTID;
+/*FIXME -- global var */
+rtems_id OcmSetpointQID = 0;
 
 typedef struct {
 	VmeModule *adc;
@@ -130,14 +127,16 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	AdcIsrArg *IsrArgList[NumAdcModules];
 	static ReaderThreadArg *rdrArray[NumReaderThreads];
 	RawDataSegment rdSegments[NumReaderThreads];
+	extern rtems_id OcmSetpointQID;
+	uint32_t ocmSetpointMQpending = 0;
 	rtems_id rawDataQID = 0;
-	rtems_id ocmSetpointQID = 0;
 	rtems_id dataHandlerTID = 0;
 	rtems_status_code rc;
 	rtems_event_set rdrSyncEvents = 0;
 	rtems_event_set isrSyncEvents = 0;
 	rtems_interval rtemsTicksPerSecond;
-	int i,x;
+	int i;
+	uint64_t loopIterations = 0;
 	const int readSizeFrames = (HALF_FIFO_LENGTH/(/*4**/AdcChannelsPerFrame)); /* @ 32 channels/frame, readSizeFrames==508 */
 	//FILE *fp = NULL;
 
@@ -168,33 +167,6 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	/* register ADC interrupt service routines with sis1100 driver... */
 	for(i=0; i<NumAdcModules; i++) {
 		RegisterAdcIsr(adcArray[i], &isrSyncEvents);
-		/*rtems_event_set event = 0;
-		AdcIsrArg *parg = NULL;
-
-		event = (1<<(24+i));
-		isrSyncEvents |= event;
-		parg = (AdcIsrArg *)calloc(1,sizeof(AdcIsrArg));
-		if(parg==NULL) {
-			syslog(LOG_INFO, "Failed to allocated AdcIsrArg[%d]\n",i);
-			FatalErrorHandler(0);
-		}
-		parg->adc = adcArray[i];
-		parg->controllerTID = DaqControllerTID;
-		parg->irqEvent = event;
-		//AdcInstallIsr(adcArray[i], AdcIsr, parg);
-		rc = vme_set_isr(crateArray[i]->fd,
-							adcArray[i]->irqVectorvector,
-							AdcIsrhandler,
-							parghandler arg);
-		if(rc) {
-			syslog(LOG_INFO, "Failed to set ADC Isr\n");
-			FatalErrorHandler(0);
-		}
-		ICS110BSetIrqVector(adcArray[i], adcArray[i]->irqVector);
-		 arm the appropriate VME interrupt level at each sis3100 & ADC...
-		rc = vme_enable_irq_level(crateArray[i]->fd, adcArray[i]->irqLevel);
-		TestDirective(rc, "vme_enable_irq_level()");
-		ICS110BInterruptControl(adcArray[i],ICS110B_IRQ_ENABLE);*/
 	}
 
 
@@ -218,12 +190,6 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	rc = rtems_message_queue_ident(RawDataQueueName, RTEMS_LOCAL, &rawDataQID);
 	TestDirective(rc, "rtems_message_queue_ident()");
 
-	/* fire up the AdcDataServer,DioWriteServer,DioReadServer interfaces */
-	StartAdcDataServer();
-	//StartDioWriteServer(crateArray);
-	/* FIXME -- unused! OCM feedback channel is via serial links... */
-	//StartDioReadServer(crateArray);
-
 	/* FIXME -- testing: offload data to host over NFS */
 	/*fp = getOutputFile("adc_1.dat");
 	if(fp==NULL) {
@@ -232,11 +198,6 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 
 	/* get qid for OCM setpoint updates */
 	InitializePSControllers(crateArray);
-	StartOcmSetpointServer(NULL);
-	/*rc = rtems_message_queue_ident(OcmSetpointQueueName, RTEMS_LOCAL, &ocmSetpointQID);
-	TestDirective(rc, "rtems_message_queue_ident");*/
-
-	StartBpmSamplesPerAvgServer(NULL);
 
 	/* start ADC acquistion on the "edge" of a rtems_clock_tick()...*/
 	rtems_task_wake_after(2);
@@ -244,7 +205,7 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	AdcStartAcquisition(adcArray, NumAdcModules);
 
 	/* main acquisition loop */
-	for(;;) {
+	for(;;loopIterations++) {
 		/* Wait for notification of ADC "fifo-half-full" event... */
 		if(RendezvousPoint(isrSyncEvents)) {
 			break; /* restart */
@@ -277,7 +238,7 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 		}
 		AdcStartAcquisition(adcArray, NumAdcModules);
 
-		/* reEnable irqs at each ADC and sis3100... */
+		/* RE-enable irqs at each ADC and sis3100... */
 		for(i=0; i<NumReaderThreads; i++) {
 			rc = vme_enable_irq_level(crateArray[i]->fd, adcArray[i]->irqLevel);
 			TestDirective(rc, "vme_enable_irq_level()");
@@ -292,22 +253,20 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 		}
 
 		/* chk if the OcmSetpointQueue is available for queries: */
-		rc = rtems_message_queue_ident(OcmSetpointQueueName, RTEMS_LOCAL, &ocmSetpointQID);
+		rc = rtems_message_queue_get_number_pending(OcmSetpointQID,
+                                                     &ocmSetpointMQpending);
+		//rc= rtems_object_get_classic_name(OcmSetpointQID, &OcmSetpointQName);
 		if(rc == RTEMS_SUCCESSFUL) {
-			uint32_t ocmSetpointMQpending = 0;
-			rc = rtems_message_queue_get_number_pending(ocmSetpointQID, &ocmSetpointMQpending);
-			if(TestDirective(rc, "rtems_message_queue_get_number_pending")) {
-				break;
-			}
 			/* If we have PowerSupply setpoints to demux, do that now. */
 			if(ocmSetpointMQpending > 0) {
 				spMsg msg;
 				size_t spBufSize;
 
-				rc = rtems_message_queue_receive(ocmSetpointQID, &msg, &spBufSize, RTEMS_NO_WAIT, RTEMS_NO_TIMEOUT);
-				TestDirective(rc, "rtems_message_queue_receive");
+				rc = rtems_message_queue_receive(OcmSetpointQID, &msg,
+                                &spBufSize, RTEMS_NO_WAIT, RTEMS_NO_TIMEOUT);
+				if(TestDirective(rc, "rtems_message_queue_receive")) { break; }
 				/* update the global PSController psControllerArray[NumOCM] */
-				UpdateSetpoints(msg.buf);
+				SimultaneousSetpointUpdate(msg.buf);
 				for(i=0; i<NumOCM; i++) {
 					syslog(LOG_INFO, "msg.buf[%i] = %d\n",i,msg.buf[i]);
 				}
@@ -353,15 +312,9 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	syslog(LOG_INFO, "RawDataQueue: max outstanding msgs=%u\n", getMaxMsgs());
 	rtems_task_delete(dataHandlerTID);
 	rtems_message_queue_delete(rawDataQID);
-	/* kill servers */
-	DestroyAdcDataServer();
-	//DestroyDioWriteServer();
-	//DestroyDioReadServer();
-	DestroyOcmSetpointServer();
-	DestroyBpmSamplesPerAvgServer();
 	/* clean up self */
 	/* FIXME -- rtems_region_delete(rawDataRID);*/
-	syslog(LOG_INFO, "daqControllerIrq exiting... loop iterations=%d\n",x);
+	syslog(LOG_INFO, "daqControllerIrq exiting... loop iterations=%lld\n",loopIterations);
 	rtems_task_delete(RTEMS_SELF);
 	//rtems_task_restart(DaqControllerTID, 0);
 	/*if(fp) {

@@ -160,18 +160,32 @@ int setChannel(PSController *ctlr, uint8_t ch) {
 	return 0;
 }
 
-int isInCorrection(PSController *ctlr, uint8_t *answer) {
-	*answer = (ctlr->inCorrection != 0);
-	return 0;
+bool isInCorrection(PSController *ctlr) {
+	return (ctlr->inCorrection != 0);
+}
+
+PSController*
+getPSControllerByName(char* ctlrName) {
+	int i;
+
+	for(i=0; i<NumOCM; i++) {
+		if(strcmp(ctlrName, psCtlrArray[i].id)==0) {
+			return &psCtlrArray[i];
+		}
+	}
+	//PSController not found
+	return NULL;
 }
 
 /* UpdateSetpoint will change a single PS channel's setpoint, BUT toggling
- * the UPDATE bit is still req'd to affect a physical change in channel's current.
+ * the UPDATE bit is STILL req'd to affect a physical change in channel's current.
  */
 int UpdateSetpoint(PSController* ctlr, int32_t setpoint) {
 	uint32_t value = 0;
 	int32_t dacSetPoint = 0;
 	int rc;
+
+	if(!ctlr->inCorrection) return 0;
 
 	ctlr->setpoint = setpoint;
 	dacSetPoint = ctlr->setpoint * DAC_AMP_CONV_FACTOR;
@@ -249,7 +263,7 @@ void ToggleUpdateBits() {
 	}
 }
 
-void UpdateSetpoints(int32_t *spBuf) {
+void SimultaneousSetpointUpdate(int32_t *spBuf) {
 	DistributeSetpoints(spBuf);
 	ToggleUpdateBits();
 }
@@ -260,16 +274,16 @@ void UpdateSetpoints(int32_t *spBuf) {
  * NOTE: we bypass the vmic2536 API and use the sis1100 API directly here
  * 			because USE_MACRO_VME_ACCESSORS may be defined AND this routine
  * 			could be called asynchronously. Thus we invoke thread-safe routines
- * 			to avoid clobbering any concurrent VME block-transfers.
+ * 			to avoid clobbering any concurrent VME block-transfers in progress.
  */
-void SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
+int SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
 	int dacSetPoint;
 	uint32_t value = 0;
 	int rc, fd;
 	uint32_t vmeAddr;
 
 	dacSetPoint = setpoint * DAC_AMP_CONV_FACTOR;
-
+	ctlr->setpoint = dacSetPoint;
 	value = (ctlr->channel & PS_CHANNEL_MASK) << PS_CHANNEL_OFFSET;
 	value = value | (dacSetPoint & 0xFFFFFF);
 
@@ -279,7 +293,7 @@ void SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
 	rc=vme_A24D32_write(fd,vmeAddr,value);
 	if(rc) {
 		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
-		return;
+		return rc;
 	}
 	/* added for Milan G IE Power 04/08/2002*/
 	usecSpinDelay(ISO_DELAY);
@@ -288,7 +302,7 @@ void SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
 	rc=vme_A24D32_write(fd,vmeAddr,(value | PS_LATCH));
 	if(rc) {
 		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
-		return;
+		return rc;
 	}
 	usecSpinDelay(ISO_DELAY);
 
@@ -296,7 +310,7 @@ void SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
 	rc=vme_A24D32_write(fd,vmeAddr,0x00000000);
 	if(rc) {
 		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
-		return;
+		return rc;
 	}
 	usecSpinDelay(ISO_DELAY);
 
@@ -304,7 +318,7 @@ void SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
 	rc=vme_A24D32_write(fd,vmeAddr,UPDATE);
 	if(rc) {
 		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
-		return;
+		return rc;
 	}
 	usecSpinDelay(ISO_DELAY);
 
@@ -312,9 +326,11 @@ void SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
 	rc=vme_A24D32_write(fd,vmeAddr,0x00000000);
 	if(rc) {
 		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
-		return;
+		return rc;
 	}
 	usecSpinDelay(ISO_DELAY);
+
+	return 0;
 }
 
 VmeModule* InitializeDioModule(VmeCrate* vmeCrate, uint32_t baseAddr) {
@@ -349,17 +365,12 @@ void ShutdownDioModules(VmeModule *modArray[], int numModules) {
 	}
 }
 
-/* FIXME -- this loop assumes one DIO module per crate !!!
- *
- * As soon as the SOA14xx-yy:X||Y magnet pwr supplies are added to
- * the orbit correction schema that assumption will break... :-(
- *
+/*
  * The simplest thing to do here is to statically initialize psCtlrArray[i].mod
  * with a similarly statically initialized dioArray[j].
  */
 void InitializePSControllers(VmeCrate** crateArray) {
 	int i,j;
-	VmeModule **modArray = dioArray;
 
 	/* First, initialize the vmic2536 DIO modules */
 	/** Init the vmic2536 DIO modules */
@@ -370,9 +381,9 @@ void InitializePSControllers(VmeCrate** crateArray) {
 
 	for(i=0; i<NumDioModules; i++) {
 		for(j=0; j<NumOCM; j++) {
-			if((psCtlrArray[j].crateId == modArray[i]->crate->id)
-					&& (psCtlrArray[j].modAddr == modArray[i]->vmeBaseAddr)) {
-				psCtlrArray[j].mod = modArray[i];
+			if((psCtlrArray[j].crateId == dioArray[i]->crate->id)
+					&& (psCtlrArray[j].modAddr == dioArray[i]->vmeBaseAddr)) {
+				psCtlrArray[j].mod = dioArray[i];
 				syslog(LOG_INFO, "psCtlrArray[%d]: id=%s, crateId=%d\n",
 						j,psCtlrArray[j].id,psCtlrArray[j].crateId);
 			}
