@@ -1,4 +1,4 @@
-record(longout, "$(clsName):dac_x") {
+record(longout, "$(clsName):dac") {
 	field(DESC, "PwrSupply $(channel) setpoint")
 	field(DTYP, "PwrSupply Setpoint")
 	field(OUT, "@$(crateId) $(vmeBaseAddr) $(channel)")
@@ -10,13 +10,13 @@ record(longout, "$(clsName):dac_x") {
 	field(LOLO, "-7602176")
 	field(LOPR, "-7602176")
 	field(EGU, "DAC")
-	field(FLNK, "$(clsName):dac_x:fbk")
+	field(FLNK, "$(clsName):dac:fbk")
 }
 
-record(longin, "$(clsName):dac_x:fbk") {
+record(longin, "$(clsName):dac:fbk") {
 	field(DESC, "PwrSupply $(channel) setpoint fbk")
 	field(DTYP, "Soft Channel")
 	field(SCAN, "Passive")
-	field(INP, "$(clsName):dac_x NPP")
+	field(INP, "$(clsName):dac NPP")
 }
 

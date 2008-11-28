@@ -1,0 +1,4 @@
+epicsEnvSet("ARCH","RTEMS-pc386")
+epicsEnvSet("IOC","ioc1009-109")
+epicsEnvSet("TOP","/mnt")
+epicsEnvSet("EPICS_BASE","")

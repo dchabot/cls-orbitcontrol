@@ -201,7 +201,7 @@ static rtems_task DataHandler(rtems_task_argument arg) {
 				memset(sums, 0, sizeof(double)*sizeof(sums)/sizeof(sums[0]));
 				//memset(sumsSqrd, 0, sizeof(double)*sizeof(sumsSqrd)/sizeof(sumsSqrd[0]));
 				numSamplesSummed=0;
-				/* XXX - SamplesPerAvg is set via BpmSamplesPerAvgServer (UI) */
+				/* XXX - SamplesPerAvg can be set via orbitcontrolUI app */
 				if(localSamplesPerAvg != SamplesPerAvg) {
 					syslog(LOG_INFO, "DataHandler: changing localSamplesPerAvg=%d to\n\tSamplesPerAvg=%d\n",
 							localSamplesPerAvg,SamplesPerAvg);

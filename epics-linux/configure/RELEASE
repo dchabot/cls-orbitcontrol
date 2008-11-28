@@ -15,12 +15,12 @@ TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 #INSTALL_LOCATION_APP=<fullpathname>
 
 #If using the sequencer, point SNCSEQ at its top directory:
-SNCSEQ=$(EPICS_BASE)/../modules/soft/seq
+#SNCSEQ=$(EPICS_BASE)/../modules/soft/seq
 
 # Asyn
-ASYN=/home/epics/src/R3.14.6/modules/support/asyn/4-2-1
+#ASYN=/home/epics/src/R3.14.6/modules/support/asyn/4-2-1
 # scalcout
-SCALCOUT=/home/epics/src/R3.14.6/modules/support/calc/2-5
+#SCALCOUT=/home/epics/src/R3.14.6/modules/support/calc/2-5
 
 # EPICS_BASE usually appears last so other apps can override stuff:
-EPICS_BASE=/home/epics/src/R3.14.6/base
+EPICS_BASE=/opt/epics/base

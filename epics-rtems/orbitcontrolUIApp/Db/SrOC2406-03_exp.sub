@@ -3,7 +3,7 @@
 #   
 #
 
-file SrOC.template
+file SrOC_exp.template
 {
 #                    
     pattern

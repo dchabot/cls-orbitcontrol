@@ -1,6 +1,6 @@
 #! /bin/bash
 
-FILELIST="bin/RTEMS-pc386/*.obj db dbd"
+FILELIST="bin/RTEMS-pc386/*.obj db dbd orbitcontrolUI.cmd envPaths"
 USAGE="Usage: $0 install-directory-name"
 
 install( ) {

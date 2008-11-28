@@ -10,6 +10,6 @@ record(longout, "BPM:samplesperavg") {
 	field(DOL, "5000")
 	field(OUT, "@BPMSamplesPerAverage")
 	field(EGU, "samples/avg")
-	field(HOPR, "10000")
-	field(LOPR, "1000")
+	field(HOPR, "10001")
+	field(LOPR, "999")
 }
