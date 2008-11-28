@@ -12,7 +12,7 @@
 #include <string.h>
 
 #include <PSController.h> /* #include <vmeDefs.h> */
-#include <DaqController.h> /* InitializeDioModule declaration */
+#include <OrbitController.h> /* InitializeDioModule declaration */
 
 static DioConfig dioConfig[] = {
 		{VMIC_2536_DEFAULT_BASE_ADDR,0},

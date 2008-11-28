@@ -5,7 +5,7 @@
 
 #include <utils.h>
 #include <ics110bl.h>
-#include <DaqController.h>
+#include <OrbitController.h>
 #include <dataDefs.h>
 #include <AdcReaderThread.h>
 
@@ -58,7 +58,7 @@ rtems_task ReaderThread(rtems_task_argument arg) {
 			//FatalErrorHandler(0);
 		}
 		if(wordsRead != wordsRequested) {
-			/* FIXME -- any mods to a DataSegment won't be visible to the DaqController;
+			/* FIXME -- any mods to a DataSegment won't be visible to the OrbitController;
 			 * we only have a *copy* of its DataSegment... :-(
 			 */
 			ds.numFrames = wordsRead/ds.numChannelsPerFrame;
@@ -69,7 +69,7 @@ rtems_task ReaderThread(rtems_task_argument arg) {
 		RegisterAtRendezvousPoint(argp);
 	}
 
-	/* clean up resources: DaqController will handle this... */
+	/* clean up resources: OrbitController will handle this... */
 	syslog(LOG_INFO, "Adc[%d]: deleting self", argp->adc->crate->id);
 	rtems_task_delete(RTEMS_SELF);
 }
@@ -79,15 +79,15 @@ ReaderThreadArg* startReaderThread(VmeModule *mod, rtems_event_set syncEvent) {
 	rtems_id qid;
 	rtems_status_code rc;
 	rtems_task_priority pri = 0;
-	rtems_id daqControllerTID;
+	rtems_id orbitControllerTID;
 	ReaderThreadArg *arg = NULL;
 	static int i = 0;
 
-	rtems_task_ident(RTEMS_SELF, RTEMS_LOCAL, &daqControllerTID);
+	rtems_task_ident(RTEMS_SELF, RTEMS_LOCAL, &orbitControllerTID);
 
 	pri = DefaultPriority+1; /* NOTE: RTEMS Classic api priority range from 1(highest) to 255(lowest) */
 
-	/* these threads are lower priority than their master (DAQController)... */
+	/* these threads are lower priority than their master (OrbitController)... */
 	rc = rtems_task_create(rtems_build_name('R','D', 'R',(char)(i+48)),
 							pri,
 							RTEMS_MINIMUM_STACK_SIZE*8,
@@ -114,7 +114,7 @@ ReaderThreadArg* startReaderThread(VmeModule *mod, rtems_event_set syncEvent) {
 		FatalErrorHandler(0);
 	}
 	arg->readerTID = tid;
-	arg->controllerTID = daqControllerTID;
+	arg->controllerTID = orbitControllerTID;
 	arg->syncEvent = syncEvent;
 	arg->rawDataQID = qid;
 	arg->adc = mod;

@@ -7,7 +7,7 @@
 
 #include <utils.h>
 #include <dataDefs.h>
-#include <DaqController.h>
+#include <OrbitController.h>
 #include <DataHandler.h>
 #include <bpmDefs.h> /* contains x/y channel scaling factors */
 
@@ -235,7 +235,7 @@ rtems_id StartDataHandler(uint32_t numReaderThreads) {
 							RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),
 							&tid);
 	TestDirective(rc, "rtems_task_create()");
-	/* raw-data queue: fed by DaqController */
+	/* raw-data queue: fed by OrbitController */
 	rc = rtems_message_queue_create(RawDataQueueName,
 									10/*max queue size*/,
 									sizeof(RawDataSegment)*numReaderThreads/*msg size*/,

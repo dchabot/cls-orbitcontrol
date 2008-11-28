@@ -11,7 +11,7 @@
 #include <utils.h> /*TestDirective()*/
 
 //#include <rtems-gdb-stub.h>
-#include "DaqController.h"
+#include "OrbitController.h"
 #include "dataDefs.h"
 #include "AdcReaderThread.h"
 #include "DataHandler.h"
@@ -44,12 +44,12 @@ static int RendezvousPoint(rtems_event_set syncEvents) {
 	rtems_status_code rc;
 	
 	rc = rtems_event_receive(syncEvents, RTEMS_EVENT_ALL|RTEMS_WAIT, RTEMS_NO_TIMEOUT, &eventsIn);
-	//syslog(LOG_INFO, "DaqControllerIrq: RendezvousPoint() syncEvents=%#x, eventsIn=%#x\n",syncEvents, eventsIn);
+	//syslog(LOG_INFO, "orbitControllerIrq: RendezvousPoint() syncEvents=%#x, eventsIn=%#x\n",syncEvents, eventsIn);
 	return TestDirective(rc, "RendezvousPoint()-->rtems_event_receive()");
 }
 
 /* NOTE: *all* access to VME equipment goes through this thread */
-rtems_task daqControllerIrq(rtems_task_argument arg) {
+rtems_task orbitControllerIrq(rtems_task_argument arg) {
 	extern int errno;
 	extern uint32_t maxMsgs;
 	static rtems_id DaqControllerTID;
@@ -76,7 +76,7 @@ rtems_task daqControllerIrq(rtems_task_argument arg) {
 	const int readSizeFrames = (HALF_FIFO_LENGTH/AdcChannelsPerFrame); /* @ 32 channels/frame, readSizeFrames==508 */
 	
 	/* Begin... */
-	syslog(LOG_INFO, "DaqControllerIrq: initializing...\n");
+	syslog(LOG_INFO, "orbitControllerIrq: initializing...\n");
 	rc = rtems_task_ident(RTEMS_SELF,RTEMS_LOCAL,&DaqControllerTID);
 	rtems_clock_get(RTEMS_CLOCK_GET_TICKS_PER_SECOND, &rtemsTicksPerSecond);
 	
@@ -112,7 +112,7 @@ rtems_task daqControllerIrq(rtems_task_argument arg) {
 		rdSegments[i].numFrames = readSizeFrames;
 	}
 	RendezvousPoint(rdrSyncEvents);
-	syslog(LOG_INFO, "DaqControllerIrq: synchronized with ReaderThreads...\n");
+	syslog(LOG_INFO, "orbitControllerIrq: synchronized with ReaderThreads...\n");
 	
 	/* fire up the DataHandler thread...*/
 	dataHandlerTID = StartDataHandler(NumReaderThreads);
@@ -179,7 +179,7 @@ rtems_task daqControllerIrq(rtems_task_argument arg) {
 			}
 			/* unleash the ReaderThreads... mmwwaahahaha... */
 			rc = rtems_message_queue_send(rdrArray[i]->rawDataQID,&rdSegments[i],sizeof(RawDataSegment));
-			TestDirective(rc, "DaqControllerIrq-->rtems_message_queue_send()-->ReaderThread queue");
+			TestDirective(rc, "orbitControllerIrq-->rtems_message_queue_send()-->ReaderThread queue");
 		}
 		/* block until the ReaderThreads are at their sync-point... */
 		if(RendezvousPoint(rdrSyncEvents)) {
@@ -188,8 +188,8 @@ rtems_task daqControllerIrq(rtems_task_argument arg) {
 		
 		/* hand raw-data buffers off to DataHandling thread */
 		rc = rtems_message_queue_send(rawDataQID, rdSegments, sizeof(rdSegments));
-		if(TestDirective(rc, "DaqControllerIrq-->rtems_message_queue_send()-->RawDataQueue")<0) {
-			syslog(LOG_INFO, "DaqControllerIrq: suspending self...\n");
+		if(TestDirective(rc, "orbitControllerIrq-->rtems_message_queue_send()-->RawDataQueue")<0) {
+			syslog(LOG_INFO, "orbitControllerIrq: suspending self...\n");
 			break;
 		}
 		
@@ -213,6 +213,6 @@ rtems_task daqControllerIrq(rtems_task_argument arg) {
 	DestroyAdcDataServer();
 	/* clean up self */
 	/* FIXME -- rtems_region_delete(rawDataRID);*/
-	syslog(LOG_INFO, "daqControllerIrq exiting... loop iterations=%d\n",loopIterations);
+	syslog(LOG_INFO, "orbitControllerIrq exiting... loop iterations=%d\n",loopIterations);
 	rtems_task_restart(DaqControllerTID, 0);
 }

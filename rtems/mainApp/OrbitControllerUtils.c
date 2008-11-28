@@ -12,7 +12,7 @@
 #include <vmic2536.h>
 #include <utils.h> /*TestDirective()*/
 
-#include <DaqController.h>
+#include <OrbitController.h>
 
 /* FIXME -- refactor (extract method) to init a *single* crate
  *
@@ -161,12 +161,12 @@ void AdcRemoveIsr(VmeModule *mod) {
 	}
 }
 
-void StartDaqController(rtems_task_entry entryPoint) {
+void StartOrbitController(rtems_task_entry entryPoint) {
 	rtems_id tid;
 	rtems_status_code rc;
 
-	rc = rtems_task_create(DaqControllerThreadName,
-							DaqThreadPriority,/*priority*/
+	rc = rtems_task_create(OrbitControllerThreadName,
+							OrbitControllerThreadPriority,/*priority*/
 							RTEMS_MINIMUM_STACK_SIZE*8,
 							RTEMS_NO_FLOATING_POINT|RTEMS_LOCAL,/*XXX floating point context req'd ??*/
 							RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),

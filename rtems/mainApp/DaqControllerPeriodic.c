@@ -9,7 +9,7 @@
 #include <utils.h> /*TestDirective()*/
 
 //#include <rtems-gdb-stub.h>
-#include "DaqController.h"
+#include "OrbitController.h"
 #include "dataDefs.h"
 #include "AdcReaderThread.h"
 #include "DataHandler.h"
@@ -177,7 +177,7 @@ rtems_task daqControllerPeriodic(rtems_task_argument arg) {
 	}
 	
 	/* clean up resources */
-	syslog(LOG_INFO, "daqControllerIrq: nuking self...\n");
+	syslog(LOG_INFO, "orbitControllerIrq: nuking self...\n");
 	ShutdownAdcModules(adcArray, NumAdcModules);
 	ShutdownDioModules(dioArray, NumDioModules);
 	ShutdownVmeCrates(crateArray, NumVmeCrates);

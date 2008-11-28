@@ -10,7 +10,7 @@
 #include <utils.h>
 #include <DaqServerUtils.h>
 #include <DioReadServer.h>
-#include <DaqController.h>
+#include <OrbitController.h>
 #include <DataHandler.h>
 #include <dataDefs.h>
 #include <BpmSamplesPerAvgServer.h>

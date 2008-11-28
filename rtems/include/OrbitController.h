@@ -1,5 +1,5 @@
-#ifndef DAQCONTROLLER_H_
-#define DAQCONTROLLER_H_
+#ifndef ORBITCONTROLLER_H_
+#define ORBITCONTROLLER_H_
 
 #include <stdint.h>
 #include <rtems.h>
@@ -7,8 +7,8 @@
 #include <sis1100_api.h>
 
 #define DefaultPriority 50
-#define DaqThreadPriority DefaultPriority
-#define DaqControllerThreadName		rtems_build_name('D','A','Q','C')
+#define OrbitControllerThreadPriority DefaultPriority
+#define OrbitControllerThreadName		rtems_build_name('D','A','Q','C')
 
 /*
 #define NumDaqStates 4
@@ -38,9 +38,8 @@ void AdcStartAcquisition(VmeModule *modArray[], int numModules);
 void AdcStopAcquisition(VmeModule *modArray[], int numModules);
 void AdcInstallIsr(VmeModule *mod, sis1100VmeISR isr, void *isrArg);
 void AdcRemoveIsr(VmeModule *mod);
-void StartDaqController(rtems_task_entry entryPoint);
+void StartOrbitController(rtems_task_entry entryPoint);
 
-/*rtems_task daqControllerPeriodic(rtems_task_argument arg);*/
-rtems_task daqControllerIrq(rtems_task_argument arg);
+rtems_task OrbitControllerIrq(rtems_task_argument arg);
 
-#endif /*DAQCONTROLLER_H_*/
+#endif /*ORBITCONTROLLER_H_*/

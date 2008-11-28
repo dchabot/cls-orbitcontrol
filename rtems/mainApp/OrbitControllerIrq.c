@@ -12,13 +12,13 @@
 #include <utils.h> /*TestDirective()*/
 
 //#include <rtems-gdb-stub.h>
-#include <DaqController.h>
+#include <OrbitController.h>
 #include <dataDefs.h>
 #include <AdcReaderThread.h>
 #include <DataHandler.h>
 #include <PSController.h>
 
-static rtems_id DaqControllerTID;
+static rtems_id OrbitControllerTID;
 /*FIXME -- global var */
 rtems_id OcmSetpointQID = 0;
 
@@ -28,11 +28,11 @@ typedef struct {
 	rtems_event_set irqEvent;
 } AdcIsrArg;
 
-static void NotifyDaqController(AdcIsrArg *argp) {
+static void NotifyOrbitController(AdcIsrArg *argp) {
 	rtems_status_code rc;
 
 	rc = rtems_event_send(argp->controllerTID, argp->irqEvent);
-	TestDirective(rc, "NotifyDaqController()-->rtems_event_send()");
+	TestDirective(rc, "NotifyOrbitController()-->rtems_event_send()");
 }
 
 static void AdcIsr(void *arg, uint8_t vector) {
@@ -40,8 +40,8 @@ static void AdcIsr(void *arg, uint8_t vector) {
 
 	/* disable irq on the board */
 	ICS110BInterruptControl(parg->adc, ICS110B_IRQ_DISABLE);
-	/* inform the DaqController of this event */
-	NotifyDaqController(parg);
+	/* inform the OrbitController of this event */
+	NotifyOrbitController(parg);
 }
 
 static void RegisterAdcIsr(VmeModule* adc, rtems_event_set* ev) {
@@ -58,7 +58,7 @@ static void RegisterAdcIsr(VmeModule* adc, rtems_event_set* ev) {
 		FatalErrorHandler(0);
 	}
 	parg->adc = adc;
-	parg->controllerTID = DaqControllerTID;
+	parg->controllerTID = OrbitControllerTID;
 	parg->irqEvent = event;
 	rc = vme_set_isr(adc->crate->fd,
 						adc->irqVector/*vector*/,
@@ -117,7 +117,7 @@ writeToFile(FILE* f, void* buf, size_t size) {
 	}
 }*/
 
-rtems_task DaqControllerIrq(rtems_task_argument arg) {
+rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 	extern int errno;
 	VmeCrate *crateArray[NumVmeCrates];
 	VmeModule *adcArray[NumAdcModules];
@@ -141,8 +141,8 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	//FILE *fp = NULL;
 
 	/* Begin... */
-	syslog(LOG_INFO, "DaqControllerIrq: initializing...\n");
-	rc = rtems_task_ident(RTEMS_SELF,RTEMS_LOCAL,&DaqControllerTID);
+	syslog(LOG_INFO, "OrbitControllerIrq: initializing...\n");
+	rc = rtems_task_ident(RTEMS_SELF,RTEMS_LOCAL,&OrbitControllerTID);
 	rtems_clock_get(RTEMS_CLOCK_GET_TICKS_PER_SECOND, &rtemsTicksPerSecond);
 
 	/* setup software-to-hardware objects */
@@ -183,7 +183,7 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 		rdSegments[i].numFrames = readSizeFrames;
 	}
 	RendezvousPoint(rdrSyncEvents);
-	syslog(LOG_INFO, "DaqControllerIrq: synchronized with ReaderThreads...\n");
+	syslog(LOG_INFO, "OrbitControllerIrq: synchronized with ReaderThreads...\n");
 
 	/* fire up the AdcDataHandler thread...*/
 	dataHandlerTID = StartDataHandler(NumReaderThreads);
@@ -193,7 +193,7 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	/* FIXME -- testing: offload data to host over NFS */
 	/*fp = getOutputFile("adc_1.dat");
 	if(fp==NULL) {
-		syslog(LOG_INFO, "DaqController: can't open %s -- %s\n","adc_1.dat",strerror(errno));
+		syslog(LOG_INFO, "OrbitController: can't open %s -- %s\n","adc_1.dat",strerror(errno));
 	}*/
 
 	/* get qid for OCM setpoint updates */
@@ -223,7 +223,7 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 			}
 			/* unleash the ReaderThreads... mmwwaahahaha... */
 			rc = rtems_message_queue_send(rdrArray[i]->rawDataQID,&rdSegments[i],sizeof(RawDataSegment));
-			TestDirective(rc, "DaqControllerIrq-->rtems_message_queue_send()-->ReaderThread queue");
+			TestDirective(rc, "OrbitControllerIrq-->rtems_message_queue_send()-->ReaderThread queue");
 		}
 		/* block until the ReaderThreads are at their sync-point... */
 		if(RendezvousPoint(rdrSyncEvents)) {
@@ -246,8 +246,8 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 		}
 		/* hand raw-data buffers off to DataHandling thread */
 		rc = rtems_message_queue_send(rawDataQID, rdSegments, sizeof(rdSegments));
-		if(TestDirective(rc, "DaqControllerIrq-->rtems_message_queue_send()-->RawDataQueue")<0) {
-			/*syslog(LOG_INFO, "DaqControllerIrq: suspending self...\n");
+		if(TestDirective(rc, "OrbitControllerIrq-->rtems_message_queue_send()-->RawDataQueue")<0) {
+			/*syslog(LOG_INFO, "OrbitControllerIrq: suspending self...\n");
 			rtems_task_wait(10);*/
 			break;
 		}
@@ -279,27 +279,27 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 
 	/* send data to host (opi2043-001) via NFS */
 	/*if(fp != NULL) {
-		syslog(LOG_INFO, "DaqController: sending data to host...\n");
+		syslog(LOG_INFO, "OrbitController: sending data to host...\n");
 		for(i=0; i<100; i++) {
 			writeToFile(fp,rawData[i],readSizeFrames*AdcChannelsPerFrame*sizeof(int32_t));
 		}
-		syslog(LOG_INFO, "DaqController: done sending data...\n");
+		syslog(LOG_INFO, "OrbitController: done sending data...\n");
 	}*/
 
 	/* shut down interrupt generation/handling */
 	for(i=0; i<NumAdcModules; i++) {
 		rc = vme_disable_irq_level(crateArray[i]->fd, adcArray[i]->irqLevel);
 		if(rc) {
-			syslog(LOG_INFO, "DaqControllerIrq: failed to IRQ-mask for Adc[%d], rc=%d\n",crateArray[i]->fd,rc);
+			syslog(LOG_INFO, "OrbitControllerIrq: failed to IRQ-mask for Adc[%d], rc=%d\n",crateArray[i]->fd,rc);
 		}
 		rc = vme_clr_isr(crateArray[i]->fd, adcArray[i]->irqVector);
 		if(rc) {
-			syslog(LOG_INFO, "DaqControllerIrq: failed to remove ISR for Adc[%d], rc=%d\n",crateArray[i]->fd,rc);
+			syslog(LOG_INFO, "OrbitControllerIrq: failed to remove ISR for Adc[%d], rc=%d\n",crateArray[i]->fd,rc);
 			//FatalErrorHandler(0);
 		}
 		free(IsrArgList[i]);
 	}
-	//rtems_task_suspend(DaqControllerTID);
+	//rtems_task_suspend(OrbitControllerTID);
 	/* clean up resources */
 	ShutdownAdcModules(adcArray, NumAdcModules);
 	ShutdownVmeCrates(crateArray, NumVmeCrates);
@@ -314,9 +314,9 @@ rtems_task DaqControllerIrq(rtems_task_argument arg) {
 	rtems_message_queue_delete(rawDataQID);
 	/* clean up self */
 	/* FIXME -- rtems_region_delete(rawDataRID);*/
-	syslog(LOG_INFO, "daqControllerIrq exiting... loop iterations=%lld\n",loopIterations);
+	syslog(LOG_INFO, "OrbitControllerIrq exiting... loop iterations=%lld\n",loopIterations);
 	rtems_task_delete(RTEMS_SELF);
-	//rtems_task_restart(DaqControllerTID, 0);
+	//rtems_task_restart(OrbitControllerTID, 0);
 	/*if(fp) {
 		fflush(fp);
 		fclose(fp);

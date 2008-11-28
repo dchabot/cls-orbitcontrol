@@ -2,12 +2,12 @@
 # 	Template leaf node Makefile
 #
 
-PGMS=${ARCH}/daq.obj
+PGMS=${ARCH}/orbitcontroller.obj
 INCLUDE_DIR=../include
 # C source names, if any, go here -- minus the .c
 C_PIECES+=AdcReaderThread 
-C_PIECES+=DaqControllerUtils 
-C_PIECES+=DaqControllerIrq
+C_PIECES+=OrbitControllerUtils 
+C_PIECES+=OrbitControllerIrq
 C_PIECES+=DataHandler
 C_PIECES+=PSController
 
@@ -21,7 +21,7 @@ CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
 
 H_PIECES=${INCLUDE_DIR}/bpmDefs
-H_PIECES+=${INCLUDE_DIR}/AdcReaderThread ${INCLUDE_DIR}/DaqController
+H_PIECES+=${INCLUDE_DIR}/AdcReaderThread ${INCLUDE_DIR}/OrbitController
 H_PIECES+=${INCLUDE_DIR}/DataHandler ${INCLUDE_DIR}/PSController
 H_FILES=$(H_PIECES:%=%.h)
 
