@@ -7,6 +7,7 @@ include $(TOP)/configure/CONFIG
 #  Optimization of db files using dbst (DEFAULT: NO)
 #DB_OPT = YES
 
+################################################################################
 ############## HEY, YOU!! THIS IS REALLY IMPORTANT, SO READ IT!! ###############
 ### This variable is used to switch between Experimental (testing on 10.51 vlan)
 ### and Production (10.50 vlan) record names. Be careful !!!

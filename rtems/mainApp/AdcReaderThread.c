@@ -10,14 +10,7 @@
 #include <AdcReaderThread.h>
 
 
-static void RegisterAtRendezvousPoint(ReaderThreadArg *argp) {
-	rtems_status_code rc;
-
-	rc = rtems_event_send(argp->controllerTID, argp->syncEvent);
-	TestDirective(rc, "ReaderThread-->RegisterAtRendezvousPoint-->rtems_event_send()");
-}
-
-rtems_task ReaderThread(rtems_task_argument arg) {
+static rtems_task ReaderThread(rtems_task_argument arg) {
 	ReaderThreadArg *argp = (ReaderThreadArg *)arg;
 	RawDataSegment ds = {0};
 	size_t dsSize;
@@ -25,11 +18,13 @@ rtems_task ReaderThread(rtems_task_argument arg) {
 	uint32_t wordsRequested;
 	uint32_t wordsRead;
 
-	/* let the controller know that we're good to go... */
-	RegisterAtRendezvousPoint(argp);
 	for(;;) {
 		uint16_t adcStatus = 0;
 
+		rc = rtems_barrier_wait(argp->barrierID, 5000);
+		if(TestDirective(rc, "rtems_barrier_wait()-AdcReaderThread")) {
+			break;
+		}
 		/* block for the controller's msg... */
 		rc = rtems_message_queue_receive(argp->rawDataQID,&ds,&dsSize,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
 		if(TestDirective(rc, "ReaderThread-->rtems_message_queue_receive()")) {
@@ -65,8 +60,6 @@ rtems_task ReaderThread(rtems_task_argument arg) {
 			syslog(LOG_INFO, "Adc[%d]: asked for %u words, but read only %u\n",
 					argp->adc->crate->id, wordsRequested, wordsRead);
 		}
-		/* let the controller know that our task is done...*/
-		RegisterAtRendezvousPoint(argp);
 	}
 
 	/* clean up resources: OrbitController will handle this... */
@@ -74,7 +67,7 @@ rtems_task ReaderThread(rtems_task_argument arg) {
 	rtems_task_delete(RTEMS_SELF);
 }
 
-ReaderThreadArg* startReaderThread(VmeModule *mod, rtems_event_set syncEvent) {
+ReaderThreadArg* startReaderThread(VmeModule *mod, rtems_id bid) {
 	rtems_id tid;
 	rtems_id qid;
 	rtems_status_code rc;
@@ -114,8 +107,8 @@ ReaderThreadArg* startReaderThread(VmeModule *mod, rtems_event_set syncEvent) {
 		FatalErrorHandler(0);
 	}
 	arg->readerTID = tid;
-	arg->controllerTID = orbitControllerTID;
-	arg->syncEvent = syncEvent;
+	arg->barrierID = bid;
+	//arg->syncEvent = syncEvent;
 	arg->rawDataQID = qid;
 	arg->adc = mod;
 

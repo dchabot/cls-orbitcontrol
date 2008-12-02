@@ -22,6 +22,6 @@ dbLoadRecords("db/SrOC2404-05.db")
 dbLoadRecords("db/SrOC2406-01.db")
 dbLoadRecords("db/SrOC2406-03.db")
 dbLoadRecords("db/SrOC2408-01.db")
-#dbLoadRecords("db/SrChicane2408-01.db")
+dbLoadRecords("db/SrChicane2408-01.db")
 
 iocInit()

@@ -20,6 +20,7 @@ static DioConfig dioConfig[] = {
 		{VMIC_2536_DEFAULT_BASE_ADDR,2},
 		{VMIC_2536_DEFAULT_BASE_ADDR,3}
 #if NumDioModules==5
+/* this oddball module controls chicane pwr supplies. Must be last in struct!! */
 		,{VMIC_2536_DEFAULT_BASE_ADDR+0x10,3}
 #endif
 };
@@ -257,7 +258,12 @@ bailout:
 void ToggleUpdateBits() {
 	int i;
 
+#if NumDioModules==5
+/* NOTE: count is NumDioModules-1 because we omit the chicane supply from this op */
+	for(i=0; i<NumDioModules-1; i++) {
+#else
 	for(i=0; i<NumDioModules; i++) {
+#endif
 		ToggleUpdateBit(dioArray[i]);
 	}
 }
@@ -276,7 +282,11 @@ void SimultaneousSetpointUpdate(int32_t *spBuf) {
  * 			to avoid clobbering any concurrent VME block-transfers in progress.
  */
 int SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
-	int dacSetPoint;
+
+	UpdateSetpoint(ctlr, setpoint);
+	ToggleUpdateBit(ctlr->mod);
+	return 0;
+	/*int dacSetPoint;
 	uint32_t value = 0;
 	int rc, fd;
 	uint32_t vmeAddr;
@@ -288,16 +298,16 @@ int SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
 
 	fd = ctlr->mod->crate->fd;
 	vmeAddr = ctlr->modAddr;
-	/* write the 32 bits out to the power supply*/
+	 write the 32 bits out to the power supply
 	rc=vme_A24D32_write(fd,vmeAddr,value);
 	if(rc) {
 		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
 		return rc;
 	}
-	/* added for Milan G IE Power 04/08/2002*/
+	 added for Milan G IE Power 04/08/2002
 	usecSpinDelay(ISO_DELAY);
 
-	/* raise the PS_LATCH bit */
+	 raise the PS_LATCH bit
 	rc=vme_A24D32_write(fd,vmeAddr,(value | PS_LATCH));
 	if(rc) {
 		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
@@ -305,7 +315,7 @@ int SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
 	}
 	usecSpinDelay(ISO_DELAY);
 
-	/* drop the PS_LATCH bit and data bits */
+	 drop the PS_LATCH bit and data bits
 	rc=vme_A24D32_write(fd,vmeAddr,0x00000000);
 	if(rc) {
 		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
@@ -313,7 +323,7 @@ int SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
 	}
 	usecSpinDelay(ISO_DELAY);
 
-	/* raise the UPDATE bit */
+	 raise the UPDATE bit
 	rc=vme_A24D32_write(fd,vmeAddr,UPDATE);
 	if(rc) {
 		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
@@ -321,7 +331,7 @@ int SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
 	}
 	usecSpinDelay(ISO_DELAY);
 
-	/* drop the UPDATE bit */
+	 drop the UPDATE bit
 	rc=vme_A24D32_write(fd,vmeAddr,0x00000000);
 	if(rc) {
 		syslog(LOG_INFO, "SetPwrSupply: failed VME write--%#x\n",rc);
@@ -329,7 +339,7 @@ int SetSingleSetpoint(PSController* ctlr, int32_t setpoint) {
 	}
 	usecSpinDelay(ISO_DELAY);
 
-	return 0;
+	return 0;*/
 }
 
 VmeModule* InitializeDioModule(VmeCrate* vmeCrate, uint32_t baseAddr) {
@@ -350,7 +360,10 @@ VmeModule* InitializeDioModule(VmeCrate* vmeCrate, uint32_t baseAddr) {
 	rc = VMIC2536_Init(pmod);
 	if(rc) {
 		syslog(LOG_INFO, "Failed to initialize VMIC-2536: rc=%d",rc);
-		FatalErrorHandler(0);
+		if(pmod) {
+			free(pmod);
+			pmod=NULL;
+		}
 	}
 
 	return pmod;
@@ -360,7 +373,7 @@ void ShutdownDioModules(VmeModule *modArray[], int numModules) {
 	int i;
 
 	for(i=0; i<numModules; i++) {
-		free(modArray[i]);
+		if(modArray[i]) { free(modArray[i]); }
 	}
 }
 
@@ -371,14 +384,19 @@ void ShutdownDioModules(VmeModule *modArray[], int numModules) {
 void InitializePSControllers(VmeCrate** crateArray) {
 	int i,j;
 
-	/* First, initialize the vmic2536 DIO modules */
-	/** Init the vmic2536 DIO modules */
+	/** Initialize the vmic2536 DIO modules */
 	for(i=0; i<NumDioModules; i++) {
 		dioArray[i] = InitializeDioModule(crateArray[dioConfig[i].vmeCrateID], dioConfig[i].baseAddr);
-		syslog(LOG_INFO, "Initialized VMIC2536 DIO module[%d]\n",i);
+		if(dioArray[i]) {
+			syslog(LOG_INFO, "Initialized VMIC2536 DIO module[%d]\n",i);
+		}
 	}
-
+#if NumDioModules==5
+/* NOTE: count is NumDioModules-1 because we omit the chicane supply from this op */
+	for(i=0; i<NumDioModules-1; i++) {
+#else
 	for(i=0; i<NumDioModules; i++) {
+#endif
 		for(j=0; j<NumOCM; j++) {
 			if((psCtlrArray[j].crateId == dioArray[i]->crate->id)
 					&& (psCtlrArray[j].modAddr == dioArray[i]->vmeBaseAddr)) {

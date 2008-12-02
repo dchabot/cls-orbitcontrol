@@ -24,42 +24,31 @@ rtems_id OcmSetpointQID = 0;
 
 typedef struct {
 	VmeModule *adc;
-	rtems_id controllerTID;
-	rtems_event_set irqEvent;
+	rtems_id barrierID;
 } AdcIsrArg;
-
-static void NotifyOrbitController(AdcIsrArg *argp) {
-	rtems_status_code rc;
-
-	rc = rtems_event_send(argp->controllerTID, argp->irqEvent);
-	TestDirective(rc, "NotifyOrbitController()-->rtems_event_send()");
-}
 
 static void AdcIsr(void *arg, uint8_t vector) {
 	AdcIsrArg *parg = (AdcIsrArg *)arg;
+	int rc;
 
 	/* disable irq on the board */
 	ICS110BInterruptControl(parg->adc, ICS110B_IRQ_DISABLE);
 	/* inform the OrbitController of this event */
-	NotifyOrbitController(parg);
+	rc = rtems_barrier_wait(parg->barrierID,RTEMS_NO_TIMEOUT);
+	TestDirective(rc,"rtems_barrier_wait-AdcIsr");
 }
 
-static void RegisterAdcIsr(VmeModule* adc, rtems_event_set* ev) {
+static void RegisterAdcIsr(VmeModule* adc, rtems_id bid) {
 	int rc;
-	static int x = 0;
-	rtems_event_set event;
 	AdcIsrArg *parg = NULL;
 
-	event = (1<<(24+x));
-	*ev |= event;
 	parg = (AdcIsrArg *)calloc(1,sizeof(AdcIsrArg));
 	if(parg==NULL) {
-		syslog(LOG_INFO, "Failed to allocated AdcIsrArg[%d]\n",x);
+		syslog(LOG_INFO, "Failed to allocated AdcIsrArg\n");
 		FatalErrorHandler(0);
 	}
 	parg->adc = adc;
-	parg->controllerTID = OrbitControllerTID;
-	parg->irqEvent = event;
+	parg->barrierID = bid;//OrbitControllerTID;
 	rc = vme_set_isr(adc->crate->fd,
 						adc->irqVector/*vector*/,
 						AdcIsr/*handler*/,
@@ -73,49 +62,8 @@ static void RegisterAdcIsr(VmeModule* adc, rtems_event_set* ev) {
 	rc = vme_enable_irq_level(adc->crate->fd, adc->irqLevel);
 	TestDirective(rc, "vme_enable_irq_level()");
 	ICS110BInterruptControl(adc,ICS110B_IRQ_ENABLE);
-
-	x++;
 }
 
-static int RendezvousPoint(rtems_event_set syncEvents) {
-	rtems_event_set eventsIn=0;
-	rtems_status_code rc;
-
-	rc = rtems_event_receive(syncEvents, RTEMS_EVENT_ALL|RTEMS_WAIT, RTEMS_NO_TIMEOUT, &eventsIn);
-	if(syncEvents != eventsIn) {
-		syslog(LOG_INFO, "RendezvousPoint() error: syncEvents=0x%08x\teventsIn=0x%08x\n",syncEvents, eventsIn);
-	}
-	return TestDirective(rc, "RendezvousPoint()-->rtems_event_receive()");
-}
-
-/*static FILE* getOutputFile(const char* filename) {
-	char basepath[64] = "/home/tmp/adcData/";
-	FILE *f;
-	char *outfile;
-
-	 form output filename
-	outfile = strncat(basepath, filename, sizeof(basepath));
-	syslog(LOG_INFO, "outfile: %s\n", outfile);
-
-	f = fopen(outfile, "w");
-	if(f == NULL) {
-	    syslog(LOG_CRIT, "fopen %s -- %s",outfile, strerror(errno));
-	    //FatalErrorHandler(0);
-	}
-
-	return f;
-}
-
-static void
-writeToFile(FILE* f, void* buf, size_t size) {
-	int n=0;
-
-	n = fwrite(buf, 1, size, f);
-	fflush(f);
-	if(n != size) {
-	    syslog(LOG_INFO, "Error: wrote only %d words, not %lu\n",n,size);
-	}
-}*/
 
 rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 	extern int errno;
@@ -129,16 +77,15 @@ rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 	RawDataSegment rdSegments[NumReaderThreads];
 	extern rtems_id OcmSetpointQID;
 	uint32_t ocmSetpointMQpending = 0;
+	rtems_id isrBarrierId;
+	rtems_id rdrBarrierId;
 	rtems_id rawDataQID = 0;
 	rtems_id dataHandlerTID = 0;
 	rtems_status_code rc;
-	rtems_event_set rdrSyncEvents = 0;
-	rtems_event_set isrSyncEvents = 0;
 	rtems_interval rtemsTicksPerSecond;
 	int i;
 	uint64_t loopIterations = 0;
 	const int readSizeFrames = (HALF_FIFO_LENGTH/(/*4**/AdcChannelsPerFrame)); /* @ 32 channels/frame, readSizeFrames==508 */
-	//FILE *fp = NULL;
 
 	/* Begin... */
 	syslog(LOG_INFO, "OrbitControllerIrq: initializing...\n");
@@ -148,7 +95,7 @@ rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 	/* setup software-to-hardware objects */
 	InitializeVmeCrates(crateArray, NumVmeCrates);
 
-	/** Init the ics1100-bl ADC modules */
+	/** Initialize the ics1100-bl ADC modules */
 	if(adcFrequency==0.0) {
 		/* use default */
 		adcFrequency = AdcDefaultFrequency;
@@ -164,25 +111,33 @@ rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 	}
 	adcFramesPerTick = (int)ceil((adcTrueFrequency*HzPerkHz)/((double)rtemsTicksPerSecond));
 
+	rc = rtems_barrier_create(rtems_build_name('i','s','r','B'),
+												RTEMS_BARRIER_AUTOMATIC_RELEASE|RTEMS_LOCAL,
+												NumAdcModules+1,
+												&isrBarrierId);
+	TestDirective(rc, "rtems_barrier_create()-isr barrier");
 	/* register ADC interrupt service routines with sis1100 driver... */
 	for(i=0; i<NumAdcModules; i++) {
-		RegisterAdcIsr(adcArray[i], &isrSyncEvents);
+		RegisterAdcIsr(adcArray[i], isrBarrierId);
 	}
 
-
+	rc = rtems_barrier_create(rtems_build_name('a','d','c','B'),
+												RTEMS_BARRIER_AUTOMATIC_RELEASE|RTEMS_LOCAL,
+												NumAdcModules+1,
+												&rdrBarrierId);
+	TestDirective(rc, "rtems_barrier_create()-adc barrier");
 	/* set up AdcReaderThreads and synchronize with them (Rendezvous pattern) */
 	for(i=0; i<NumReaderThreads; i++) {
-		rtems_event_set event = 0;
-
-		event = (1<<(16+i));
-		rdrSyncEvents |= event;
-		rdrArray[i] = startReaderThread(adcArray[i], event);
+		rdrArray[i] = startReaderThread(adcArray[i], rdrBarrierId);
 		/* initialize the invariants of the raw-data segment array...*/
 		rdSegments[i].adc = adcArray[i];
 		rdSegments[i].numChannelsPerFrame = AdcChannelsPerFrame;
 		rdSegments[i].numFrames = readSizeFrames;
 	}
-	RendezvousPoint(rdrSyncEvents);
+	rc = rtems_barrier_wait(rdrBarrierId, 5000);/*FIXME--debugging timeouts*/
+	if(TestDirective(rc,"rtems_barrier_wait-OrbitController rdr barrier")) {
+		FatalErrorHandler(0);
+	}
 	syslog(LOG_INFO, "OrbitControllerIrq: synchronized with ReaderThreads...\n");
 
 	/* fire up the AdcDataHandler thread...*/
@@ -190,13 +145,6 @@ rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 	rc = rtems_message_queue_ident(RawDataQueueName, RTEMS_LOCAL, &rawDataQID);
 	TestDirective(rc, "rtems_message_queue_ident()");
 
-	/* FIXME -- testing: offload data to host over NFS */
-	/*fp = getOutputFile("adc_1.dat");
-	if(fp==NULL) {
-		syslog(LOG_INFO, "OrbitController: can't open %s -- %s\n","adc_1.dat",strerror(errno));
-	}*/
-
-	/* get qid for OCM setpoint updates */
 	InitializePSControllers(crateArray);
 
 	/* start ADC acquistion on the "edge" of a rtems_clock_tick()...*/
@@ -204,10 +152,11 @@ rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 	/* enable acquire at the ADCz */
 	AdcStartAcquisition(adcArray, NumAdcModules);
 
-	/* main acquisition loop */
+	/* XXX -- main control loop */
 	for(;;loopIterations++) {
 		/* Wait for notification of ADC "fifo-half-full" event... */
-		if(RendezvousPoint(isrSyncEvents)) {
+		rc=rtems_barrier_wait(isrBarrierId,5000);
+		if(TestDirective(rc, "rtems_barrier_wait()--isr barrier")) {
 			break; /* restart */
 		}
 
@@ -219,18 +168,17 @@ rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 			rdSegments[i].buf = (int32_t *)calloc(1, readSizeFrames*AdcChannelsPerFrame*sizeof(int32_t));
 			if(rdSegments[i].buf==NULL) {
 				syslog(LOG_INFO, "Failed to c'allocate rdSegment buffers: %s", strerror(errno));
-				exit(1);/* FIXME */
+				FatalErrorHandler(0);
 			}
 			/* unleash the ReaderThreads... mmwwaahahaha... */
 			rc = rtems_message_queue_send(rdrArray[i]->rawDataQID,&rdSegments[i],sizeof(RawDataSegment));
 			TestDirective(rc, "OrbitControllerIrq-->rtems_message_queue_send()-->ReaderThread queue");
 		}
 		/* block until the ReaderThreads are at their sync-point... */
-		if(RendezvousPoint(rdrSyncEvents)) {
+		rc = rtems_barrier_wait(rdrBarrierId, 5000);/*FIXME--debugging timeouts*/
+		if(TestDirective(rc,"rtems_barrier_wait-OrbitController rdr barrier")) {
 			break;
 		}
-
-		//rawData[x] = rdSegments[1].buf;
 
 		/* reset (clear) each ADC FIFO, then re-enable acquisition... */
 		for(i=0; i<NumReaderThreads; i++) {
@@ -247,8 +195,6 @@ rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 		/* hand raw-data buffers off to DataHandling thread */
 		rc = rtems_message_queue_send(rawDataQID, rdSegments, sizeof(rdSegments));
 		if(TestDirective(rc, "OrbitControllerIrq-->rtems_message_queue_send()-->RawDataQueue")<0) {
-			/*syslog(LOG_INFO, "OrbitControllerIrq: suspending self...\n");
-			rtems_task_wait(10);*/
 			break;
 		}
 
@@ -277,15 +223,6 @@ rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 	} /* end main acquisition-loop */
 	AdcStopAcquisition(adcArray, NumAdcModules);
 
-	/* send data to host (opi2043-001) via NFS */
-	/*if(fp != NULL) {
-		syslog(LOG_INFO, "OrbitController: sending data to host...\n");
-		for(i=0; i<100; i++) {
-			writeToFile(fp,rawData[i],readSizeFrames*AdcChannelsPerFrame*sizeof(int32_t));
-		}
-		syslog(LOG_INFO, "OrbitController: done sending data...\n");
-	}*/
-
 	/* shut down interrupt generation/handling */
 	for(i=0; i<NumAdcModules; i++) {
 		rc = vme_disable_irq_level(crateArray[i]->fd, adcArray[i]->irqLevel);
@@ -299,7 +236,6 @@ rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 		}
 		free(IsrArgList[i]);
 	}
-	//rtems_task_suspend(OrbitControllerTID);
 	/* clean up resources */
 	ShutdownAdcModules(adcArray, NumAdcModules);
 	ShutdownVmeCrates(crateArray, NumVmeCrates);
@@ -316,10 +252,4 @@ rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 	/* FIXME -- rtems_region_delete(rawDataRID);*/
 	syslog(LOG_INFO, "OrbitControllerIrq exiting... loop iterations=%lld\n",loopIterations);
 	rtems_task_delete(RTEMS_SELF);
-	//rtems_task_restart(OrbitControllerTID, 0);
-	/*if(fp) {
-		fflush(fp);
-		fclose(fp);
-	}
-	rtems_task_suspend(RTEMS_SELF);*/
 }
