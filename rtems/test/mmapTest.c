@@ -43,7 +43,7 @@ void StartMmapTest(const uint16_t aVector) {
 	uint16_t data = 0;
 	
 	syslog(LOG_INFO, "StartMmapTest() starting...\n");
-	InitializeVmeCrates();
+	InitializeVmeCrate();
 	InitializeAdcModules(10.0/*kHz*/, 32/*channelsPerFrame*/);
 	
 	/* try out some mmap'd accesses here... */

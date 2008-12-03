@@ -18,7 +18,7 @@
 
 #define ADC_PER_VOLT 419430.3
 
-/* XXX -- documentation is WRONG; fifo length is 1024*32, NOT 1024*64 words.
+/* XXX -- fifo length is 1024*128 Bytes (128 kB), NOT 1024*64 words.
  * Unless, they mean 64 kWords where a "word" is 2 bytes... marketing @ssh0lz...*/
 #define HALF_FIFO_LENGTH 16256 /* 16 kWords; word-size is 4 bytes */
 

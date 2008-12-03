@@ -18,7 +18,6 @@
 #include <DataHandler.h>
 #include <PSController.h>
 
-static rtems_id OrbitControllerTID;
 /*FIXME -- global var */
 rtems_id OcmSetpointQID = 0;
 
@@ -48,13 +47,13 @@ static void RegisterAdcIsr(VmeModule* adc, rtems_id bid) {
 		FatalErrorHandler(0);
 	}
 	parg->adc = adc;
-	parg->barrierID = bid;//OrbitControllerTID;
+	parg->barrierID = bid;
 	rc = vme_set_isr(adc->crate->fd,
 						adc->irqVector/*vector*/,
 						AdcIsr/*handler*/,
 						parg/*handler arg*/);
 	if(rc) {
-		syslog(LOG_INFO, "Failed to set ADC Isr\n");
+		syslog(LOG_INFO, "Failed to set ADC Isr, crate# %d\n",adc->crate->id);
 		FatalErrorHandler(0);
 	}
 	ICS110BSetIrqVector(adc, adc->irqVector);
@@ -67,12 +66,12 @@ static void RegisterAdcIsr(VmeModule* adc, rtems_id bid) {
 
 rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 	extern int errno;
-	VmeCrate *crateArray[NumVmeCrates];
-	VmeModule *adcArray[NumAdcModules];
+	static VmeCrate *crateArray[NumVmeCrates];
+	static VmeModule *adcArray[NumAdcModules];
 	int adcFramesPerTick;
 	double adcFrequency = 0.0;
 	double adcTrueFrequency = 0.0;
-	AdcIsrArg *IsrArgList[NumAdcModules];
+	static AdcIsrArg *IsrArgList[NumAdcModules];
 	static ReaderThreadArg *rdrArray[NumReaderThreads];
 	RawDataSegment rdSegments[NumReaderThreads];
 	extern rtems_id OcmSetpointQID;
@@ -89,11 +88,13 @@ rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 
 	/* Begin... */
 	syslog(LOG_INFO, "OrbitControllerIrq: initializing...\n");
-	rc = rtems_task_ident(RTEMS_SELF,RTEMS_LOCAL,&OrbitControllerTID);
 	rtems_clock_get(RTEMS_CLOCK_GET_TICKS_PER_SECOND, &rtemsTicksPerSecond);
 
 	/* setup software-to-hardware objects */
-	InitializeVmeCrates(crateArray, NumVmeCrates);
+	for(i=0; i<NumVmeCrates; i++) {
+		crateArray[i] = InitializeVmeCrate(i);
+	}
+	syslog(LOG_INFO, "Initialized %d VME crates.\n",i);
 
 	/** Initialize the ics1100-bl ADC modules */
 	if(adcFrequency==0.0) {

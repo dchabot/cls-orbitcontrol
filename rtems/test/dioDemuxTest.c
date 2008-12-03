@@ -166,7 +166,7 @@ void StartDioDemuxTest(int numIters) {
 	sum=sumSqrs=avg=stdDev=max=0.0;
 
 	syslog(LOG_INFO, "StartAdcFifoTest() beginning...\n");
-	InitializeVmeCrates(VmeCrates, numVmeCrates);
+	InitializeVmeCrate(VmeCrates, numVmeCrates);
 
 	__InitializePSControllers(VmeCrates);
 

@@ -55,7 +55,7 @@ rtems_task daqControllerPeriodic(rtems_task_argument arg) {
 	rtems_clock_get(RTEMS_CLOCK_GET_TICKS_PER_SECOND, &rtemsTicksPerSecond);
 	
 	/* setup software-to-hardware objects */
-	InitializeVmeCrates(crateArray, NumVmeCrates);
+	InitializeVmeCrate(crateArray, NumVmeCrates);
 	
 	if(adcFrequency==0.0) {
 		/* use default */

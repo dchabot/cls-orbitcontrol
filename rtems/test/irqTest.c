@@ -173,7 +173,7 @@ void StartIrqTest(void) {
 	
 	rtems_clock_get(RTEMS_CLOCK_GET_TICKS_PER_SECOND, &rtemsTicksPerSecond);
 	syslog(LOG_INFO, "Initializing vme crates...\n");
-	InitializeVmeCrates();
+	InitializeVmeCrate();
 	syslog(LOG_INFO, "Initializing adc modules...\n");
 	InitializeAdcModules(adcFrameRate_kHz, adcTrueFrameRate, adcChannelsPerFrame);
 	syslog(LOG_INFO, "Enabling ADC interrupts...");

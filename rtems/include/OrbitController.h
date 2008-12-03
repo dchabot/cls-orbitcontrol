@@ -26,11 +26,15 @@ typedef struct {
 #define AdcChannelsPerFrame 32
 #define HzPerkHz 1000.0
 
-#define AdcDefaultFrequency 10.0
+/* XXX
+ * NOTE: 10.1kHz will produce 9.987570kHz sampling rate:
+ * a 0.1243% diff from the desired 10 kHz rate
+ */
+#define AdcDefaultFrequency 10.1 /* in kHz */
 
 
 /* prototypes */
-void InitializeVmeCrates(VmeCrate *crateArray[], int numCrates);
+VmeCrate* InitializeVmeCrate(int crateNum);
 void ShutdownVmeCrates(VmeCrate *crateArray[], int numCrates);
 VmeModule* InitializeAdcModule(VmeCrate* vmeCrate,uint32_t baseAddr,double targetFrameRate,int numChannelsPerFrame,double *trueFrameRate);
 void ShutdownAdcModules(VmeModule *modArray[], int numModules);

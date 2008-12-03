@@ -271,7 +271,7 @@ void StartPeriodicTest(void) {
 	rtems_clock_get(RTEMS_CLOCK_GET_TICKS_PER_SECOND, &rtemsTicksPerSecond);
 	
 	syslog(LOG_INFO, "Initializing hardware...\n");
-	InitializeVmeCrates();
+	InitializeVmeCrate();
 	InitializeAdcModules(adcFrameRate_kHz, adcChannelsPerFrame);
 	syslog(LOG_INFO, "DONE\n");
 	

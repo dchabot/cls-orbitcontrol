@@ -53,7 +53,7 @@ void StartAdcFifoTest(void) {
 	
 	syslog(LOG_INFO, "StartAdcFifoTest() beginning...\n");
 	now=then=start=0;
-	InitializeVmeCrates();
+	InitializeVmeCrate();
 	trueSampleRate = InitializeAdcModules(10.0/*kHz*/, 32/*channelsPerFrame*/);
 	syslog(LOG_INFO, "trueSampleRate=%.9g\n", trueSampleRate);
 

@@ -20,7 +20,7 @@ static VmeModule *AdcModules[numAdcModules];
 #include "../mainApp/DaqController.h"
 
 #if 0
-static void InitializeVmeCrates(void) {
+static void InitializeVmeCrate(void) {
 	int i;
 
 	for(i=0; i<numVmeCrates; i++) {

@@ -14,44 +14,40 @@
 
 #include <OrbitController.h>
 
-/* FIXME -- refactor (extract method) to init a *single* crate
- *
- * Assumes one sis1100/3100 per crate
+/* Assumes one sis1100/3100 per crate
  * AND that the VME-PCI devices have been initialized
  */
-void InitializeVmeCrates(VmeCrate *crateArray[], int numCrates) {
-	int i;
+VmeCrate* InitializeVmeCrate(int crateNum) {
+	VmeCrate *crate = NULL;
+	int fd;
 	extern int errno;
+	char devName[64];
 
-	for(i=0; i<numCrates; i++) {
-		int fd;
-		char devName[64];
-
-		crateArray[i] = (VmeCrate *)calloc(1,sizeof(VmeCrate));
-		if(crateArray[i]==NULL) {
-			syslog(LOG_INFO, "Failed to allocate vme crate[%d]:\n\t%s",i,strerror(errno));
-			FatalErrorHandler(0);
-		}
-		crateArray[i]->id = i;
-		sprintf(devName, "/dev/sis1100_%d",i);
-		fd = open(devName, O_RDWR, 0);
-		if(fd < 0) {
-			syslog(LOG_INFO, "Failed to open %s: %s\n",devName, strerror(fd));
-			FatalErrorHandler(0);
-		}
-		crateArray[i]->fd = fd;
-#ifdef USE_MACRO_VME_ACCESSORS
-		rtems_status_code rc = vme_set_mmap_entry(fd, 0x00000000,
-								0x39/*AM*/,0xFF010800/*hdr*/,
-								(1<<24)-1,&(crateArray[i]->a24BaseAddr));
-		TestDirective(rc, "vme_set_mmap_entry()");
-		syslog(LOG_INFO, "crate# %d, VME A24 base-address=%p",
-				i,crateArray[i]->a24BaseAddr);
-#endif
-		/* do a VME System-Reset */
-		vmesysreset(fd);
+	crate = (VmeCrate *)calloc(1,sizeof(VmeCrate));
+	if(crate==NULL) {
+		syslog(LOG_INFO, "Failed to allocate vme crate[%d]:\n\t%s",crateNum,strerror(errno));
+		FatalErrorHandler(0);
 	}
-	syslog(LOG_INFO, "Initialized %d vme crates\n",numCrates);
+	sprintf(devName, "/dev/sis1100_%d",crateNum);
+	fd = open(devName, O_RDWR, 0);
+	if(fd < 0) {
+		syslog(LOG_INFO, "Failed to open %s: %s\n",devName, strerror(fd));
+		FatalErrorHandler(0);
+	}
+	crate->fd = fd;
+	crate->id = crateNum;
+#ifdef USE_MACRO_VME_ACCESSORS
+	rtems_status_code rc = vme_set_mmap_entry(fd, 0x00000000,
+							0x39/*AM*/,0xFF010800/*hdr*/,
+							(1<<24)-1,&(crate->a24BaseAddr));
+	TestDirective(rc, "vme_set_mmap_entry()");
+	syslog(LOG_INFO, "crate# %d, VME A24 base-address=%p",
+			crateNum,crate->a24BaseAddr);
+#endif
+	/* do a VME System-Reset */
+	vmesysreset(fd);
+
+	return crate;
 }
 
 void ShutdownVmeCrates(VmeCrate *crateArray[], int numCrates) {
@@ -59,15 +55,16 @@ void ShutdownVmeCrates(VmeCrate *crateArray[], int numCrates) {
 	rtems_status_code rc;
 
 	for(i=0; i<numCrates; i++) {
+#ifdef USE_MACRO_VME_ACCESSORS
 		rc = vme_clr_mmap_entry(crateArray[i]->fd, &crateArray[i]->a24BaseAddr, (1<<24)-1);
 		TestDirective(rc, "vme_clr_mmap_entry()");
+#endif
 		crateArray[i]->id = 0;
 		close(crateArray[i]->fd);
 		free(crateArray[i]);
 	}
 }
 
-/* FIXME -- refactor (extract method) to init a *single* module */
 VmeModule* InitializeAdcModule(VmeCrate *vmeCrate,
 							uint32_t baseAddr,
 							double targetFrameRate,
