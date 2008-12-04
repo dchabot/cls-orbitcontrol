@@ -113,9 +113,9 @@ rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 	adcFramesPerTick = (int)ceil((adcTrueFrequency*HzPerkHz)/((double)rtemsTicksPerSecond));
 
 	rc = rtems_barrier_create(rtems_build_name('i','s','r','B'),
-												RTEMS_BARRIER_AUTOMATIC_RELEASE|RTEMS_LOCAL,
-												NumAdcModules+1,
-												&isrBarrierId);
+								RTEMS_BARRIER_AUTOMATIC_RELEASE|RTEMS_LOCAL,
+								NumAdcModules+1,
+								&isrBarrierId);
 	TestDirective(rc, "rtems_barrier_create()-isr barrier");
 	/* register ADC interrupt service routines with sis1100 driver... */
 	for(i=0; i<NumAdcModules; i++) {
@@ -123,9 +123,9 @@ rtems_task OrbitControllerIrq(rtems_task_argument arg) {
 	}
 
 	rc = rtems_barrier_create(rtems_build_name('a','d','c','B'),
-												RTEMS_BARRIER_AUTOMATIC_RELEASE|RTEMS_LOCAL,
-												NumAdcModules+1,
-												&rdrBarrierId);
+								RTEMS_BARRIER_AUTOMATIC_RELEASE|RTEMS_LOCAL,
+								NumAdcModules+1,
+								&rdrBarrierId);
 	TestDirective(rc, "rtems_barrier_create()-adc barrier");
 	/* set up AdcReaderThreads and synchronize with them (Rendezvous pattern) */
 	for(i=0; i<NumReaderThreads; i++) {
