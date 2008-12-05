@@ -56,7 +56,7 @@ int VMIC2536_setControl(VmeModule *module, uint16_t value) {
 
 	return vme_A24D16_write(cardFD,cardBase + VMIC_2536_CONTROL_REG_OFFSET,value);
 #else
-	VmeWrite_16(module,VMIC_2536_CONTROL_REG_OFFSET,value);
+	writeD16(module,VMIC_2536_CONTROL_REG_OFFSET,value);
 	return 0;
 #endif
 }
@@ -77,7 +77,7 @@ int VMIC2536_getControl(VmeModule *module, uint16_t* value) {
 
     return vme_A24D16_read(cardFD,cardBase + VMIC_2536_CONTROL_REG_OFFSET,value);
 #else
-    *value = VmeRead_16(module, VMIC_2536_CONTROL_REG_OFFSET);
+    *value = readD16(module, VMIC_2536_CONTROL_REG_OFFSET);
     return 0;
 #endif
 }
@@ -99,7 +99,7 @@ int VMIC2536_setOutput(VmeModule *module, uint32_t value) {
 
     return vme_A24D32_write(cardFD,cardBase + VMIC_2536_OUTPUT_REG_OFFSET,value);
 #else
-    VmeWrite_32(module, VMIC_2536_OUTPUT_REG_OFFSET, value);
+    writeD32(module, VMIC_2536_OUTPUT_REG_OFFSET, value);
     return 0;
 #endif
 }
@@ -120,7 +120,7 @@ int VMIC2536_getOutput(VmeModule *module, uint32_t* value) {
 
     return vme_A24D32_read(cardFD,cardBase + VMIC_2536_OUTPUT_REG_OFFSET,value);
 #else
-    *value = VmeRead_32(module, VMIC_2536_OUTPUT_REG_OFFSET);
+    *value = readD32(module, VMIC_2536_OUTPUT_REG_OFFSET);
     return 0;
 #endif
 }
@@ -135,7 +135,7 @@ int VMIC2536_getBoardID(VmeModule *module, uint16_t* value) {
 
     return vme_A24D16_read(cardFD,cardBase + VMIC_2536_BOARDID_REG_OFFSET,value);
 #else
-    *value = VmeRead_16(module, VMIC_2536_BOARDID_REG_OFFSET);
+    *value = readD16(module, VMIC_2536_BOARDID_REG_OFFSET);
     return 0;
 #endif
 }

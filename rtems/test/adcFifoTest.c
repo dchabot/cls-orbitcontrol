@@ -67,7 +67,7 @@ void StartAdcFifoTest(void) {
 	ICS110BStopAcquisition(AdcModules[3]);
 	rdtscll(now);
 	for(i=0; !ICS110BIsEmpty(AdcModules[3]); i++) {
-		VmeRead_32(AdcModules[3], ICS110B_FIFO_OFFSET);
+		readD32(AdcModules[3], ICS110B_FIFO_OFFSET);
 	}
 	syslog(LOG_INFO, "adcFifoTest: read %d frames, %d channels\n", i/32, i);
 	syslog(LOG_INFO, "adcFifoTest: reached full in %.9f [s]\n", ((double)(now-start))/tscTicksPerSecond);

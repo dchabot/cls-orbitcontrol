@@ -15,7 +15,7 @@ C_FILES=$(C_PIECES:%=%.c)
 C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
 
 # C++ source names, if any, go here -- minus the .cc
-CC_PIECES=
+CC_PIECES=VmeCrate VmeModule
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
@@ -23,6 +23,7 @@ CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 H_PIECES=${INCLUDE_DIR}/bpmDefs
 H_PIECES+=${INCLUDE_DIR}/AdcReaderThread ${INCLUDE_DIR}/OrbitController
 H_PIECES+=${INCLUDE_DIR}/DataHandler ${INCLUDE_DIR}/PSController
+H_PIECES+=${INCLUDE_DIR}/VmeCrate ${INCLUDE_DIR}/VmeModule
 H_FILES=$(H_PIECES:%=%.h)
 
 # Assembly source names, if any, go here -- minus the .S
@@ -48,6 +49,7 @@ include $(RTEMS_ROOT)/make/leaf.cfg
 # (OPTIONAL) Add local stuff here using +=
 #
 CFLAGS+= -I ../include -I $(RTEMS_MAKEFILE_PATH)/lib/include
+CXXFLAGS += ${CFLAGS}
 
 
 ifndef RTEMS_SITE_INSTALLDIR

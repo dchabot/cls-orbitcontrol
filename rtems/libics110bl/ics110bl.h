@@ -1,6 +1,10 @@
 #ifndef ICS110BL_H_
 #define ICS110BL_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <vmeDefs.h>
 
@@ -217,4 +221,9 @@ int ICS110BGetStatus(VmeModule *module, uint16_t *status);
 int ICS110BIsEmpty(VmeModule *module);
 int ICS110BIsFull(VmeModule *module);
 int ICS110BIsHalfFull(VmeModule *module);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /*ICS110BL_H_*/

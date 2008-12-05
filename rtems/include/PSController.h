@@ -8,6 +8,10 @@
 #ifndef PSCONTROLLER_H_
 #define PSCONTROLLER_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -86,4 +90,9 @@ int SetSingleSetpoint(PSController* ctlr, int32_t setpoint);
 VmeModule* InitializeDioModule(VmeCrate* vmeCrate, uint32_t baseAddr);
 void ShutdownDioModules(VmeModule *DioModules[], int numModules);
 void InitializePSControllers(VmeCrate** crateArray);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* PSCONTROLLER_H_ */

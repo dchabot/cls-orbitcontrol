@@ -74,7 +74,7 @@ void StartAdcAcquireTest(void) {
 	syslog(LOG_INFO, "adcAcquireTest: slept for %.9f [s]\n", ((double)(now-start))/tscTicksPerSecond);
 	
 	for(i=0; !ICS110BIsEmpty(AdcModules[0]); i++) {
-		uint32_t data = VmeRead_32(AdcModules[0], ICS110B_FIFO_OFFSET);
+		uint32_t data = readD32(AdcModules[0], ICS110B_FIFO_OFFSET);
 	}
 	syslog(LOG_INFO, "adcAcquireTest: read %d frames, %d channels\n", i/32, i);
 	

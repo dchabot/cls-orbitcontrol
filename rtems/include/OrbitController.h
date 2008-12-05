@@ -1,6 +1,10 @@
 #ifndef ORBITCONTROLLER_H_
 #define ORBITCONTROLLER_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <rtems.h>
 #include <vmeDefs.h>
@@ -45,5 +49,9 @@ void AdcRemoveIsr(VmeModule *mod);
 void StartOrbitController(rtems_task_entry entryPoint);
 
 rtems_task OrbitControllerIrq(rtems_task_argument arg);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /*ORBITCONTROLLER_H_*/

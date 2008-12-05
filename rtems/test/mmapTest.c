@@ -49,18 +49,18 @@ void StartMmapTest(const uint16_t aVector) {
 	/* try out some mmap'd accesses here... */
 	for(i=0; i<numVmeCrates; i++) {
 		printf("Reading from AdcModules[%d]\n",i);
-		data = VmeRead_16(AdcModules[i], ICS110B_CTRL_OFFSET);
+		data = readD16(AdcModules[i], ICS110B_CTRL_OFFSET);
 		printf("ctl reg=%#hx\n",data);
-		data = VmeRead_16(AdcModules[i], ICS110B_STAT_RESET_OFFSET);
+		data = readD16(AdcModules[i], ICS110B_STAT_RESET_OFFSET);
 		printf("stat reg=%#hx\n",data);
 		uint16_t vec = 0;
 		uint16_t newvec = 0;
-		vec = VmeRead_16(AdcModules[i], ICS110B_IVECT_OFFSET);
+		vec = readD16(AdcModules[i], ICS110B_IVECT_OFFSET);
 		printf("vec=%#hx\n",vec&0x00FF);
 		vec=aVector;
 		printf("Setting vec to %#hx\n",vec);
-		VmeWrite_16(AdcModules[i],ICS110B_IVECT_OFFSET,vec);
-		newvec = VmeRead_16(AdcModules[i], ICS110B_IVECT_OFFSET);
+		writeD16(AdcModules[i],ICS110B_IVECT_OFFSET,vec);
+		newvec = readD16(AdcModules[i], ICS110B_IVECT_OFFSET);
 		printf("new vec=%#hx\n",newvec&0x00FF);
 	}
 	

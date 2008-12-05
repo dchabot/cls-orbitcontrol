@@ -1,6 +1,10 @@
 #ifndef BPMDEFS_H_
 #define BPMDEFS_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* FIXME -- unused */
 typedef struct {
 	int rawX;
@@ -150,5 +154,9 @@ double YBPM_convFactor[54]= {
 	/*"1412-04:BPMy:val",*/   	1.152,
 	/*"1412-05:BPMy:val"*/      1.152
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /*BPMDEFS_H_*/

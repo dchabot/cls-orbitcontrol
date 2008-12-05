@@ -1,6 +1,10 @@
 #ifndef BPMSSAMPLESPERAVGSERVER_
 #define BPMSSAMPLESPERAVGSERVER_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <rtems.h>
 #include "DataHandler.h"
 
@@ -9,5 +13,9 @@
 
 void  StartBpmSamplesPerAvgServer(void *arg);
 void DestroyBpmSamplesPerAvgServer(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /*BPMSSAMPLESPERAVGSERVER_*/

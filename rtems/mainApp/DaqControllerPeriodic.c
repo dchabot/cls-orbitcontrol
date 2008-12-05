@@ -171,7 +171,7 @@ rtems_task daqControllerPeriodic(rtems_task_argument arg) {
 	 */
 	for(i=0; i<NumAdcModules; i++) {
 		for(x=0; !ICS110BIsEmpty(adcArray[i]); x++) {
-			VmeRead_32(adcArray[i], ICS110B_FIFO_OFFSET);
+			readD32(adcArray[i], ICS110B_FIFO_OFFSET);
 		}
 		syslog(LOG_INFO, "adc[%d]: fifo has %d frames, %d channels remaining\n",i, x/AdcChannelsPerFrame, x);
 	}

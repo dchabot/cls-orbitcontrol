@@ -21,7 +21,7 @@ CC_PIECES=
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
-H_FILES=
+H_FILES=utils.h
 
 # Assembly source names, if any, go here -- minus the .S
 S_PIECES=

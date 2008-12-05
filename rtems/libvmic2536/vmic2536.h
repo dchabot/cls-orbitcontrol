@@ -1,6 +1,10 @@
 #ifndef VMIC2536_H_
 #define VMIC2536_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <vmeDefs.h>
 
@@ -27,5 +31,10 @@ int VMIC2536_getControl(VmeModule *module, uint16_t* value);
 int VMIC2536_setOutput(VmeModule *module, uint32_t value);
 int VMIC2536_getOutput(VmeModule *module, uint32_t* value);
 int VMIC2536_getBoardID(VmeModule *module, uint16_t* value);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /*VMIC2536_H_*/

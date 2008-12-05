@@ -31,12 +31,12 @@ typedef struct {
  */
 #define USE_MACRO_VME_ACCESSORS
 
-#define VmeRead_32(mod, reg, ...)  *(volatile uint32_t *)(mod->pcBaseAddr + mod->vmeBaseAddr + reg)
-#define VmeRead_16(mod, reg, ...)   *(volatile uint16_t *)(mod->pcBaseAddr + mod->vmeBaseAddr + reg)
-#define VmeRead_8(mod, reg, ...)   *(volatile uint8_t *)(mod->pcBaseAddr + mod->vmeBaseAddr + reg)
+#define readD32(mod, reg, ...)  *(volatile uint32_t *)(mod->pcBaseAddr + mod->vmeBaseAddr + reg)
+#define readD16(mod, reg, ...)   *(volatile uint16_t *)(mod->pcBaseAddr + mod->vmeBaseAddr + reg)
+#define readD8(mod, reg, ...)   *(volatile uint8_t *)(mod->pcBaseAddr + mod->vmeBaseAddr + reg)
 
-#define VmeWrite_32(mod, reg, data, ...)  *(volatile uint32_t *)(mod->pcBaseAddr + mod->vmeBaseAddr + reg) = (data)
-#define VmeWrite_16(mod, reg, data, ...)  *(volatile uint16_t *)(mod->pcBaseAddr + mod->vmeBaseAddr + reg) = (data)
-#define VmeWrite_8(mod, reg, data, ...)  *(volatile uint8_t *)(mod->pcBaseAddr + mod->vmeBaseAddr + reg) = (data)
+#define writeD32(mod, reg, data, ...)  *(volatile uint32_t *)(mod->pcBaseAddr + mod->vmeBaseAddr + reg) = (data)
+#define writeD16(mod, reg, data, ...)  *(volatile uint16_t *)(mod->pcBaseAddr + mod->vmeBaseAddr + reg) = (data)
+#define writeD8(mod, reg, data, ...)  *(volatile uint8_t *)(mod->pcBaseAddr + mod->vmeBaseAddr + reg) = (data)
 
 #endif /*VMEDEFS_H_*/

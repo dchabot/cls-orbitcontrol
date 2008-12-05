@@ -145,14 +145,14 @@ int programFoxRate(VmeModule *module, int foxWordPtr) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D32_write(cardFD, cardBase + ICS110B_CLOCK_OFFSET, ctrlWord); 	/* First control word write out */
 #else
-	VmeWrite_32(module,ICS110B_CLOCK_OFFSET,ctrlWord);
+	writeD32(module,ICS110B_CLOCK_OFFSET,ctrlWord);
 #endif
 	ICS110BTaskDelay(0.170);
 
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D32_write(cardFD, cardBase + ICS110B_CLOCK_OFFSET, foxWord); 	/* Writting out the word */
 #else
-	VmeWrite_32(module,ICS110B_CLOCK_OFFSET,foxWord);
+	writeD32(module,ICS110B_CLOCK_OFFSET,foxWord);
 #endif
 	ICS110BTaskDelay(0.170);
 
@@ -160,7 +160,7 @@ int programFoxRate(VmeModule *module, int foxWordPtr) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D32_write(cardFD, cardBase + ICS110B_CLOCK_OFFSET, ctrlWord);	/* Second control word write out */
 #else
-	VmeWrite_32(module,ICS110B_CLOCK_OFFSET,ctrlWord);
+	writeD32(module,ICS110B_CLOCK_OFFSET,ctrlWord);
 #endif
 	ICS110BTaskDelay(0.170);
 
@@ -168,7 +168,7 @@ int programFoxRate(VmeModule *module, int foxWordPtr) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D32_write(cardFD, cardBase + ICS110B_CLOCK_OFFSET, ctrlWord);	/* Third control word write out */
 #else
-	VmeWrite_32(module,ICS110B_CLOCK_OFFSET,ctrlWord);
+	writeD32(module,ICS110B_CLOCK_OFFSET,ctrlWord);
 #endif
 	ICS110BTaskDelay(0.170);
 
@@ -201,7 +201,7 @@ int ICS110BProgramAdcSpi(VmeModule *module, int arg) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D16_write(cardFD, cardBase + ICS110B_ADC_SPI_OFFSET, ctrlWord);
 #else
-	VmeWrite_16(module,ICS110B_ADC_SPI_OFFSET,ctrlWord);
+	writeD16(module,ICS110B_ADC_SPI_OFFSET,ctrlWord);
 #endif
 	ICS110BTaskDelay(0.5);
 
@@ -209,7 +209,7 @@ int ICS110BProgramAdcSpi(VmeModule *module, int arg) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D16_write(cardFD, cardBase + ICS110B_ADC_SPI_OFFSET, ctrlWord);
 #else
-	VmeWrite_16(module,ICS110B_ADC_SPI_OFFSET,ctrlWord);
+	writeD16(module,ICS110B_ADC_SPI_OFFSET,ctrlWord);
 #endif
 	ICS110BTaskDelay(0.5);
 
@@ -224,7 +224,7 @@ int ICS110BProgramAdcSpi(VmeModule *module, int arg) {
 #ifndef USE_MACRO_VME_ACCESSORS
 		status |= vme_A24D16_write(cardFD, cardBase + ICS110B_ADC_SPI_OFFSET, ctrlWord);
 #else
-		VmeWrite_16(module,ICS110B_ADC_SPI_OFFSET,ctrlWord);
+		writeD16(module,ICS110B_ADC_SPI_OFFSET,ctrlWord);
 #endif
 		ICS110BTaskDelay(0.5);
 		regAddr++;
@@ -234,7 +234,7 @@ int ICS110BProgramAdcSpi(VmeModule *module, int arg) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D16_write(cardFD, cardBase + ICS110B_ADC_SPI_OFFSET, ctrlWord);
 #else
-	VmeWrite_16(module,ICS110B_ADC_SPI_OFFSET,ctrlWord);
+	writeD16(module,ICS110B_ADC_SPI_OFFSET,ctrlWord);
 #endif
 	ICS110BTaskDelay(0.034);
 	return status;
@@ -386,7 +386,7 @@ int ICS110BDemodReset(VmeModule *module) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D32_write(cardFD, cardBase + ICS110B_CLOCK_OFFSET, temp);
 #else
-	VmeWrite_32(module,ICS110B_CLOCK_OFFSET,temp);
+	writeD32(module,ICS110B_CLOCK_OFFSET,temp);
 #endif
 	ICS110BTaskDelay(0.175);
 
@@ -535,7 +535,7 @@ int ICS110BMasterSet(VmeModule *module, int master) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeRead_16(module,ICS110B_CTRL_OFFSET);
+	data = readD16(module,ICS110B_CTRL_OFFSET);
 #endif
 
 	if (master) {
@@ -547,7 +547,7 @@ int ICS110BMasterSet(VmeModule *module, int master) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeWrite_16(module,ICS110B_CTRL_OFFSET,data);
+	writeD16(module,ICS110B_CTRL_OFFSET,data);
 #endif
 
 	return status;
@@ -581,7 +581,7 @@ int ICS110BAcquireSourceSet(VmeModule *module, int source) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeRead_16(module,ICS110B_CTRL_OFFSET);
+	data = readD16(module,ICS110B_CTRL_OFFSET);
 #endif
 
 	if(source == ICS110B_INTERNAL) {
@@ -593,7 +593,7 @@ int ICS110BAcquireSourceSet(VmeModule *module, int source) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeWrite_16(module,ICS110B_CTRL_OFFSET,data);
+	writeD16(module,ICS110B_CTRL_OFFSET,data);
 #endif
 
 	return status;
@@ -630,7 +630,7 @@ int ICS110BOutputModeSet(VmeModule *module, uint16_t outMode) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeRead_16(module,ICS110B_CTRL_OFFSET);
+	data = readD16(module,ICS110B_CTRL_OFFSET);
 #endif
 
 	shortOutMode &= 0x7;
@@ -642,7 +642,7 @@ int ICS110BOutputModeSet(VmeModule *module, uint16_t outMode) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeWrite_16(module,ICS110B_CTRL_OFFSET,data);
+	writeD16(module,ICS110B_CTRL_OFFSET,data);
 #endif
 
 	return status;
@@ -676,7 +676,7 @@ int ICS110BClockSelectSet(VmeModule *module, int clksel) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeRead_16(module,ICS110B_CTRL_OFFSET);
+	data = readD16(module,ICS110B_CTRL_OFFSET);
 #endif
 
 	if(clksel == ICS110B_INTERNAL) {
@@ -688,7 +688,7 @@ int ICS110BClockSelectSet(VmeModule *module, int clksel) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeWrite_16(module,ICS110B_CTRL_OFFSET,data);
+	writeD16(module,ICS110B_CTRL_OFFSET,data);
 #endif
 
 	return status;
@@ -725,7 +725,7 @@ int ICS110BOversamplingSet(VmeModule *module, int ratio) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeRead_16(module,ICS110B_CTRL_OFFSET);
+	data = readD16(module,ICS110B_CTRL_OFFSET);
 #endif
 
 	if(ratio == ICS110B_X64) {
@@ -737,7 +737,7 @@ int ICS110BOversamplingSet(VmeModule *module, int ratio) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeWrite_16(module,ICS110B_CTRL_OFFSET,data);
+	writeD16(module,ICS110B_CTRL_OFFSET,data);
 #endif
 
 	return status;
@@ -768,7 +768,7 @@ int ICS110BNoChannelsSet(VmeModule *module, int numChan) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D16_write(cardFD,cardBase + ICS110B_NUM_CHANS_OFFSET,data);
 #else
-	VmeWrite_16(module,ICS110B_NUM_CHANS_OFFSET,data);
+	writeD16(module,ICS110B_NUM_CHANS_OFFSET,data);
 #endif
 	return status;
 }
@@ -810,7 +810,7 @@ int ICS110BDeviceReset(VmeModule *module) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D16_write(cardFD,cardBase + ICS110B_STAT_RESET_OFFSET,data);
 #else
-	VmeWrite_16(module,ICS110B_STAT_RESET_OFFSET,data);
+	writeD16(module,ICS110B_STAT_RESET_OFFSET,data);
 #endif
 	return status;
 }
@@ -840,7 +840,7 @@ int ICS110BFIFOReset(VmeModule *module) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D16_read(cardFD,cardBase + ICS110B_STAT_RESET_OFFSET,&data);
 #else
-	data = VmeRead_16(module,ICS110B_STAT_RESET_OFFSET);
+	data = readD16(module,ICS110B_STAT_RESET_OFFSET);
 #endif
 
 	data |= ICS110B_FIFO_RESET;
@@ -848,7 +848,7 @@ int ICS110BFIFOReset(VmeModule *module) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_STAT_RESET_OFFSET,data);
 #else
-	VmeWrite_16(module,ICS110B_STAT_RESET_OFFSET,data);
+	writeD16(module,ICS110B_STAT_RESET_OFFSET,data);
 #endif
 
 	return status;
@@ -885,7 +885,7 @@ int ICS110BInterruptControl(VmeModule *module, int enable) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeRead_16(module,ICS110B_CTRL_OFFSET);
+	data = readD16(module,ICS110B_CTRL_OFFSET);
 #endif
 
 	if(enable) {
@@ -897,7 +897,7 @@ int ICS110BInterruptControl(VmeModule *module, int enable) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeWrite_16(module,ICS110B_CTRL_OFFSET,data);
+	writeD16(module,ICS110B_CTRL_OFFSET,data);
 #endif
 
 	return status;
@@ -919,7 +919,7 @@ int ICS110BSetIrqVector(VmeModule *module, uint8_t vector) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D16_write(cardFD,cardBase + ICS110B_IVECT_OFFSET,data);
 #else
-	VmeWrite_16(module,ICS110B_IVECT_OFFSET,data);
+	writeD16(module,ICS110B_IVECT_OFFSET,data);
 #endif
 
     return status;
@@ -938,7 +938,7 @@ int ICS110BStartAcquisition(VmeModule *module) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeRead_16(module,ICS110B_CTRL_OFFSET);
+	data = readD16(module,ICS110B_CTRL_OFFSET);
 #endif
 
 	data |= 1;
@@ -946,7 +946,7 @@ int ICS110BStartAcquisition(VmeModule *module) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeWrite_16(module,ICS110B_CTRL_OFFSET,data);
+	writeD16(module,ICS110B_CTRL_OFFSET,data);
 #endif
 
 	return status;
@@ -964,7 +964,7 @@ int ICS110BStopAcquisition(VmeModule *module){
 #ifndef USE_MACRO_VME_ACCESSORS
 	status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeRead_16(module,ICS110B_CTRL_OFFSET);
+	data = readD16(module,ICS110B_CTRL_OFFSET);
 #endif
 
 	data &= ~1;
@@ -972,7 +972,7 @@ int ICS110BStopAcquisition(VmeModule *module){
 #ifndef USE_MACRO_VME_ACCESSORS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeWrite_16(module,ICS110B_CTRL_OFFSET,data);
+	writeD16(module,ICS110B_CTRL_OFFSET,data);
 #endif
 
 	return status;
@@ -988,7 +988,7 @@ int ICS110BGetStatus(VmeModule *module, uint16_t *status) {
 #ifndef USE_MACRO_VME_ACCESSORS
 	return vme_A24D16_read(cardFD,cardBase + ICS110B_STAT_RESET_OFFSET,status);
 #else
-	*status = VmeRead_16(module,ICS110B_STAT_RESET_OFFSET);
+	*status = readD16(module,ICS110B_STAT_RESET_OFFSET);
 	*status &= 0x00CF;
 	return OK;
 #endif
@@ -1006,7 +1006,7 @@ int ICS110BIsEmpty(VmeModule *module) {
 	int status = 0;
     status = vme_A24D16_read(cardFD, cardBase + ICS110B_STAT_RESET_OFFSET, &data);
 #else
-    data = VmeRead_16(module,ICS110B_STAT_RESET_OFFSET);
+    data = readD16(module,ICS110B_STAT_RESET_OFFSET);
 #endif
     return ((data&ICS110B_FIFO_EMPTY)==ICS110B_FIFO_EMPTY);
 }
@@ -1023,7 +1023,7 @@ int ICS110BIsFull(VmeModule *module) {
 	int status = 0;
 	status = vme_A24D16_read(cardFD, cardBase + ICS110B_STAT_RESET_OFFSET, &data);
 #else
-    data = VmeRead_16(module,ICS110B_STAT_RESET_OFFSET);
+    data = readD16(module,ICS110B_STAT_RESET_OFFSET);
 #endif
     return ((data&ICS110B_FIFO_FULL)==ICS110B_FIFO_FULL);
 }
@@ -1040,7 +1040,7 @@ int ICS110BIsHalfFull(VmeModule *module) {
 	int status = 0;
 	status = vme_A24D16_read(cardFD, cardBase + ICS110B_STAT_RESET_OFFSET, &data);
 #else
-    data = VmeRead_16(module,ICS110B_STAT_RESET_OFFSET);
+    data = readD16(module,ICS110B_STAT_RESET_OFFSET);
 #endif
     return ((data&ICS110B_FIFO_HALF_FULL)==ICS110B_FIFO_HALF_FULL);
 }
