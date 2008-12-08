@@ -2,7 +2,7 @@
 #include <syslog.h>
 
 #include <bsp.h> /* rtemsReboot() */
-#include <utils.h>
+#include "utils.h"
 #include <rtems-gdb-stub.h> /*rtems_gdb_breakpoint()*/
 
 void FatalErrorHandler(FatalErrorCallback cb) {
