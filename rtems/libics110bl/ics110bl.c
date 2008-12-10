@@ -130,16 +130,16 @@ int InitICS110BL(VmeModule *module, double reqSampleRate, double *trueSampleRate
 	Delay letting the board react to the write (The manual explicitly states this step)
 */
 int programFoxRate(VmeModule *module, int foxWordPtr) {
-	u_int32_t       ctrlWord;
-	u_int32_t       foxWord;
-	u_int32_t cardBase;
+	uint32_t       ctrlWord;
+	uint32_t       foxWord;
+	uint32_t cardBase;
 	int cardFD;
 	int status = 0;
 
 	cardBase = module->vmeBaseAddr;
 	cardFD = module->crate->fd;
 
-	foxWord = *(u_int32_t *)foxWordPtr;
+	foxWord = *(uint32_t *)foxWordPtr;
 
 	ctrlWord = (0x38001e05| (foxWord & 0x80000000));
 #ifndef USE_MACRO_VME_ACCESSORS

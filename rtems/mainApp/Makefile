@@ -16,6 +16,7 @@ C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
 
 # C++ source names, if any, go here -- minus the .cc
 CC_PIECES=VmeCrate VmeModule Ics110blModule Vmic2536Module
+CC_PIECES+=StartApp
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
@@ -73,7 +74,7 @@ $(filter %.obj, $(PGMS)): ${OBJS}
 	$(LD) -o $(PGMS) -r ${OBJS}
 
 install:  all
-	$(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_MAKEFILE_PATH)/lib
+#	$(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_MAKEFILE_PATH)/lib
 	$(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_SITE_INSTALLDIR)
 # copy to tftp server bootfile location
 #	scp $(PGMS) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)

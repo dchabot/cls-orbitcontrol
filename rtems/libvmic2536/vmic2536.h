@@ -6,7 +6,9 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#ifndef __cplusplus
 #include <vmeDefs.h>
+#endif
 
 /* XXX -- these boards require only 0x00-0x0F of address space...
  * Why not just use A16 space instead of polluting the A24-space ???
@@ -24,17 +26,17 @@ extern "C" {
 #define VMIC_2536_INPUT_REG_OFFSET 0x04
 #define VMIC_2536_OUTPUT_REG_OFFSET 0x08
 
-
+#ifndef __cplusplus
 int VMIC2536_Init(VmeModule *module);
 int VMIC2536_setControl(VmeModule *module, uint16_t value);
 int VMIC2536_getControl(VmeModule *module, uint16_t* value);
 int VMIC2536_setOutput(VmeModule *module, uint32_t value);
 int VMIC2536_getOutput(VmeModule *module, uint32_t* value);
 int VMIC2536_getBoardID(VmeModule *module, uint16_t* value);
+#endif
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /*VMIC2536_H_*/

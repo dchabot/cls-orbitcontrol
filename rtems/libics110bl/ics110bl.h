@@ -6,8 +6,9 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include <vmeDefs.h>
-
+#ifndef __cplusplus
+	#include <vmeDefs.h>
+#endif
 #define ICS110B_DEFAULT_BASEADDR	0x00D00000
 
 #define ICS110B_DEFAULT_IRQ_LEVEL	3 /* factory default */
@@ -25,6 +26,8 @@ extern "C" {
 /* XXX -- documentation is WRONG; fifo length is 1024*32, NOT 1024*64 words.
  * Unless, they mean 64 kWords where a "word" is 2 bytes... marketing @ssh0lz...*/
 #define HALF_FIFO_LENGTH 16256 /* 16 kWords; word-size is 4 bytes */
+
+#define ICS110B_DEFAULT_CHANNELS_PER_FRAME	32
 
 #define OK 0
 #define ERROR 1
@@ -194,6 +197,7 @@ typedef struct
     Prototypes
     ===========================================================================
 */
+#ifndef __cplusplus
 int InitICS110BL(VmeModule *module, double reqSampleRate, double *trueSampleRate, int clockingSelect, int AcquireSelect, /*uint8_t irqVector,*/ int numChannels);
 int programFoxRate(VmeModule *module, int foxWordPtr);
 int ICS110BProgramAdcSpi(VmeModule *module, int arg);
@@ -221,6 +225,7 @@ int ICS110BGetStatus(VmeModule *module, uint16_t *status);
 int ICS110BIsEmpty(VmeModule *module);
 int ICS110BIsFull(VmeModule *module);
 int ICS110BIsHalfFull(VmeModule *module);
+#endif
 
 #ifdef __cplusplus
 }

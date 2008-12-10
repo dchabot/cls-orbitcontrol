@@ -32,4 +32,28 @@ private:
 	uint32_t a32BaseAddr;
 };
 
+inline uint32_t VmeCrate::getId() const {
+	return id;
+}
+
+inline void VmeCrate::setId(uint32_t id) {
+	this->id = id;
+}
+
+inline int VmeCrate::getFd() const {
+	return fd;
+}
+
+inline uint32_t VmeCrate::getA16BaseAddr() const {
+	return a16BaseAddr;
+}
+
+inline uint32_t VmeCrate::getA24BaseAddr() const {
+	return a24BaseAddr;
+}
+
+inline uint32_t VmeCrate::getA32BaseAddr() const {
+	return a32BaseAddr;
+}
+
 #endif /* VMECRATE_H_ */
