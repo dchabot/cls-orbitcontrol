@@ -32,7 +32,7 @@ private:
 	AdcReader& operator=(const AdcReader&);
 
 	/* we need a static method here 'cause we need to omit the "this"
-	 * pointer from rtems_task_start(), a native c-function.
+	 * pointer from rtems_task_start(tid,threadStart,arg), a native c-function.
 	 */
 	static rtems_task threadStart(rtems_task_argument arg);
 	rtems_task threadBody(rtems_task_argument arg);

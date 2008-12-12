@@ -28,11 +28,11 @@ extern "C" void startApp() {
 				<< " kHz, ch/Frame = " << dec << (int)adc.getChannelsPerFrame() << endl;
 		dio.initialize();
 		cout << dio.getType() << ": base address=0x" << hex << dio.getVmeBaseAddr() << endl;
-
+		rtems_task_wake_after(1000);
 		AdcReader r(adc);
 		r.start(0);
 
-		rtems_task_wake_after(1000);
+		rtems_task_wake_after(5000);
 		throw "Some exception!!!";
 	}
 	catch(...) {

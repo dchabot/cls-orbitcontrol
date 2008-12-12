@@ -51,17 +51,27 @@ AdcReader::~AdcReader() {
 }
 
 /* Since threadStart() is a static method, it has no "this" ptr
- * hidden in its call stack. Therefore, its an acceptable entry point for the
+ * hidden in its call stack. Therefore, its an acceptable thread-entry-point for the
  * native c-function, rtems_task_start().
+ *
+ * WTF ?!?!... maybe some c++ guru can explain to me why threadBody() chokes (hangs sys)
+ * if I use references(&) in threadStart() instead of good 'ol pointers...?
+ *
+ * Or, for that matter, how am I even able to call a non-static method (threadBody())
+ * from within the static method threadStart() ? Shouldn't the compiler catch that ??
+ *
+ * Does the use of a pointer here (instead of reference) make all this magic possible ??
  */
 rtems_task AdcReader::threadStart(rtems_task_argument arg) {
-	AdcReader& rdr = (AdcReader&)arg;
-	rdr.threadBody(rdr.arg);
+	AdcReader *rdr = (AdcReader*)arg;
+	rdr->threadBody(rdr->arg);
 }
 
 rtems_task AdcReader::threadBody(rtems_task_argument arg) {
-	syslog(LOG_INFO, "AdcReader#%d is alive!!!\n",getInstance());
-	rtems_task_suspend(getThreadId());
+	for(;;) {
+		syslog(LOG_INFO, "AdcReader#%d is alive!!!\n",instance);
+		rtems_task_wake_after(1000);
+	}
 }
 
 void AdcReader::start(rtems_task_argument arg) {
