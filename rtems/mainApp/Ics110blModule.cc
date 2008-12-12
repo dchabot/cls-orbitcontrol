@@ -15,13 +15,15 @@ using namespace std;
 
 Ics110blModule::Ics110blModule(VmeCrate& c, uint32_t vmeAddr) :
 	//constructor-initializer list
-	VmeModule(c,vmeAddr), trueFrameRate(0),
-	channelsPerFrame(ICS110B_DEFAULT_CHANNELS_PER_FRAME),
-	overSamplingRate(ICS110B_X128)
+	VmeModule(c,vmeAddr)
 {
-	VmeModule::setIrqLevel(ICS110B_DEFAULT_IRQ_LEVEL);
-	VmeModule::setIrqVector(ICS110B_DEFAULT_IRQ_VECTOR);
-	VmeModule::setType("ICS-110BL");
+	type = "ICS-110BL";
+	initialized = acquiring = false;
+	irqLevel = ICS110B_DEFAULT_IRQ_LEVEL;
+	irqVector = ICS110B_DEFAULT_IRQ_VECTOR;
+	trueFrameRate = 0;
+	channelsPerFrame = ICS110B_DEFAULT_CHANNELS_PER_FRAME;
+	overSamplingRate = ICS110B_X128;
 }
 
 Ics110blModule::~Ics110blModule() {
@@ -73,24 +75,26 @@ void Ics110blModule::initialize(double requestedFrameRate,
 	setChannelsPerFrame(channelsPerFrame);
 
 	setFrameRate(requestedFrameRate,oversampleRate);
+
+	initialized = true;
 }
 
 void Ics110blModule::programFoxRate(uint32_t foxWord) {
 	uint32_t ctrlWord = (0x38001e05| (foxWord & 0x80000000));
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D32_write(cardFD, cardBase + ICS110B_CLOCK_OFFSET, ctrlWord); 	/* First control word write out */
 #else
-	VmeModule::writeA24D32(ICS110B_CLOCK_OFFSET,ctrlWord);
+	writeA24D32(ICS110B_CLOCK_OFFSET,ctrlWord);
 #endif
 	Ics110blModule::sleep(0.170);
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D32_write(cardFD, cardBase + ICS110B_CLOCK_OFFSET, foxWord); 	/* Writting out the word */
 #else
-	VmeModule::writeA24D32(ICS110B_CLOCK_OFFSET,foxWord);
+	writeA24D32(ICS110B_CLOCK_OFFSET,foxWord);
 #endif
 	Ics110blModule::sleep(0.170);
 
@@ -98,7 +102,7 @@ void Ics110blModule::programFoxRate(uint32_t foxWord) {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D32_write(cardFD, cardBase + ICS110B_CLOCK_OFFSET, ctrlWord);	/* Second control word write out */
 #else
-	VmeModule::writeA24D32(ICS110B_CLOCK_OFFSET,ctrlWord);
+	writeA24D32(ICS110B_CLOCK_OFFSET,ctrlWord);
 #endif
 	Ics110blModule::sleep(0.170);
 
@@ -106,7 +110,7 @@ void Ics110blModule::programFoxRate(uint32_t foxWord) {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D32_write(cardFD, cardBase + ICS110B_CLOCK_OFFSET, ctrlWord);	/* Third control word write out */
 #else
-	VmeModule::writeA24D32(ICS110B_CLOCK_OFFSET,ctrlWord);
+	writeA24D32(ICS110B_CLOCK_OFFSET,ctrlWord);
 #endif
 	Ics110blModule::sleep(0.170);
 }
@@ -120,11 +124,11 @@ void Ics110blModule::programAdcSpi(ICS110B_ADC_SPI *arg) {
 	ctrlWord = 0x8000; /* select device(s) */
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_write(cardFD, cardBase + ICS110B_ADC_SPI_OFFSET, ctrlWord);
 #else
-	VmeModule::writeA24D16(ICS110B_ADC_SPI_OFFSET,ctrlWord);
+	writeA24D16(ICS110B_ADC_SPI_OFFSET,ctrlWord);
 #endif
 	Ics110blModule::sleep(0.5);
 
@@ -132,7 +136,7 @@ void Ics110blModule::programAdcSpi(ICS110B_ADC_SPI *arg) {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D16_write(cardFD, cardBase + ICS110B_ADC_SPI_OFFSET, ctrlWord);
 #else
-	VmeModule::writeA24D16(ICS110B_ADC_SPI_OFFSET,ctrlWord);
+	writeA24D16(ICS110B_ADC_SPI_OFFSET,ctrlWord);
 #endif
 	Ics110blModule::sleep(0.5);
 
@@ -147,7 +151,7 @@ void Ics110blModule::programAdcSpi(ICS110B_ADC_SPI *arg) {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 		status |= vme_A24D16_write(cardFD, cardBase + ICS110B_ADC_SPI_OFFSET, ctrlWord);
 #else
-		VmeModule::writeA24D16(ICS110B_ADC_SPI_OFFSET,ctrlWord);
+		writeA24D16(ICS110B_ADC_SPI_OFFSET,ctrlWord);
 #endif
 		Ics110blModule::sleep(0.5);
 		regAddr++;
@@ -157,7 +161,7 @@ void Ics110blModule::programAdcSpi(ICS110B_ADC_SPI *arg) {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D16_write(cardFD, cardBase + ICS110B_ADC_SPI_OFFSET, ctrlWord);
 #else
-	VmeModule::writeA24D16(ICS110B_ADC_SPI_OFFSET,ctrlWord);
+	writeA24D16(ICS110B_ADC_SPI_OFFSET,ctrlWord);
 #endif
 	Ics110blModule::sleep(0.034);
 }
@@ -245,11 +249,11 @@ void Ics110blModule::resetDemodulator() {
 			| 0x40000000;   /* This routes serial clock to daughter card rather than to other destinations*/
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D32_write(cardFD, cardBase + ICS110B_CLOCK_OFFSET, temp);
 #else
-	VmeModule::writeA24D32(ICS110B_CLOCK_OFFSET,temp);
+	writeA24D32(ICS110B_CLOCK_OFFSET,temp);
 #endif
 	Ics110blModule::sleep(0.175);
 }
@@ -323,11 +327,11 @@ void Ics110blModule::setMaster(int master) {
 	uint16_t data = 0;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeModule::readA24D16(ICS110B_CTRL_OFFSET);
+	data = readA24D16(ICS110B_CTRL_OFFSET);
 #endif
 
 	if (master) {
@@ -339,7 +343,7 @@ void Ics110blModule::setMaster(int master) {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeModule::writeA24D16(ICS110B_CTRL_OFFSET,data);
+	writeA24D16(ICS110B_CTRL_OFFSET,data);
 #endif
 
 }
@@ -348,11 +352,11 @@ void Ics110blModule::setAcquisitionTriggerSource(int src) {
 	uint16_t data = 0;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeModule::readA24D16(ICS110B_CTRL_OFFSET);
+	data = readA24D16(ICS110B_CTRL_OFFSET);
 #endif
 
 	if(src == ICS110B_INTERNAL) {
@@ -364,7 +368,7 @@ void Ics110blModule::setAcquisitionTriggerSource(int src) {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeModule::writeA24D16(ICS110B_CTRL_OFFSET,data);
+	writeA24D16(ICS110B_CTRL_OFFSET,data);
 #endif
 
 }
@@ -373,11 +377,11 @@ void Ics110blModule::setClockSource(int src) {
 	uint16_t data = 0;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeModule::readA24D16(ICS110B_CTRL_OFFSET);
+	data = readA24D16(ICS110B_CTRL_OFFSET);
 #endif
 
 	if(src == ICS110B_INTERNAL) {
@@ -389,7 +393,7 @@ void Ics110blModule::setClockSource(int src) {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeModule::writeA24D16(ICS110B_CTRL_OFFSET,data);
+	writeA24D16(ICS110B_CTRL_OFFSET,data);
 #endif
 
 }
@@ -398,11 +402,11 @@ void Ics110blModule::setOutputMode(uint16_t mode) {
 	uint16_t data = 0;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeModule::readA24D16(ICS110B_CTRL_OFFSET);
+	data = readA24D16(ICS110B_CTRL_OFFSET);
 #endif
 
 	mode &= 0x7;
@@ -414,7 +418,7 @@ void Ics110blModule::setOutputMode(uint16_t mode) {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeModule::writeA24D16(ICS110B_CTRL_OFFSET,data);
+	writeA24D16(ICS110B_CTRL_OFFSET,data);
 #endif
 
 }
@@ -424,11 +428,11 @@ void Ics110blModule::setClockSelect(int clk) {
 
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeModule::readA24D16(ICS110B_CTRL_OFFSET);
+	data = readA24D16(ICS110B_CTRL_OFFSET);
 #endif
 
 	if(clk == ICS110B_INTERNAL) {
@@ -440,7 +444,7 @@ void Ics110blModule::setClockSelect(int clk) {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeModule::writeA24D16(ICS110B_CTRL_OFFSET,data);
+	writeA24D16(ICS110B_CTRL_OFFSET,data);
 #endif
 
 }
@@ -449,11 +453,11 @@ void Ics110blModule::setOversamplingRate(uint8_t rate) {
 	uint16_t data = 0;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeModule::readA24D16(ICS110B_CTRL_OFFSET);
+	data = readA24D16(ICS110B_CTRL_OFFSET);
 #endif
 
 	if(rate == ICS110B_X64) {
@@ -465,7 +469,7 @@ void Ics110blModule::setOversamplingRate(uint8_t rate) {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeModule::writeA24D16(ICS110B_CTRL_OFFSET,data);
+	writeA24D16(ICS110B_CTRL_OFFSET,data);
 #endif
 
 }
@@ -481,22 +485,14 @@ void Ics110blModule::setChannelsPerFrame(uint8_t ch) {
 	data -= 1;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_write(cardFD,cardBase + ICS110B_NUM_CHANS_OFFSET,data);
 #else
-	VmeModule::writeA24D16(ICS110B_NUM_CHANS_OFFSET,data);
+	writeA24D16(ICS110B_NUM_CHANS_OFFSET,data);
 #endif
 
 	channelsPerFrame = ch;
-}
-
-uint8_t Ics110blModule::getChannelsPerFrame() const {
-	return channelsPerFrame;
-}
-
-double Ics110blModule::getFrameRate() const {
-	return trueFrameRate;
 }
 
 void Ics110blModule::setHPF(int overSamplingRate, bool isEnabled) {
@@ -533,8 +529,8 @@ void Ics110blModule::readFifo(uint32_t *buffer,
 	uint32_t cardBase;
 	int status = 0;
 
-	cardBase = VmeModule::getVmeBaseAddr();
-	cardFD = VmeModule::getCrate().getFd();
+	cardBase = vmeBaseAddr;
+	cardFD = crate.getFd();
 
 	status = vme_A24BLT32FIFO_read(cardFD,cardBase+ICS110B_FIFO_OFFSET,buffer,wordsRequested,wordsRead);
 
@@ -554,11 +550,11 @@ void Ics110blModule::reset() {
 	 */
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_write(cardFD,cardBase + ICS110B_STAT_RESET_OFFSET,data);
 #else
-	VmeModule::writeA24D16(ICS110B_STAT_RESET_OFFSET,data);
+	writeA24D16(ICS110B_STAT_RESET_OFFSET,data);
 #endif
 }
 
@@ -566,11 +562,11 @@ void Ics110blModule::resetFifo() {
 	uint16_t data = 0;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD,cardBase + ICS110B_STAT_RESET_OFFSET,&data);
 #else
-	data = VmeModule::readA24D16(ICS110B_STAT_RESET_OFFSET);
+	data = readA24D16(ICS110B_STAT_RESET_OFFSET);
 #endif
 
 	data |= ICS110B_FIFO_RESET;
@@ -578,60 +574,51 @@ void Ics110blModule::resetFifo() {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_STAT_RESET_OFFSET,data);
 #else
-	VmeModule::writeA24D16(ICS110B_STAT_RESET_OFFSET,data);
+	writeA24D16(ICS110B_STAT_RESET_OFFSET,data);
 #endif
 
 }
 
 void Ics110blModule::setIrqVector(uint8_t vector) {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_write(cardFD,cardBase + ICS110B_IVECT_OFFSET,(uint16_t)vector);
 #else
-	VmeModule::writeA24D16(ICS110B_IVECT_OFFSET,(uint16_t)vector);
+	writeA24D16(ICS110B_IVECT_OFFSET,(uint16_t)vector);
 #endif
-	VmeModule::setIrqVector(vector);
+	setIrqVector(vector);
 }
 
-uint8_t Ics110blModule::getIrqVector() {
+uint8_t Ics110blModule::getIrqVector() const {
 	uint16_t vector;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD,cardBase + ICS110B_IVECT_OFFSET,&vector);
 #else
-	vector = VmeModule::readA24D16(ICS110B_IVECT_OFFSET);
+	vector = readA24D16(ICS110B_IVECT_OFFSET);
 #endif
 
 	return (uint8_t)vector;
-}
-
-/** The VME IRQ level is set via jumper and not accessible from software */
-void Ics110blModule::setIrqLevel(uint8_t level) {
-	VmeModule::setIrqLevel(level);
-}
-
-uint8_t Ics110blModule::getIrqLevel() const {
-	return VmeModule::getIrqLevel();
 }
 
 void Ics110blModule::enableInterrupt() {
 	uint16_t data = 0;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeModule::readA24D16(ICS110B_CTRL_OFFSET);
+	data = readA24D16(ICS110B_CTRL_OFFSET);
 #endif
 	data |= ICS110B_VME_INT_ENABLE;
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeModule::writeA24D16(ICS110B_CTRL_OFFSET,data);
+	writeA24D16(ICS110B_CTRL_OFFSET,data);
 #endif
 }
 
@@ -639,17 +626,17 @@ void Ics110blModule::disableInterrupt() {
 	uint16_t data = 0;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeModule::readA24D16(ICS110B_CTRL_OFFSET);
+	data = readA24D16(ICS110B_CTRL_OFFSET);
 #endif
 	data &= ~ICS110B_VME_INT_ENABLE;
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeModule::writeA24D16(ICS110B_CTRL_OFFSET,data);
+	writeA24D16(ICS110B_CTRL_OFFSET,data);
 #endif
 }
 
@@ -657,11 +644,11 @@ void Ics110blModule::startAcquisition() {
 	uint16_t data = 0;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeModule::readA24D16(ICS110B_CTRL_OFFSET);
+	data = readA24D16(ICS110B_CTRL_OFFSET);
 #endif
 
 	data |= 1;
@@ -669,19 +656,20 @@ void Ics110blModule::startAcquisition() {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeModule::writeA24D16(ICS110B_CTRL_OFFSET,data);
+	writeA24D16(ICS110B_CTRL_OFFSET,data);
 #endif
+	acquiring = true;
 }
 
 void Ics110blModule::stopAcquisition() {
 	uint16_t data = 0;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD,cardBase + ICS110B_CTRL_OFFSET,&data);
 #else
-	data = VmeModule::readA24D16(ICS110B_CTRL_OFFSET);
+	data = readA24D16(ICS110B_CTRL_OFFSET);
 #endif
 
 	data &= ~1;
@@ -689,19 +677,20 @@ void Ics110blModule::stopAcquisition() {
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 	status |= vme_A24D16_write(cardFD,cardBase + ICS110B_CTRL_OFFSET,data);
 #else
-	VmeModule::writeA24D16(ICS110B_CTRL_OFFSET,data);
+	writeA24D16(ICS110B_CTRL_OFFSET,data);
 #endif
+	acquiring = false;
 }
 
 uint16_t Ics110blModule::getStatus() {
 	uint16_t data;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD,cardBase + ICS110B_STAT_RESET_OFFSET,&data);
 #else
-	data = VmeModule::readA24D16(ICS110B_STAT_RESET_OFFSET);
+	data = readA24D16(ICS110B_STAT_RESET_OFFSET);
 #endif
 
 	return data &= 0x00CF;
@@ -711,11 +700,11 @@ bool Ics110blModule::isFifoEmpty() {
 	uint16_t data = 0;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD, cardBase + ICS110B_STAT_RESET_OFFSET, &data);
 #else
-	data = VmeModule::readA24D16(ICS110B_STAT_RESET_OFFSET);
+	data = readA24D16(ICS110B_STAT_RESET_OFFSET);
 #endif
 
 	return ((data&ICS110B_FIFO_EMPTY)==ICS110B_FIFO_EMPTY);
@@ -725,11 +714,11 @@ bool Ics110blModule::isFifoFull() {
 	uint16_t data = 0;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD, cardBase + ICS110B_STAT_RESET_OFFSET, &data);
 #else
-	data = VmeModule::readA24D16(ICS110B_STAT_RESET_OFFSET);
+	data = readA24D16(ICS110B_STAT_RESET_OFFSET);
 #endif
 
 	return ((data&ICS110B_FIFO_FULL)==ICS110B_FIFO_FULL);
@@ -739,11 +728,11 @@ bool Ics110blModule::isFifoHalfFull() {
 	uint16_t data = 0;
 
 #ifndef ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
-	uint32_t cardBase = VmeModule::getVmeBaseAddr();
-	int cardFD = VmeModule::getCrate().getFd();
+	uint32_t cardBase = vmeBaseAddr;
+	int cardFD = crate.getFd();
 	int status = vme_A24D16_read(cardFD, cardBase + ICS110B_STAT_RESET_OFFSET, &data);
 #else
-	data = VmeModule::readA24D16(ICS110B_STAT_RESET_OFFSET);
+	data = readA24D16(ICS110B_STAT_RESET_OFFSET);
 #endif
 
 	return ((data&ICS110B_FIFO_HALF_FULL)==ICS110B_FIFO_HALF_FULL);

@@ -5,18 +5,18 @@
 PGMS=${ARCH}/orbitcontroller.obj
 INCLUDE_DIR=../include
 # C source names, if any, go here -- minus the .c
-C_PIECES+=AdcReaderThread 
-C_PIECES+=OrbitControllerUtils 
-C_PIECES+=OrbitControllerIrq
-C_PIECES+=DataHandler
-C_PIECES+=PSController
+#C_PIECES+=AdcReaderThread 
+#C_PIECES+=OrbitControllerUtils 
+#C_PIECES+=OrbitControllerIrq
+#C_PIECES+=DataHandler
+#C_PIECES+=PSController
 
 C_FILES=$(C_PIECES:%=%.c)
 C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
 
 # C++ source names, if any, go here -- minus the .cc
 CC_PIECES=VmeCrate VmeModule Ics110blModule Vmic2536Module
-CC_PIECES+=StartApp
+CC_PIECES+=StartApp AdcReader OrbitController
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
@@ -26,6 +26,7 @@ H_PIECES+=${INCLUDE_DIR}/AdcReaderThread ${INCLUDE_DIR}/OrbitController
 H_PIECES+=${INCLUDE_DIR}/DataHandler ${INCLUDE_DIR}/PSController
 H_PIECES+=${INCLUDE_DIR}/VmeCrate ${INCLUDE_DIR}/VmeModule
 H_PIECES+=${INCLUDE_DIR}/Ics110blModule ${INCLUDE_DIR}/Vmic2536Module
+H_PIECES+=${INCLUDE_DIR}/AdcReader ${INCLUDE_DIR}/OrbitController
 H_FILES=$(H_PIECES:%=%.h)
 
 # Assembly source names, if any, go here -- minus the .S

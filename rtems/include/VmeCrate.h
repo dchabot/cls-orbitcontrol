@@ -22,9 +22,9 @@ public:
 	uint32_t getA24BaseAddr() const;
 	uint32_t getA32BaseAddr() const;
 private:
-//default and copy-constructors are private
 	VmeCrate();
 	VmeCrate(const VmeCrate&);
+	const VmeCrate& operator=(const VmeCrate&);
 	uint32_t id;
 	int fd;
 	uint32_t a16BaseAddr;

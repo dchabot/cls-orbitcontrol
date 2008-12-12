@@ -11,21 +11,20 @@
 #include <VmeCrate.h>
 #include <stdint.h>
 
-
+/* An abstract base-class */
 class VmeModule {
 public:
 	VmeModule(VmeCrate& c, uint32_t vmeAddr);
 	virtual ~VmeModule();
 //these will probably have to access hardware:
 //thus, we force subclasses to override and forbid any VmeModule instances.
-	virtual uint8_t getIrqLevel() const;
-	virtual void setIrqLevel(uint8_t irqLevel);
-	virtual uint8_t getIrqVector() const;
-	virtual void setIrqVector(uint8_t irqVector);
+	virtual uint8_t getIrqLevel() const = 0;
+	virtual void setIrqLevel(uint8_t irqLevel)=0;
+	virtual uint8_t getIrqVector() const = 0;
+	virtual void setIrqVector(uint8_t irqVector)=0;
 
 //class-attribute accessors
-	VmeCrate & getCrate() const;
-	void setCrate(VmeCrate & crate);
+	VmeCrate& getCrate() const;
 	char *getName() const;
 	void setName(char *name);
 	const char *getType() const;
@@ -41,31 +40,27 @@ public:
 	uint32_t getPcA32BaseAddr() const;
 	void setPcA32BaseAddr(uint32_t pcA32BaseAddr);
 //VME A32 single-cycle accessors
-	void writeA32D32(uint32_t offset, uint32_t val);
-	void writeA32D16(uint32_t offset, uint16_t val);
-	void writeA32D8(uint32_t offset, uint8_t val);
-	uint32_t readA32D32(uint32_t offset);
-	uint16_t readA32D16(uint32_t offset);
-	uint8_t	 readA32D8(uint32_t offset);
+	void writeA32D32(uint32_t offset, uint32_t val) const;
+	void writeA32D16(uint32_t offset, uint16_t val) const;
+	void writeA32D8(uint32_t offset, uint8_t val) const;
+	uint32_t readA32D32(uint32_t offset) const;
+	uint16_t readA32D16(uint32_t offset) const;
+	uint8_t	 readA32D8(uint32_t offset) const;
 //VME A24 single-cycle accessors
-	void writeA24D32(uint32_t offset, uint32_t val);
-	void writeA24D16(uint32_t offset, uint16_t val);
-	void writeA24D8(uint32_t offset, uint8_t val);
-	uint32_t readA24D32(uint32_t offset);
-	uint16_t readA24D16(uint32_t offset);
-	uint8_t	 readA24D8(uint32_t offset);
+	void writeA24D32(uint32_t offset, uint32_t val) const;
+	void writeA24D16(uint32_t offset, uint16_t val) const;
+	void writeA24D8(uint32_t offset, uint8_t val) const;
+	uint32_t readA24D32(uint32_t offset) const;
+	uint16_t readA24D16(uint32_t offset) const;
+	uint8_t	 readA24D8(uint32_t offset) const;
 //VME A16 single-cycle accessors
-	void writeA16D32(uint32_t offset, uint32_t val);
-	void writeA16D16(uint32_t offset, uint16_t val);
-	void writeA16D8(uint32_t offset, uint8_t val);
-	uint32_t readA16D32(uint32_t offset);
-	uint16_t readA16D16(uint32_t offset);
-	uint8_t	 readA16D8(uint32_t offset);
-
-private:
-// default and copy-constructors are private
-	VmeModule();
-	VmeModule(const VmeModule&);
+	void writeA16D32(uint32_t offset, uint32_t val) const;
+	void writeA16D16(uint32_t offset, uint16_t val) const;
+	void writeA16D8(uint32_t offset, uint8_t val) const;
+	uint32_t readA16D32(uint32_t offset) const;
+	uint16_t readA16D16(uint32_t offset) const;
+	uint8_t	 readA16D8(uint32_t offset) const;
+protected:
 	VmeCrate& crate;
 	char *name;
 	const char *type;
@@ -76,16 +71,16 @@ private:
 	uint32_t pcA32BaseAddr;
 	uint8_t irqLevel;
 	uint8_t irqVector;
+private:
+// default and copy-constructors are private
+	VmeModule();
+	VmeModule(const VmeModule&);
 };
 
 
 //class-attribute accessors
 inline VmeCrate& VmeModule::getCrate() const {
    return crate;
-}
-
-inline void VmeModule::setCrate(VmeCrate& crate) {
-   this->crate = crate;
 }
 
 inline char* VmeModule::getName() const {
@@ -161,77 +156,77 @@ inline void VmeModule::setIrqVector(uint8_t vector) {
 }
 
 //VME A32 space single-cycle read/write definitions
-inline void VmeModule::writeA32D32(uint32_t offset, uint32_t val) {
+inline void VmeModule::writeA32D32(uint32_t offset, uint32_t val)  const{
 	*(volatile uint32_t *)(pcA32BaseAddr + vmeBaseAddr + offset) = (val);
 }
 
-inline void VmeModule::writeA32D16(uint32_t offset, uint16_t val) {
+inline void VmeModule::writeA32D16(uint32_t offset, uint16_t val)  const{
 	*(volatile uint16_t *)(pcA32BaseAddr + vmeBaseAddr + offset) = (val);
 }
 
-inline void VmeModule::writeA32D8(uint32_t offset, uint8_t val) {
+inline void VmeModule::writeA32D8(uint32_t offset, uint8_t val)  const{
 	*(volatile uint8_t *)(pcA32BaseAddr + vmeBaseAddr + offset) = (val);
 }
 
-inline uint32_t VmeModule::readA32D32(uint32_t offset) {
+inline uint32_t VmeModule::readA32D32(uint32_t offset)  const{
 	return *(volatile uint32_t *)(pcA32BaseAddr + vmeBaseAddr + offset);
 }
 
-inline uint16_t VmeModule::readA32D16(uint32_t offset) {
+inline uint16_t VmeModule::readA32D16(uint32_t offset)  const{
 	return *(volatile uint16_t *)(pcA32BaseAddr + vmeBaseAddr + offset);
 }
 
-inline uint8_t VmeModule::readA32D8(uint32_t offset) {
+inline uint8_t VmeModule::readA32D8(uint32_t offset)  const{
 	return *(volatile uint8_t *)(pcA32BaseAddr + vmeBaseAddr + offset);
 }
 
 //VME A24 space single-cycle read/write definitions
-inline void VmeModule::writeA24D32(uint32_t offset, uint32_t val) {
+inline void VmeModule::writeA24D32(uint32_t offset, uint32_t val)  const{
 	*(volatile uint32_t *)(pcA24BaseAddr + vmeBaseAddr + offset) = (val);
 }
 
-inline void VmeModule::writeA24D16(uint32_t offset, uint16_t val) {
+inline void VmeModule::writeA24D16(uint32_t offset, uint16_t val)  const{
 	*(volatile uint16_t *)(pcA24BaseAddr + vmeBaseAddr + offset) = (val);
 }
 
-inline void VmeModule::writeA24D8(uint32_t offset, uint8_t val) {
+inline void VmeModule::writeA24D8(uint32_t offset, uint8_t val)  const{
 	*(volatile uint8_t *)(pcA24BaseAddr + vmeBaseAddr + offset) = (val);
 }
 
-inline uint32_t VmeModule::readA24D32(uint32_t offset) {
+inline uint32_t VmeModule::readA24D32(uint32_t offset)  const{
 	return *(volatile uint32_t *)(pcA24BaseAddr + vmeBaseAddr + offset);
 }
 
-inline uint16_t VmeModule::readA24D16(uint32_t offset) {
+inline uint16_t VmeModule::readA24D16(uint32_t offset) const {
 	return *(volatile uint16_t *)(pcA24BaseAddr + vmeBaseAddr + offset);
 }
 
-inline uint8_t VmeModule::readA24D8(uint32_t offset) {
+inline uint8_t VmeModule::readA24D8(uint32_t offset)  const{
 	return *(volatile uint8_t *)(pcA24BaseAddr + vmeBaseAddr + offset);
 }
 
 //VME A16 space single-cycle read/write definitions
-inline void VmeModule::writeA16D32(uint32_t offset, uint32_t val) {
+inline void VmeModule::writeA16D32(uint32_t offset, uint32_t val)  const{
 	*(volatile uint32_t *)(pcA16BaseAddr + vmeBaseAddr + offset) = (val);
 }
 
-inline void VmeModule::writeA16D16(uint32_t offset, uint16_t val) {
+inline void VmeModule::writeA16D16(uint32_t offset, uint16_t val)  const{
 	*(volatile uint16_t *)(pcA16BaseAddr + vmeBaseAddr + offset) = (val);
 }
 
-inline void VmeModule::writeA16D8(uint32_t offset, uint8_t val) {
+inline void VmeModule::writeA16D8(uint32_t offset, uint8_t val)  const{
 	*(volatile uint8_t *)(pcA16BaseAddr + vmeBaseAddr + offset) = (val);
 }
 
-inline uint32_t VmeModule::readA16D32(uint32_t offset) {
+inline uint32_t VmeModule::readA16D32(uint32_t offset)  const{
 	return *(volatile uint32_t *)(pcA16BaseAddr + vmeBaseAddr + offset);
 }
 
-inline uint16_t VmeModule::readA16D16(uint32_t offset) {
+inline uint16_t VmeModule::readA16D16(uint32_t offset)  const{
 	return *(volatile uint16_t *)(pcA16BaseAddr + vmeBaseAddr + offset);
 }
 
-inline uint8_t VmeModule::readA16D8(uint32_t offset) {
+inline uint8_t VmeModule::readA16D8(uint32_t offset)  const{
 	return *(volatile uint8_t *)(pcA16BaseAddr + vmeBaseAddr + offset);
 }
 

@@ -44,7 +44,7 @@ public:
 	void resetFifo();
 //these are impls of the virtual methods in VmeModule:
 	void setIrqVector(uint8_t vector);
-	uint8_t getIrqVector();
+	uint8_t getIrqVector() const;
 	void setIrqLevel(uint8_t level);
 	uint8_t getIrqLevel() const;
 //
@@ -56,14 +56,44 @@ public:
 	bool isFifoEmpty();
 	bool isFifoFull();
 	bool isFifoHalfFull();
+	bool isInitialized() const;
+	bool isAcquiring() const;
+
 private:
 	Ics110blModule();
 	Ics110blModule(Ics110blModule&);
+
 	static void sleep(double secs);
 	double trueFrameRate;//in kHz
 	static const double crossoverFrameRate = 54.0; /* kHz. Where oversampling rate is cut in half (128x->64x) */
 	uint8_t channelsPerFrame;//[2,32] mod(2)
 	uint8_t overSamplingRate; //either 64 or 128 times...
+	bool initialized;
+	bool acquiring;
 };
 
+/** The VME IRQ level is set via jumper and not accessible from software */
+inline void Ics110blModule::setIrqLevel(uint8_t level) {
+	irqLevel = level;
+}
+
+inline uint8_t Ics110blModule::getIrqLevel() const {
+	return irqLevel;
+}
+
+inline uint8_t Ics110blModule::getChannelsPerFrame() const {
+	return channelsPerFrame;
+}
+
+inline double Ics110blModule::getFrameRate() const {
+	return trueFrameRate;
+}
+
+inline bool Ics110blModule::isInitialized() const {
+	return initialized;
+}
+
+inline bool Ics110blModule::isAcquiring() const {
+	return acquiring;
+}
 #endif /* ICS110BLMODULE_H_ */
