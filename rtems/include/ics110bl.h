@@ -25,7 +25,7 @@ extern "C" {
 
 /* XXX -- documentation is WRONG; fifo length is 1024*32, NOT 1024*64 words.
  * Unless, they mean 64 kWords where a "word" is 2 bytes... marketing @ssh0lz...*/
-#define HALF_FIFO_LENGTH 16256 /* 16 kWords; word-size is 4 bytes */
+#define HALF_FIFO_LENGTH 16*1024 /* 16 kWords; word-size is 4 bytes */
 
 #define ICS110B_DEFAULT_CHANNELS_PER_FRAME	32
 

@@ -39,7 +39,7 @@ public:
 	uint8_t getChannelsPerFrame() const;
 	double getFrameRate() const;
 	void setHPF(int overSamplingRate, bool isEnabled);
-	void readFifo(uint32_t* buffer, uint32_t wordsRequested, uint32_t* wordsRead) const;
+	int readFifo(uint32_t* buffer, uint32_t wordsRequested, uint32_t* wordsRead) const;
 	void reset();
 	void resetFifo();
 //these are impls of the virtual methods in VmeModule:

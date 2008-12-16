@@ -21,10 +21,11 @@ public:
 	AdcReader(Ics110blModule& adc);
 	virtual ~AdcReader();
 	void start(rtems_task_argument);
-	rtems_id getQueueId() const;
 	void read(RawDataSegment* ds);
 	int getInstance() const;
 	rtems_id getThreadId() const;
+	rtems_id getBarrierId() const;
+	void setBarrierId(rtems_id bid);
 
 private:
 	AdcReader();
@@ -40,15 +41,19 @@ private:
 	rtems_task_priority priority;
 	rtems_id tid;
 	rtems_name threadName;
-	rtems_id qid;
-	rtems_name queueName;
 	rtems_id barrierId;
 	int instance;
 	Ics110blModule& adc;
+	static const rtems_event_set readEvent=1;
+	RawDataSegment *ds;
 };
 
 
-inline rtems_id AdcReader::getQueueId() const {
-	return qid;
+inline rtems_id AdcReader::getBarrierId() const {
+	return barrierId;
+}
+
+inline void AdcReader::setBarrierId(rtems_id bid) {
+	barrierId = bid;
 }
 #endif /* ADCREADER_H_ */

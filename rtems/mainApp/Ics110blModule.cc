@@ -522,17 +522,16 @@ void Ics110blModule::setHPF(int overSamplingRate, bool isEnabled) {
 
 }
 
-void Ics110blModule::readFifo(uint32_t *buffer,
+int Ics110blModule::readFifo(uint32_t *buffer,
 								uint32_t wordsRequested,
 								uint32_t *wordsRead) const {
 	int cardFD;
 	uint32_t cardBase;
-	int status = 0;
 
 	cardBase = vmeBaseAddr;
 	cardFD = crate.getFd();
 
-	status = vme_A24BLT32FIFO_read(cardFD,cardBase+ICS110B_FIFO_OFFSET,buffer,wordsRequested,wordsRead);
+	return vme_A24BLT32FIFO_read(cardFD,cardBase+ICS110B_FIFO_OFFSET,buffer,wordsRequested,wordsRead);
 
 }
 
