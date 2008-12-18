@@ -7,6 +7,7 @@
 
 #include "DataHandler.h"
 #include "OrbitController.h"
+#include <OrbitControlException.h>
 #include <iostream>
 #include <syslog.h>
 #include <utils.h>
@@ -52,7 +53,7 @@ void DataHandler::enqueRawData(RawDataSegment *ds) const {
 	rtems_status_code rc;
 	rc = rtems_message_queue_send(inpQueueId, ds, sizeof(RawDataSegment)*NumAdcModules);
 	if(TestDirective(rc, "DataHandler--rtems_message_queue_send()-->RawDataQueue")<0) {
-		throw "DataHandler: enque failure!!\n";
+		throw OrbitControlException("DataHandler: enque failure!!",rc);
 	}
 }
 
@@ -67,7 +68,7 @@ void DataHandler::start(rtems_task_argument arg) {
 							RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),
 							&tid);
 	if(TestDirective(rc, "Data Handler -- rtems_task_create()")) {
-		throw "DataHandler: problem creating task!!\n";
+		throw OrbitControlException("DataHandler: problem creating task!!",rc);
 	}
 	/* raw-data queue: fed by OrbitController */
 	inpQueueName = rtems_build_name('D','H','I','q');
@@ -77,14 +78,14 @@ void DataHandler::start(rtems_task_argument arg) {
 									RTEMS_LOCAL|RTEMS_FIFO,
 									&inpQueueId);
 	if(TestDirective(rc, "DataHandler -- rtems_message_queue_create()")) {
-		throw "DataHandler: problem creating msq queue!!\n";
+		throw OrbitControlException("DataHandler: problem creating msq queue!!",rc);
 	}
 
 	this->arg = arg;
 	rc = rtems_task_start(tid,threadStart,(rtems_task_argument)this);
 	if(rc != RTEMS_SUCCESSFUL) {
 		syslog(LOG_INFO, "Failed to start DataHandler thread: %s\n",rtems_status_text(rc));
-		throw "Couldn't start DataHandler thread!!!\n";
+		throw OrbitControlException("Couldn't start DataHandler thread!!!",rc);
 	}
 	syslog(LOG_INFO, "Started DataHandler with priority %d\n",priority);
 

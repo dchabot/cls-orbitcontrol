@@ -8,13 +8,20 @@
 #ifndef ORBITCONTROLEXCEPTION_H_
 #define ORBITCONTROLEXCEPTION_H_
 
+#include <syslog.h>
 #include <stdexcept>
 using std::runtime_error;
 using std::string;
 
 class OrbitControlException : public runtime_error {
 public:
-	OrbitControlException(const string& msg = "") : runtime_error(msg) {}
+	OrbitControlException(const string& msg = "", int rc=0)
+	: runtime_error(msg),returncode(rc)
+	{
+		syslog(LOG_INFO, "\n\n%s rc=%d\n\n",msg.c_str(),returncode);
+	}
+private:
+	int returncode;
 };
 
 #endif /* ORBITCONTROLEXCEPTION_H_ */

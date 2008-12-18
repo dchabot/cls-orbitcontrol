@@ -10,6 +10,7 @@
 
 #include <VmeCrate.h>
 #include <Ics110blModule.h>
+#include <Vmic2536Module.h>
 #include <AdcReader.h>
 #include <AdcIsr.h>
 #include <AdcData.h>
@@ -20,7 +21,7 @@
 #include <rtems.h>
 #include <stdint.h>
 
-
+using std::vector;
 
 
 const rtems_task_priority OrbitControllerPriority=50;
@@ -32,9 +33,17 @@ class OrbitController {
 public:
 	OrbitController();
 	~OrbitController();
-	void start();
+	void start(rtems_task_argument arg);
 
 private:
+	void startAdcAcquisition();
+	void stopAdcAcquisition();
+	void resetAdcFifos();
+	void enableAdcInterrupts();
+
+	void rendezvousWithIsr();
+	void rendezvousWithAdcReaders();
+
 	/* we need a static method here 'cause we need to omit the "this"
 	 * pointer from rtems_task_start(tid,threadStart,arg), a native c-function.
 	 */
@@ -53,11 +62,12 @@ private:
 	rtems_id rdrBarrierId;
 	rtems_name rdrBarrierName;
 
-	std::vector<VmeCrate*> crateArray;
-	std::vector<Ics110blModule*> adcArray;
-	std::vector<AdcIsr*> isrArray;
-	std::vector<AdcReader*> rdrArray;
-	std::vector<AdcData*> rdSegments;
+	vector<VmeCrate*> crateArray;
+	vector<Ics110blModule*> adcArray;
+	vector<Vmic2536Module*> dioArray;
+	vector<AdcIsr*> isrArray;
+	vector<AdcReader*> rdrArray;
+	vector<AdcData*> rdSegments;
 };
 
 #endif /* ORBITCONTROLLER_H_ */

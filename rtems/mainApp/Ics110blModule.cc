@@ -5,6 +5,7 @@
  *      Author: djc
  */
 
+#include <OrbitControlException.h>
 #include <Ics110blModule.h>
 #include <rtems.h>
 #include <sis1100_api.h>
@@ -286,10 +287,10 @@ void Ics110blModule::calcFoxWord(double *reqRate, long  *progWord) {
 	}
 
 	if (m == 8) {
-		throw "ICS110BL: Frame rate too low!!\n";
+		throw OrbitControlException("ICS110BL: Frame rate too low!!");
 	} else {
 		if (fvco > freqRange[tabLen]) {
-			throw "ICS110BL: Frame rate too high!!\n";
+			throw OrbitControlException("ICS110BL: Frame rate too high!!");
 		}
 	}
 
@@ -486,7 +487,7 @@ void Ics110blModule::setChannelsPerFrame(uint8_t ch) {
 	if((data%2 != 0) || (data > 32) || (data < 2)) {
 		string err("2 < numChannels < 32 and divisible by 2\n");
 		syslog(LOG_INFO, "%s",err.c_str());
-		throw err.c_str();
+		throw OrbitControlException(err.c_str());
 	}
 	data -= 1;
 
@@ -520,7 +521,7 @@ void Ics110blModule::setHPF(int overSamplingRate, bool isEnabled) {
 		}
 		default: {
 			syslog(LOG_INFO,"Ics110blModule::enableHPF: invalid oversampling option=%i\n",overSamplingRate);
-			throw "Ics110blModule::enableHPF: invalid overSamplingRate\n";
+			throw OrbitControlException("Ics110blModule::enableHPF: invalid overSamplingRate");
 		}
 	} /* end switch() */
 

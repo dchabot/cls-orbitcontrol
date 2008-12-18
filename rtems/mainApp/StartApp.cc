@@ -16,6 +16,10 @@
 #include "OrbitController.h"
 #include <OrbitControlException.h>
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 /* to avoid c++ name-mangling, make this callable from "c"... */
 extern "C" void startApp() {
 
@@ -45,12 +49,13 @@ extern "C" void startApp() {
 		dh->destroyInstance();*/
 
 		OrbitController *oc = new OrbitController();
-		rtems_task_wake_after(10000);
+		oc->start(0);
+		rtems_task_wake_after(5000);
 		delete oc;
 		throw OrbitControlException("This is a test of OrbitControlExceptions!!\n");
 	}
 	catch(OrbitControlException& ex) {
-		syslog(LOG_INFO, "%s",ex.what());
+		cout << ex.what();
 	}
 	catch(...) {
 		syslog(LOG_INFO,"Caught an exception!!\n");

@@ -9,7 +9,7 @@
 #include <sis1100_api.h>
 #include <syslog.h>
 #include <utils.h>
-
+#include <OrbitControlException.h>
 
 
 AdcIsr::AdcIsr(Ics110blModule* mod, rtems_id id) :
@@ -23,18 +23,18 @@ AdcIsr::AdcIsr(Ics110blModule* mod, rtems_id id) :
 						(void*)this/*handler arg*/);
 	if(rc<0) {
 		syslog(LOG_INFO, "Failed to set ADC Isr, crate# %d\n",adc->getCrate()->getId());
-		throw "Failed to set ADC ISR!!\n";
+		throw OrbitControlException("AdcIsr: vme_set_isr() failed!!",rc);
 	}
 	/* arm the appropriate VME interrupt level at each sis3100 & ADC... */
 	adc->setIrqVector(ICS110B_DEFAULT_IRQ_VECTOR);
 	rc = vme_enable_irq_level(adc->getCrate()->getFd(), adc->getIrqLevel());
 	if(rc<0)
-		throw "Failed to enable interrupts at sis3100!!\n";
+		throw OrbitControlException("AdcIsr: vme_enable_irq_level() failed!!",rc);
 	adc->enableInterrupt();
 }
 
 AdcIsr::~AdcIsr() {
-	int rc = vme_disable_irq_level(adc->getCrate()->getFd(), (1<<adc->getIrqLevel()));
+	int rc = vme_disable_irq_level(adc->getCrate()->getFd(), adc->getIrqLevel());
 	rc |= vme_clr_isr(adc->getCrate()->getFd(), adc->getIrqVector());
 	if(rc) {
 		//DO NOT THROW EXCEPTIONS FROM DTORS !!!!!!!
@@ -43,16 +43,22 @@ AdcIsr::~AdcIsr() {
 	syslog(LOG_INFO, "AdcIsr dtor!!\n");
 }
 
+/***************************** private interface ***********************************/
+/*
+ * NOTE: isr(void*,uint8_t) will be called from a C-func ptr
+ * 		 in a high priority thread!
+ */
 void AdcIsr::isr(void *arg, uint8_t vector) {
 	AdcIsr *parg = (AdcIsr*)arg;
 	rtems_status_code rc;
 
 	/* disable irq on the board*/
 	parg->adc->disableInterrupt();
+	syslog(LOG_INFO, "AdcIsr called!!\n");
 	/* inform the OrbitController of this event*/
 	rc = rtems_barrier_wait(parg->bid,RTEMS_NO_TIMEOUT);
-	if(TestDirective(rc, "AdcIsr -- rtems_barrier_wait()"))
-		throw "AdcIsr -- rtems_barrier_wait()\n";
+	//don't throw() from here:
+	TestDirective(rc, "AdcIsr -- rtems_barrier_wait()");
 }
 
 

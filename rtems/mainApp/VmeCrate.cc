@@ -6,6 +6,7 @@
  */
 
 #include <VmeCrate.h>
+#include <OrbitControlException.h>
 
 #include <stdio.h>
 #include <cstring>
@@ -48,7 +49,7 @@ VmeCrate::VmeCrate(uint32_t crateId) :
 		syslog(LOG_INFO, "%s: %s\n",err.c_str(),strerror(fd));
 		err += ": ";
 		err += strerror(fd);
-		throw err.c_str();
+		throw OrbitControlException(err.c_str());
 	}
 
 	this->fd = fd;
@@ -59,7 +60,7 @@ VmeCrate::VmeCrate(uint32_t crateId) :
 	if(rc) {
 		string err("vme_set_mmap_entry() failure!! ");
 		syslog(LOG_INFO, "%scrate#=%d rc=%d\n",err.c_str(),crateId,rc);
-		throw err.c_str();
+		throw OrbitControlException(err.c_str());
 	}
 	syslog(LOG_INFO, "crate# %d, VME A24 base-address=%p",crateId, a24BaseAddr);
 	/* do a VME System-Reset */

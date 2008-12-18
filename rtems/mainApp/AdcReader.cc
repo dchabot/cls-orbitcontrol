@@ -7,6 +7,7 @@
 
 #include <AdcReader.h>
 #include "OrbitController.h"
+#include <OrbitControlException.h>
 #include <rtems/error.h>
 #include <syslog.h>
 #include <utils.h>
@@ -27,9 +28,8 @@ AdcReader::AdcReader(Ics110blModule* mod, rtems_id bid) :
 							RTEMS_NO_FLOATING_POINT|RTEMS_LOCAL,
 							RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),
 							&tid);
-	if(rc != RTEMS_SUCCESSFUL) {
-		syslog(LOG_INFO, "Failed to create task %d: %s\n",i,rtems_status_text(rc));
-		throw "Couldn't create AdcReader thread!!!\n";
+	if(TestDirective(rc,"AdcReader -- rtems_task_create()")) {
+		throw OrbitControlException("Failed to create task ",rc);
 	}
 	instance = i;
 	i++;
@@ -108,11 +108,9 @@ void AdcReader::start(rtems_task_argument arg) {
 	rtems_status_code rc;
 	this->arg = arg;
 	rc = rtems_task_start(tid,threadStart,(rtems_task_argument)this);
-	if(rc != RTEMS_SUCCESSFUL) {
-		syslog(LOG_INFO, "Failed to start AdcReader %d: %s\n",instance,rtems_status_text(rc));
-		throw "Couldn't start AdcReader!!!\n";
+	if(TestDirective(rc, "AdcReader -- rtems_task_start()")) {
+		throw OrbitControlException("Couldn't start AdcReader!!!",rc);
 	}
-	syslog(LOG_INFO, "Started AdcReader %d with priority %d\n",instance,priority);
 }
 
 /** read() will unblock this AdcReader's thread, triggering
