@@ -16,7 +16,7 @@
 
 class Ics110blModule : public VmeModule {
 public:
-	Ics110blModule(VmeCrate& c, uint32_t vmeAddr);
+	Ics110blModule(VmeCrate* c, uint32_t vmeAddr);
 	virtual ~Ics110blModule();
 
 // FIXME -- make this a class attribute with accessor/mutator:
@@ -61,7 +61,7 @@ public:
 
 private:
 	Ics110blModule();
-	Ics110blModule(Ics110blModule&);
+	Ics110blModule(const Ics110blModule&);
 
 	static void sleep(double secs);
 	double trueFrameRate;//in kHz

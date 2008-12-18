@@ -19,7 +19,7 @@
 #include <utils.h>
 #include <string>
 
-using namespace std;
+using std::string;
 /**
  * Instantiate a new VmeCrate object. Based on the crateId provided,
  * a file descriptor is opened on "/dev/sis1100_crateId".
@@ -55,22 +55,22 @@ VmeCrate::VmeCrate(uint32_t crateId) :
 	//map A24 space into PC memory:
 	int rc = vme_set_mmap_entry(fd, 0x00000000,
 							0x39/*AM*/,0xFF010800/*hdr*/,
-							(1<<24)-1,&(this->a24BaseAddr));
+							(1<<24)-1,&a24BaseAddr);
 	if(rc) {
 		string err("vme_set_mmap_entry() failure!! ");
 		syslog(LOG_INFO, "%scrate#=%d rc=%d\n",err.c_str(),crateId,rc);
 		throw err.c_str();
 	}
-	syslog(LOG_INFO, "crate# %d, VME A24 base-address=%p",crateId, this->a24BaseAddr);
+	syslog(LOG_INFO, "crate# %d, VME A24 base-address=%p",crateId, a24BaseAddr);
 	/* do a VME System-Reset */
 	vmesysreset(fd);
 }
 
 VmeCrate::~VmeCrate() {
-	int rc = vme_clr_mmap_entry(this->fd, &this->a24BaseAddr, (1<<24)-1);
+	int rc = vme_clr_mmap_entry(fd, &a24BaseAddr, (1<<24)-1);
 	if(rc) {
-		syslog(LOG_INFO,"vme_clr_mmap_entry() failure!! crate#=%d rc=%d\n",this->id,rc);
+		syslog(LOG_INFO,"vme_clr_mmap_entry() failure!! crate#=%d rc=%d\n",id,rc);
 	}
-	close(this->fd);
-	syslog(LOG_INFO,"Destroyed crate, id=%d",id);
+	close(fd);
+	syslog(LOG_INFO,"VmeCrate %d dtor!!\n",id);
 }

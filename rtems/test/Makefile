@@ -7,12 +7,12 @@ PGMS=${ARCH}/tests.obj
 # C source names, if any, go here -- minus the .c
 #C_PIECES=readoutTest irqTest mmapTest delayTest
 #C_PIECES+=adcAcquireTest SpawnTask adcFifoTest spinTest
-C_PIECES=dioDemuxTest
+C_PIECES=
 C_FILES=$(C_PIECES:%=%.c)
 C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
 
 # C++ source names, if any, go here -- minus the .cc
-CC_PIECES=
+CC_PIECES=matrixTest adcSumTest
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
@@ -40,8 +40,8 @@ include $(RTEMS_ROOT)/make/leaf.cfg
 #
 # (OPTIONAL) Add local stuff here using +=
 #
-CFLAGS+= -I ../../include 
-
+CFLAGS+= -I ../include 
+CXXFLAGS+=${CFLAGS}
 #
 # Add your list of files to delete here.  The config files
 #  already know how to delete some stuff, so you may want
@@ -60,13 +60,13 @@ $(filter %.obj, $(PGMS)): ${OBJS}
 #	$(RANLIB) o-optimize/libtest.a
 
 ifndef RTEMS_SITE_INSTALLDIR
-RTEMS_SITE_INSTALLDIR = /export/tftpboot/epics/IOC1009-109
+RTEMS_SITE_INSTALLDIR = /home/chabotd/ioc1009-109
 endif
 
 install:  all
-	$(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_MAKEFILE_PATH)/lib
+#	$(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_MAKEFILE_PATH)/lib
 # copy to tftp server bootfile location
-	scp $(PGMS) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
+	$(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_SITE_INSTALLDIR)
 	
 
 

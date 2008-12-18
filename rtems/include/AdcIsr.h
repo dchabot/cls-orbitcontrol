@@ -14,7 +14,7 @@
 class AdcIsr {
 public:
 	AdcIsr(Ics110blModule* mod, rtems_id id);
-	~AdcIsr();
+	virtual ~AdcIsr();
 	rtems_id getBarrierId() const;
 	Ics110blModule* getAdc() const;
 

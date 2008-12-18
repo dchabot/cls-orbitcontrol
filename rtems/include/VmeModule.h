@@ -14,7 +14,7 @@
 /* An abstract base-class */
 class VmeModule {
 public:
-	VmeModule(VmeCrate& c, uint32_t vmeAddr);
+	VmeModule(VmeCrate* c, uint32_t vmeAddr);
 	virtual ~VmeModule();
 //these will probably have to access hardware:
 //thus, we force subclasses to override and forbid any VmeModule instances.
@@ -24,7 +24,7 @@ public:
 	virtual void setIrqVector(uint8_t irqVector)=0;
 
 //class-attribute accessors
-	VmeCrate& getCrate() const;
+	VmeCrate* getCrate() const;
 	char *getName() const;
 	void setName(char *name);
 	const char *getType() const;
@@ -61,7 +61,7 @@ public:
 	uint16_t readA16D16(uint32_t offset) const;
 	uint8_t	 readA16D8(uint32_t offset) const;
 protected:
-	VmeCrate& crate;
+	VmeCrate* crate;
 	char *name;
 	const char *type;
 	uint8_t slot;
@@ -79,7 +79,7 @@ private:
 
 
 //class-attribute accessors
-inline VmeCrate& VmeModule::getCrate() const {
+inline VmeCrate* VmeModule::getCrate() const {
    return crate;
 }
 

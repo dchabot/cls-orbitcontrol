@@ -25,19 +25,19 @@ double XBPM_convFactor[54]= {
 	/*"1402-09:BPMx:val",*/   	1.261,
 	/*"1402-10:BPMx:val",*/   	1.261,
 
-	/*"1403-01:BPMx:val",*/   	1.261,
+	/*"1403-01:BPMx:val",*/   	1.261,/*unused in orbit correction*/
 	/*"1403-02:BPMx:val",*/   	1.261,
 	/*"1403-03:BPMx:val",*/   	1.261,
 	/*"1403-04:BPMx:val",*/   	1.261,
 	/*"1403-05:BPMx:val",*/   	1.261,
 
-	/*"1404-01:BPMx:val",*/   	1.261,
+	/*"1404-01:BPMx:val",*/   	1.261,/*unused in orbit correction*/
 	/*"1404-02:BPMx:val",*/   	1.261,
 	/*"1404-03:BPMx:val",*/   	1.261,
 	/*"1404-04:BPMx:val",*/   	1.261,
 	/*"1404-05:BPMx:val",*/   	1.261,
 
-	/*"1405-01:BPMx:val",*/   	1.261,
+	/*"1405-01:BPMx:val",*/   	1.261,/*unused in orbit correction*/
 	/*"1405-02:BPMx:val",*/   	1.261,
 	/*"1405-03:BPMx:val",*/   	1.261,
 	/*"1405-04:BPMx:val",*/   	1.261,
@@ -48,7 +48,7 @@ double XBPM_convFactor[54]= {
 	/*"1406-04:BPMx:val",*/   	1.261,
 	/*"1406-05:BPMx:val",*/   	1.261,
 
-	/*"1407-01:BPMx:val",*/   	1.261,
+	/*"1407-01:BPMx:val",*/   	1.261,/*unused in orbit correction*/
 	/*"1407-03:BPMx:val",*/   	1.261,
 	/*"1407-04:BPMx:val",*/   	1.261,
 	/*"1407-05:BPMx:val",*/   	1.261,
@@ -60,7 +60,7 @@ double XBPM_convFactor[54]= {
 	/*"1408-04:BPMx:val",*/   	1.261,
 	/*"1408-05:BPMx:val",*/   	1.261,
 
-	/*"1409-01:BPMx:val",*/   	1.261,
+	/*"1409-01:BPMx:val",*/   	1.261,/*unused in orbit correction*/
 	/*"1409-02:BPMx:val",*/   	1.261,
 	/*"1409-03:BPMx:val",*/   	1.261,
 	/*"1409-04:BPMx:val",*/   	1.261,
@@ -72,7 +72,7 @@ double XBPM_convFactor[54]= {
 	/*"1410-04:BPMx:val",*/   	1.261,
 	/*"1410-05:BPMx:val",*/   	1.261,
 
-	/*"1411-01:BPMx:val",*/   	3.17,
+	/*"1411-01:BPMx:val",*/   	3.17,/*unused in orbit correction*/
 	/*"1411-02:BPMx:val",*/   	1.261,
 	/*"1411-03:BPMx:val",*/   	1.261,
 	/*"1411-04:BPMx:val",*/   	1.261,
@@ -96,19 +96,19 @@ double YBPM_convFactor[54]= {
 	/*"1402-09:BPMy:val",*/   	1.152,
 	/*"1402-10:BPMy:val",*/   	1.152,
 
-	/*"1403-01:BPMy:val",*/   	1.152,
+	/*"1403-01:BPMy:val",*/   	1.152,/*unused in orbit correction*/
 	/*"1403-02:BPMy:val",*/   	1.152,
 	/*"1403-03:BPMy:val",*/   	1.152,
 	/*"1403-04:BPMy:val",*/   	1.152,
 	/*"1403-05:BPMy:val",*/   	1.152,
 
-	/*"1404-01:BPMy:val",*/   	1.152,
+	/*"1404-01:BPMy:val",*/   	1.152,/*unused in orbit correction*/
 	/*"1404-02:BPMy:val",*/   	1.152,
 	/*"1404-03:BPMy:val",*/   	1.152,
 	/*"1404-04:BPMy:val",*/   	1.152,
 	/*"1404-05:BPMy:val",*/   	1.152,
 
-	/*"1405-01:BPMy:val",*/   	1.152,
+	/*"1405-01:BPMy:val",*/   	1.152,/*unused in orbit correction*/
 	/*"1405-02:BPMy:val",*/   	1.152,
 	/*"1405-03:BPMy:val",*/   	1.152,
 	/*"1405-04:BPMy:val",*/   	1.152,
@@ -119,7 +119,7 @@ double YBPM_convFactor[54]= {
 	/*"1406-04:BPMy:val",*/   	1.152,
 	/*"1406-05:BPMy:val",*/   	1.152,
 
-	/*"1407-01:BPMy:val",*/   	1.152,
+	/*"1407-01:BPMy:val",*/   	1.152,/*unused in orbit correction*/
 	/*"1407-03:BPMy:val",*/   	1.152,
 	/*"1407-04:BPMy:val",*/   	1.152,
 	/*"1407-05:BPMy:val",*/   	1.152,
@@ -131,7 +131,7 @@ double YBPM_convFactor[54]= {
 	/*"1408-04:BPMy:val",*/   	1.152,
 	/*"1408-05:BPMy:val",*/   	1.152,
 
-	/*"1409-01:BPMy:val",*/   	1.152,
+	/*"1409-01:BPMy:val",*/   	1.152,/*unused in orbit correction*/
 	/*"1409-02:BPMy:val",*/   	1.152,
 	/*"1409-03:BPMy:val",*/   	1.152,
 	/*"1409-04:BPMy:val",*/   	1.152,
@@ -143,7 +143,7 @@ double YBPM_convFactor[54]= {
 	/*"1410-04:BPMy:val",*/   	1.152,
 	/*"1410-05:BPMy:val",*/   	1.152,
 
-	/*"1411-01:BPMy:val",*/   	2.60,
+	/*"1411-01:BPMy:val",*/   	2.60,/*unused in orbit correction*/
 	/*"1411-02:BPMy:val",*/   	1.152,
 	/*"1411-03:BPMy:val",*/   	1.152,
 	/*"1411-04:BPMy:val",*/   	1.152,

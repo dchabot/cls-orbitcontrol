@@ -18,7 +18,7 @@ typedef struct {
 
 class AdcReader {
 public:
-	AdcReader(Ics110blModule& adc);
+	AdcReader(Ics110blModule* adc, rtems_id bid);
 	virtual ~AdcReader();
 	void start(rtems_task_argument);
 	void read(RawDataSegment* ds);
@@ -43,7 +43,7 @@ private:
 	rtems_name threadName;
 	rtems_id barrierId;
 	int instance;
-	Ics110blModule& adc;
+	Ics110blModule* adc;
 	static const rtems_event_set readEvent=1;
 	RawDataSegment *ds;
 };

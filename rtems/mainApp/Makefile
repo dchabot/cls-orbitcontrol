@@ -16,8 +16,9 @@ C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
 
 # C++ source names, if any, go here -- minus the .cc
 CC_PIECES=VmeCrate VmeModule Ics110blModule Vmic2536Module
-CC_PIECES+=StartApp AdcReader OrbitController DataHandler
-CC_PIECES+=AdcIsr
+CC_PIECES+=OrbitController
+CC_PIECES+=StartApp AdcReader DataHandler
+CC_PIECES+=AdcIsr AdcData
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
@@ -28,7 +29,7 @@ H_PIECES+=${INCLUDE_DIR}/DataHandler ${INCLUDE_DIR}/PSController
 H_PIECES+=${INCLUDE_DIR}/VmeCrate ${INCLUDE_DIR}/VmeModule
 H_PIECES+=${INCLUDE_DIR}/Ics110blModule ${INCLUDE_DIR}/Vmic2536Module
 H_PIECES+=${INCLUDE_DIR}/AdcReader ${INCLUDE_DIR}/OrbitController
-H_PIECES+=${INCLUDE_DIR}/AdcDataSegment ${INCLUDE_DIR}/AdcIsr
+H_PIECES+=${INCLUDE_DIR}/AdcData ${INCLUDE_DIR}/AdcIsr
 H_FILES=$(H_PIECES:%=%.h)
 
 # Assembly source names, if any, go here -- minus the .S
@@ -74,8 +75,10 @@ CLOBBER_ADDITIONS +=
 all:	${ARCH} $(SRCS) $(PGMS)
 
 $(filter %.obj, $(PGMS)): ${OBJS}
-	$(LD) -o $(PGMS) -r ${OBJS}
-
+#	$(LD) -o $(PGMS) -r ${OBJS}
+	${CXX} -nostdlib -Wl -r -o ${PGMS} ${OBJS}
+	${SIZE} ${PGMS}
+	 
 install:  all
 #	$(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_MAKEFILE_PATH)/lib
 	$(INSTALL_VARIANT) -m 644 $(PGMS) $(RTEMS_SITE_INSTALLDIR)

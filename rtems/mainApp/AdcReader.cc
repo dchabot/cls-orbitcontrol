@@ -11,10 +11,10 @@
 #include <syslog.h>
 #include <utils.h>
 
-AdcReader::AdcReader(Ics110blModule& mod) :
+AdcReader::AdcReader(Ics110blModule* mod, rtems_id bid) :
 	//ctor-initializer list
 	priority(OrbitControllerPriority+1),
-	tid(0),barrierId(0),instance(0),
+	tid(0),barrierId(bid),instance(0),
 	adc(mod),ds(NULL)
 {
 	static int i = 0;
@@ -37,7 +37,7 @@ AdcReader::AdcReader(Ics110blModule& mod) :
 
 AdcReader::~AdcReader() {
 	rtems_task_delete(tid);
-	syslog(LOG_INFO, "Destroyed AdcReader %d\n",instance);
+	syslog(LOG_INFO, "AdcReader %d dtor!!\n",instance);
 }
 
 /* Since threadStart() is a static method, it has no "this" ptr
@@ -66,8 +66,8 @@ rtems_task AdcReader::threadBody(rtems_task_argument arg) {
 		uint16_t adcStatus = 0;
 		rtems_event_set eventsIn = 0;
 
-		rc = rtems_barrier_wait(barrierId, 5000);
-		if(TestDirective(rc, "rtems_barrier_wait()-AdcReaderThread")) {
+		rc = rtems_barrier_wait(barrierId, 50000);
+		if(TestDirective(rc, "rtems_barrier_wait()-AdcReader")) {
 			break;
 		}
 		/* block for the controller's signal... */
@@ -76,16 +76,16 @@ rtems_task AdcReader::threadBody(rtems_task_argument arg) {
 			break;
 		}
 		/* chk for FIFO-FULL or FIFO-not-1/2-FULL conditions */
-		adcStatus = adc.getStatus();
+		adcStatus = adc->getStatus();
 		if((adcStatus&ICS110B_FIFO_FULL) || !(adcStatus&ICS110B_FIFO_HALF_FULL)) {
 			syslog(LOG_INFO, "AdcReader[%d] (pre-BLT) has abnormal status=%#hx",instance, adcStatus);
 			break;
 		}
 		/* get the data... */
-		wordsRequested = ds->numFrames*adc.getChannelsPerFrame();
-		int readStatus = adc.readFifo((uint32_t *)ds->buf,wordsRequested,&wordsRead);
+		wordsRequested = ds->numFrames*adc->getChannelsPerFrame();
+		int readStatus = adc->readFifo((uint32_t *)ds->buf,wordsRequested,&wordsRead);
 		/* chk for FIFO-1/2-FULL (still ?!?) or FIFO-empty conditions */
-		adcStatus = adc.getStatus();
+		adcStatus = adc->getStatus();
 		if((adcStatus&ICS110B_FIFO_HALF_FULL) || (adcStatus&ICS110B_FIFO_EMPTY)) {
 			syslog(LOG_INFO, "AdcReader[%d] (post-BLT) has abnormal status=%#hx",instance, adcStatus);
 			//break;
@@ -95,7 +95,7 @@ rtems_task AdcReader::threadBody(rtems_task_argument arg) {
 			//FatalErrorHandler(0);
 		}
 		if(wordsRead != wordsRequested) {
-			ds->numFrames = wordsRead/adc.getChannelsPerFrame();
+			ds->numFrames = wordsRead/adc->getChannelsPerFrame();
 			syslog(LOG_INFO, "AdcReader[%d]: asked for %u words, but read only %u\n",
 					instance, wordsRequested, wordsRead);
 		}

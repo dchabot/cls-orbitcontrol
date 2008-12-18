@@ -16,7 +16,7 @@
 
 class Vmic2536Module : public VmeModule {
 public:
-	Vmic2536Module(VmeCrate& c, uint32_t vmeAddr);
+	Vmic2536Module(VmeCrate* c, uint32_t vmeAddr);
 	virtual ~Vmic2536Module();
 
 	void initialize();
@@ -35,7 +35,7 @@ public:
 	void setIrqLevel(uint8_t l) {}
 private:
 	Vmic2536Module();
-	Vmic2536Module(Vmic2536Module&);
+	Vmic2536Module(const Vmic2536Module&);
 
 	bool initialized;
 };
