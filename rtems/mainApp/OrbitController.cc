@@ -5,8 +5,10 @@
  *      Author: chabotd
  */
 
-#include "OrbitController.h"
+#include <OrbitController.h>
 #include <OrbitControlException.h>
+#include <cstdio>
+#include <rtems/error.h>
 #include <sis1100_api.h>
 #include <syslog.h>
 #include <utils.h>
@@ -32,24 +34,36 @@ OrbitController::OrbitController() :
 							RTEMS_FLOATING_POINT|RTEMS_LOCAL,
 							RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),
 							&tid);
-	if(TestDirective(rc, "OrbitController -- rtems_task_create()")) {
-		throw OrbitControlException("OrbitController: problem creating task!!",rc);
+	if(rc != RTEMS_SUCCESSFUL) {
+		//fatal
+		char msg[256];
+		snprintf(msg,strlen(msg),"OrbitController: task_create failure--%s",
+									rtems_status_text(rc));
+		throw OrbitControlException(msg);
 	}
 	isrBarrierName = rtems_build_name('i','s','r','B');
 	rc = rtems_barrier_create(isrBarrierName,
 								RTEMS_BARRIER_AUTOMATIC_RELEASE|RTEMS_LOCAL,
 								NumAdcModules+1,
 								&isrBarrierId);
-	if(TestDirective(rc, "OrbitController -- rtems_barrier_create()-isr barrier")) {
-		throw OrbitControlException("OrbitController: problem creating isr-barrier!!",rc);
+	if(rc != RTEMS_SUCCESSFUL) {
+		//fatal
+		char msg[256];
+		snprintf(msg,strlen(msg),"OrbitController: ISR barrier_create() failure--%s",
+									rtems_status_text(rc));
+		throw OrbitControlException(msg);
 	}
 	rdrBarrierName = rtems_build_name('a','d','c','B');
 	rc = rtems_barrier_create(rdrBarrierName,
 								RTEMS_BARRIER_AUTOMATIC_RELEASE|RTEMS_LOCAL,
 								NumAdcModules+1,
 								&rdrBarrierId);
-	if(TestDirective(rc, "OrbitController -- rtems_barrier_create()-adc barrier")) {
-		throw OrbitControlException("OrbitController: problem creating AdcReader barrier!!",rc);
+	if(rc != RTEMS_SUCCESSFUL) {
+		//fatal
+		char msg[256];
+		snprintf(msg,strlen(msg),"OrbitController: RDR barrier_create() failure--%s",
+									rtems_status_text(rc));
+		throw OrbitControlException(msg);
 	}
 	rtems_clock_get(RTEMS_CLOCK_GET_TICKS_PER_SECOND, &rtemsTicksPerSecond);
 	//initialize hardware control...
@@ -72,8 +86,12 @@ OrbitController::OrbitController() :
 		rdrArray[i]->start(0);
 	}
 	rc = rtems_barrier_wait(rdrBarrierId, 50000);/*FIXME--debugging timeouts*/
-	if(TestDirective(rc,"rtems_barrier_wait-OrbitController rdr barrier")) {
-		throw OrbitControlException("OrbitController: problem waiting at rdrBarrier!!",rc);
+	if(rc != RTEMS_SUCCESSFUL) {
+		//Fatal
+		char msg[256];
+		snprintf(msg,strlen(msg),"OrbitController: RDR barrier_wait() failure--%s",
+									rtems_status_text(rc));
+		throw OrbitControlException(msg);
 	}
 	syslog(LOG_INFO, "OrbitController: synchronized with AdcReaders...\n");
 }
@@ -94,8 +112,11 @@ void OrbitController::start(rtems_task_argument arg) {
 	this->arg = arg;
 	rc = rtems_task_start(tid,threadStart,(rtems_task_argument)this);
 	if(rc != RTEMS_SUCCESSFUL) {
-		syslog(LOG_INFO, "Failed to start OrbitController thread: %s\n",rtems_status_text(rc));
-		throw OrbitControlException("Couldn't start OrbitController thread!!!",rc);
+		//fatal
+		char msg[256];
+		snprintf(msg,strlen(msg),"Failed to start OrbitController thread: %s",
+									rtems_status_text(rc));
+		throw OrbitControlException(msg);
 	}
 }
 /*********************** private interface *****************************************/
@@ -153,17 +174,25 @@ void OrbitController::enableAdcInterrupts() {
 
 void OrbitController::rendezvousWithIsr() {
 	/* Wait for notification of ADC "fifo-half-full" event... */
-	rtems_status_code rc = rtems_barrier_wait(isrBarrierId,5000);
-	if(TestDirective(rc, "OrbitController -- rtems_barrier_wait()--isr barrier")) {
-		throw OrbitControlException("OrbitController: rtems_barrier_wait() failure!!",rc);
+	rtems_status_code rc = rtems_barrier_wait(isrBarrierId,5000);/*FIXME--debugging timeouts*/
+	if(rc != RTEMS_SUCCESSFUL) {
+		//Fatal
+		char msg[256];
+		snprintf(msg,strlen(msg),"OrbitController: ISR barrier_wait() failure--%s",
+									rtems_status_text(rc));
+		throw OrbitControlException(msg);
 	}
 }
 
 void OrbitController::rendezvousWithAdcReaders() {
 	/* block until the ReaderThreads are at their sync-point... */
 	rtems_status_code rc = rtems_barrier_wait(rdrBarrierId, 5000);/*FIXME--debugging timeouts*/
-	if(TestDirective(rc,"rtems_barrier_wait-OrbitController rdr barrier")) {
-		throw OrbitControlException("OrbitController: rtems_barrier_wait() failure!!",rc);
+	if(rc != RTEMS_SUCCESSFUL) {
+		//Fatal
+		char msg[256];
+		snprintf(msg,strlen(msg),"OrbitController: RDR barrier_wait() failure--%s",
+									rtems_status_text(rc));
+		throw OrbitControlException(msg);
 	}
 }
 

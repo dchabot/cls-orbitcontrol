@@ -10,6 +10,8 @@
 
 #include <rtems.h>
 #include <Ics110blModule.h>
+#include <AdcData.h>
+
 
 typedef struct {
 	uint32_t numFrames;
@@ -21,11 +23,8 @@ public:
 	AdcReader(Ics110blModule* adc, rtems_id bid);
 	virtual ~AdcReader();
 	void start(rtems_task_argument);
-	void read(RawDataSegment* ds);
-	int getInstance() const;
-	rtems_id getThreadId() const;
-	rtems_id getBarrierId() const;
-	void setBarrierId(rtems_id bid);
+	void read(AdcData* data);
+	AdcData* getAdcData() const;
 
 private:
 	AdcReader();
@@ -45,15 +44,11 @@ private:
 	int instance;
 	Ics110blModule* adc;
 	static const rtems_event_set readEvent=1;
-	RawDataSegment *ds;
+	AdcData *data;
 };
 
 
-inline rtems_id AdcReader::getBarrierId() const {
-	return barrierId;
-}
-
-inline void AdcReader::setBarrierId(rtems_id bid) {
-	barrierId = bid;
+inline AdcData* AdcReader::getAdcData() const {
+	return data;
 }
 #endif /* ADCREADER_H_ */

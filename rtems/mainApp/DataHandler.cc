@@ -5,16 +5,18 @@
  *      Author: chabotd
  */
 
-#include "DataHandler.h"
-#include "OrbitController.h"
+#include <DataHandler.h>
+#include <OrbitController.h>
 #include <OrbitControlException.h>
-#include <iostream>
+#include <cstdio>
+#include <rtems/error.h>
 #include <syslog.h>
 #include <utils.h>
 #include <bpmDefs.h> /* contains x/y channel scaling factors */
 #include <ics110bl.h> /* need the definition of ADC_PER_VOLT */
-#include <stdlib.h>
 
+
+//the Singleton instance
 DataHandler* DataHandler::instance = 0;
 
 DataHandler::DataHandler() :
@@ -50,10 +52,13 @@ rtems_task DataHandler::threadBody(rtems_task_argument arg) {
 }
 
 void DataHandler::enqueRawData(RawDataSegment *ds) const {
-	rtems_status_code rc;
-	rc = rtems_message_queue_send(inpQueueId, ds, sizeof(RawDataSegment)*NumAdcModules);
-	if(TestDirective(rc, "DataHandler--rtems_message_queue_send()-->RawDataQueue")<0) {
-		throw OrbitControlException("DataHandler: enque failure!!",rc);
+	rtems_status_code rc = rtems_message_queue_send(inpQueueId, ds, sizeof(RawDataSegment)*NumAdcModules);
+	if(rc != RTEMS_SUCCESSFUL) {
+		//Fatal
+		char msg[256];
+		snprintf(msg,strlen(msg),"DataHandler: msg_q_send() failure--%s",
+									rtems_status_text(rc));
+		throw OrbitControlException(msg);
 	}
 }
 
@@ -67,8 +72,12 @@ void DataHandler::start(rtems_task_argument arg) {
 							RTEMS_FLOATING_POINT|RTEMS_LOCAL,
 							RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),
 							&tid);
-	if(TestDirective(rc, "Data Handler -- rtems_task_create()")) {
-		throw OrbitControlException("DataHandler: problem creating task!!",rc);
+	if(rc != RTEMS_SUCCESSFUL) {
+		//Fatal
+		char msg[256];
+		snprintf(msg,strlen(msg),"DataHandler: task_create() failure--%s",
+									rtems_status_text(rc));
+		throw OrbitControlException(msg);
 	}
 	/* raw-data queue: fed by OrbitController */
 	inpQueueName = rtems_build_name('D','H','I','q');
@@ -77,15 +86,21 @@ void DataHandler::start(rtems_task_argument arg) {
 									sizeof(RawDataSegment)*NumAdcModules/*msg size*/,
 									RTEMS_LOCAL|RTEMS_FIFO,
 									&inpQueueId);
-	if(TestDirective(rc, "DataHandler -- rtems_message_queue_create()")) {
-		throw OrbitControlException("DataHandler: problem creating msq queue!!",rc);
+	if(rc != RTEMS_SUCCESSFUL) {
+		//Fatal
+		char msg[256];
+		snprintf(msg,strlen(msg),"DataHandler: msg_q_create() failure--%s",
+									rtems_status_text(rc));
+		throw OrbitControlException(msg);
 	}
-
 	this->arg = arg;
 	rc = rtems_task_start(tid,threadStart,(rtems_task_argument)this);
 	if(rc != RTEMS_SUCCESSFUL) {
-		syslog(LOG_INFO, "Failed to start DataHandler thread: %s\n",rtems_status_text(rc));
-		throw OrbitControlException("Couldn't start DataHandler thread!!!",rc);
+		//Fatal
+		char msg[256];
+		snprintf(msg,strlen(msg),"DataHandler: task_start() failure--%s",
+									rtems_status_text(rc));
+		throw OrbitControlException(msg);
 	}
 	syslog(LOG_INFO, "Started DataHandler with priority %d\n",priority);
 
@@ -190,6 +205,6 @@ void DataHandler::sumBPMChannelData(double* sums, RawDataSegment* rdSegments) {
 
 	/* release allocated memory */
 	for(nthAdc=0; nthAdc<NumAdcModules; nthAdc++) {
-		free(rdSegments[nthAdc].buf);
+		//free(rdSegments[nthAdc].buf);
 	}
 }

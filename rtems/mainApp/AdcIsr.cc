@@ -54,7 +54,6 @@ void AdcIsr::isr(void *arg, uint8_t vector) {
 
 	/* disable irq on the board*/
 	parg->adc->disableInterrupt();
-	syslog(LOG_INFO, "AdcIsr called!!\n");
 	/* inform the OrbitController of this event*/
 	rc = rtems_barrier_wait(parg->bid,RTEMS_NO_TIMEOUT);
 	//don't throw() from here:

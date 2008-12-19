@@ -4,10 +4,11 @@
  *  Created on: Dec 12, 2008
  *      Author: chabotd
  */
-
+#include <stdint.h>
 #include <AdcReader.h>
-#include "OrbitController.h"
+#include <OrbitController.h>
 #include <OrbitControlException.h>
+#include <cstdio>
 #include <rtems/error.h>
 #include <syslog.h>
 #include <utils.h>
@@ -16,7 +17,7 @@ AdcReader::AdcReader(Ics110blModule* mod, rtems_id bid) :
 	//ctor-initializer list
 	priority(OrbitControllerPriority+1),
 	tid(0),barrierId(bid),instance(0),
-	adc(mod),ds(NULL)
+	adc(mod),data(NULL)
 {
 	static int i = 0;
 	rtems_status_code rc;
@@ -28,10 +29,15 @@ AdcReader::AdcReader(Ics110blModule* mod, rtems_id bid) :
 							RTEMS_NO_FLOATING_POINT|RTEMS_LOCAL,
 							RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),
 							&tid);
-	if(TestDirective(rc,"AdcReader -- rtems_task_create()")) {
-		throw OrbitControlException("Failed to create task ",rc);
-	}
 	instance = i;
+	if(rc != RTEMS_SUCCESSFUL) {
+		//Fatal...
+		char msg[256];
+		snprintf(msg,strlen(msg),"AdcReader[%d]: create_task() failure--%s",
+									instance,rtems_status_text(rc));
+		throw OrbitControlException(msg);
+	}
+
 	i++;
 }
 
@@ -67,37 +73,53 @@ rtems_task AdcReader::threadBody(rtems_task_argument arg) {
 		rtems_event_set eventsIn = 0;
 
 		rc = rtems_barrier_wait(barrierId, 50000);
-		if(TestDirective(rc, "rtems_barrier_wait()-AdcReader")) {
-			break;
+		if(rc != RTEMS_SUCCESSFUL) {
+			//Fatal: bail out
+			string msg("AdcReader: barrier_wait()--");
+			msg += rtems_status_text(rc);
+			throw OrbitControlException(msg,rc);
 		}
 		/* block for the controller's signal... */
 		rc = rtems_event_receive(RTEMS_EVENT_ANY,RTEMS_WAIT,RTEMS_NO_TIMEOUT,&eventsIn);
-		if(TestDirective(rc, "AdcReader-->rtems_event_receive()")) {
-			break;
+		if(rc != RTEMS_SUCCESSFUL) {
+			//also Fatal: bail...
+			string msg("AdcReader: event_receive()--");
+			msg += rtems_status_text(rc);
+			throw OrbitControlException(msg,rc);
 		}
 		/* chk for FIFO-FULL or FIFO-not-1/2-FULL conditions */
 		adcStatus = adc->getStatus();
 		if((adcStatus&ICS110B_FIFO_FULL) || !(adcStatus&ICS110B_FIFO_HALF_FULL)) {
-			syslog(LOG_INFO, "AdcReader[%d] (pre-BLT) has abnormal status=%#hx",instance, adcStatus);
-			break;
+			//this should "never happen": Fatal if it does...
+			char msg[256];
+			snprintf(msg,strlen(msg),"AdcReader[%d] (pre-BLT) has abnormal status=%#hx",instance, adcStatus);
+			throw OrbitControlException(msg);
 		}
 		/* get the data... */
-		wordsRequested = ds->numFrames*adc->getChannelsPerFrame();
-		int readStatus = adc->readFifo((uint32_t *)ds->buf,wordsRequested,&wordsRead);
+		wordsRequested = data->getFrames()*adc->getChannelsPerFrame();
+		int readStatus = adc->readFifo((uint32_t *)data->getBuffer(),wordsRequested,&wordsRead);
 		/* chk for FIFO-1/2-FULL (still ?!?) or FIFO-empty conditions */
 		adcStatus = adc->getStatus();
 		if((adcStatus&ICS110B_FIFO_HALF_FULL) || (adcStatus&ICS110B_FIFO_EMPTY)) {
-			syslog(LOG_INFO, "AdcReader[%d] (post-BLT) has abnormal status=%#hx",instance, adcStatus);
-			//break;
+			//again, this should "never happen": Fatal if it does...
+			char msg[256];
+			snprintf(msg,strlen(msg),"AdcReader[%d] (post-BLT) has abnormal status=%#hx",instance, adcStatus);
+			throw OrbitControlException(msg);
 		}
 		if(readStatus) {
-			syslog(LOG_INFO, "AdcReader[%d] BLT problem: status = %d", instance, readStatus);
-			//FatalErrorHandler(0);
+			//probably fatal...
+			char msg[256];
+			snprintf(msg,strlen(msg),"AdcReader[%d] BLT problem: status = %d", instance, readStatus);
+			throw OrbitControlException(msg);
 		}
 		if(wordsRead != wordsRequested) {
-			ds->numFrames = wordsRead/adc->getChannelsPerFrame();
-			syslog(LOG_INFO, "AdcReader[%d]: asked for %u words, but read only %u\n",
-					instance, wordsRequested, wordsRead);
+			//also probably fatal...
+			char msg[256];
+			snprintf(msg,strlen(msg),"AdcReader[%d]: asked for %u words, but read only %u",
+										instance,
+										(unsigned int)wordsRequested,
+										(unsigned int)wordsRead);
+			throw OrbitControlException(msg);
 		}
 	}
 	syslog(LOG_INFO, "AdcReader[%d]: deleting self", instance);
@@ -108,25 +130,21 @@ void AdcReader::start(rtems_task_argument arg) {
 	rtems_status_code rc;
 	this->arg = arg;
 	rc = rtems_task_start(tid,threadStart,(rtems_task_argument)this);
-	if(TestDirective(rc, "AdcReader -- rtems_task_start()")) {
-		throw OrbitControlException("Couldn't start AdcReader!!!",rc);
+	if(rc != RTEMS_SUCCESSFUL) {
+		char msg[256];
+		snprintf(msg,strlen(msg),"AdcReader[%d]: task_start() failure--%s",
+									instance,rtems_status_text(rc));
+		throw OrbitControlException(msg);
 	}
 }
 
 /** read() will unblock this AdcReader's thread, triggering
  * 	a VME BLT op.
  *
- * @param ds
+ * @param data
  */
-void AdcReader::read(RawDataSegment *ds) {
-	this->ds = ds;
+void AdcReader::read(AdcData *data) {
+	this->data = data;
 	rtems_event_send(tid,readEvent);
 }
 
-int AdcReader::getInstance() const {
-	return instance;
-}
-
-rtems_id AdcReader::getThreadId() const {
-	return tid;
-}

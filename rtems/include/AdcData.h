@@ -25,7 +25,7 @@ public:
 private:
 	AdcData();
 	AdcData(const AdcData&);
-	uint32_t numFrames;
+	const uint32_t numFrames;
 	const uint32_t bufSize;
 	int32_t *buf;
 };
@@ -36,6 +36,7 @@ private:
 inline uint32_t AdcData::getFrames() const {
 	return numFrames;
 }
+
 /**
  * @return buffer size in number of channels contain (4 bytes/channel)
  */

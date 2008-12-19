@@ -9,7 +9,8 @@
 
 AdcData::AdcData(Ics110blModule* adc, uint32_t frames) :
 	//ctor-initializer list
-	numFrames(frames),bufSize(adc->getChannelsPerFrame()*numFrames)
+	numFrames(frames),
+	bufSize(adc->getChannelsPerFrame()*numFrames)
 {
 	buf = new int32_t[bufSize];
 }
