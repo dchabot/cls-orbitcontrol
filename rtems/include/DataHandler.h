@@ -9,6 +9,7 @@
 #define DATAHANDLER_H_
 
 #include <rtems.h>
+#include <AdcData.h>
 #include <AdcReader.h> /* for definition of RawDataSegment */
 
 /**

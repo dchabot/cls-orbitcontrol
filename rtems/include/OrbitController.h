@@ -26,6 +26,7 @@ using std::vector;
 
 const rtems_task_priority OrbitControllerPriority=50;
 const uint32_t NumAdcModules = 4;
+const uint32_t NumAdcReaders = 4;
 const uint32_t NumVmeCrates = 4;
 
 
