@@ -29,27 +29,42 @@ const uint32_t NumAdcModules = 4;
 const uint32_t NumAdcReaders = 4;
 const uint32_t NumVmeCrates = 4;
 
-
+/**
+ * A Singleton class for managing the storage-ring orbit control system.
+ *
+ * After obtaining an object instance via OrbitController::getInstance(),
+ * the initialize() method should be invoked prior to calling start(dbl rate).
+ *
+ * If initialize() is NOT called prior to start(), the ICS-110BL ADCz will be configured
+ * with a default sample-rate (aka frame-rate) of 10 kHz.
+ *
+ * Don't forget to call destroyInstance() to release all resources!!
+ */
 class OrbitController {
 public:
-	OrbitController();
-	~OrbitController();
+	static OrbitController* getInstance();
+	void initialize(const double adcSampleRate);
 	void start(rtems_task_argument arg);
+	void destroyInstance();
 
 private:
+	OrbitController();
+	OrbitController(const OrbitController&);
+	const OrbitController& operator=(const OrbitController&);
+	~OrbitController();
+
 	void startAdcAcquisition();
 	void stopAdcAcquisition();
 	void resetAdcFifos();
 	void enableAdcInterrupts();
-
 	void rendezvousWithIsr();
 	void rendezvousWithAdcReaders();
+	void activateAdcReaders();
 
-	/* we need a static method here 'cause we need to omit the "this"
-	 * pointer from rtems_task_start(tid,threadStart,arg), a native c-function.
-	 */
 	static rtems_task threadStart(rtems_task_argument arg);
 	rtems_task threadBody(rtems_task_argument arg);
+
+	static OrbitController* instance;
 	rtems_id tid;
 	rtems_name threadName;
 	rtems_task_argument arg;
@@ -68,7 +83,9 @@ private:
 	vector<Vmic2536Module*> dioArray;
 	vector<AdcIsr*> isrArray;
 	vector<AdcReader*> rdrArray;
-	vector<AdcData*> rdSegments;
+	AdcData* rdSegments[NumAdcModules];
+
+	bool initialized;
 };
 
 #endif /* ORBITCONTROLLER_H_ */

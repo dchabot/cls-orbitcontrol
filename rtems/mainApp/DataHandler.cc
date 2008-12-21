@@ -56,7 +56,7 @@ void DataHandler::enqueRawData(RawDataSegment *ds) const {
 	if(rc != RTEMS_SUCCESSFUL) {
 		//Fatal
 		char msg[256];
-		snprintf(msg,strlen(msg),"DataHandler: msg_q_send() failure--%s",
+		snprintf(msg,sizeof(msg),"DataHandler: msg_q_send() failure--%s",
 									rtems_status_text(rc));
 		throw OrbitControlException(msg);
 	}
@@ -75,7 +75,7 @@ void DataHandler::start(rtems_task_argument arg) {
 	if(rc != RTEMS_SUCCESSFUL) {
 		//Fatal
 		char msg[256];
-		snprintf(msg,strlen(msg),"DataHandler: task_create() failure--%s",
+		snprintf(msg,sizeof(msg),"DataHandler: task_create() failure--%s",
 									rtems_status_text(rc));
 		throw OrbitControlException(msg);
 	}
@@ -89,7 +89,7 @@ void DataHandler::start(rtems_task_argument arg) {
 	if(rc != RTEMS_SUCCESSFUL) {
 		//Fatal
 		char msg[256];
-		snprintf(msg,strlen(msg),"DataHandler: msg_q_create() failure--%s",
+		snprintf(msg,sizeof(msg),"DataHandler: msg_q_create() failure--%s",
 									rtems_status_text(rc));
 		throw OrbitControlException(msg);
 	}
@@ -98,7 +98,7 @@ void DataHandler::start(rtems_task_argument arg) {
 	if(rc != RTEMS_SUCCESSFUL) {
 		//Fatal
 		char msg[256];
-		snprintf(msg,strlen(msg),"DataHandler: task_start() failure--%s",
+		snprintf(msg,sizeof(msg),"DataHandler: task_start() failure--%s",
 									rtems_status_text(rc));
 		throw OrbitControlException(msg);
 	}

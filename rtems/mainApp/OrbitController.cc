@@ -15,15 +15,29 @@
 #include <ics110bl.h>
 #include <vmic2536.h>
 
+OrbitController* OrbitController::instance = 0;
+
 OrbitController::OrbitController() :
 	//ctor-initializer list
 	tid(0),threadName(0),arg(0),
 	priority(OrbitControllerPriority),
 	rtemsTicksPerSecond(0),adcFramesPerTick(0),
 	isrBarrierId(0),isrBarrierName(0),
-	rdrBarrierId(0),rdrBarrierName(0)
+	rdrBarrierId(0),rdrBarrierName(0),
+	initialized(false)
+{ }
 
-{
+OrbitController::~OrbitController() { }
+
+OrbitController* OrbitController::getInstance() {
+	//FIXME -- not thread-safe!!
+	if(instance==0) {
+		instance = new OrbitController();
+	}
+	return instance;
+}
+
+void OrbitController::initialize(const double adcSampleRate) {
 	rtems_status_code rc;
 	syslog(LOG_INFO, "OrbitController: initializing...\n");
 	//create thread and barriers for Rendezvous Pattern
@@ -37,7 +51,7 @@ OrbitController::OrbitController() :
 	if(rc != RTEMS_SUCCESSFUL) {
 		//fatal
 		char msg[256];
-		snprintf(msg,strlen(msg),"OrbitController: task_create failure--%s",
+		snprintf(msg,sizeof(msg),"OrbitController: task_create failure--%s",
 									rtems_status_text(rc));
 		throw OrbitControlException(msg);
 	}
@@ -49,7 +63,7 @@ OrbitController::OrbitController() :
 	if(rc != RTEMS_SUCCESSFUL) {
 		//fatal
 		char msg[256];
-		snprintf(msg,strlen(msg),"OrbitController: ISR barrier_create() failure--%s",
+		snprintf(msg,sizeof(msg),"OrbitController: ISR barrier_create() failure--%s",
 									rtems_status_text(rc));
 		throw OrbitControlException(msg);
 	}
@@ -61,7 +75,7 @@ OrbitController::OrbitController() :
 	if(rc != RTEMS_SUCCESSFUL) {
 		//fatal
 		char msg[256];
-		snprintf(msg,strlen(msg),"OrbitController: RDR barrier_create() failure--%s",
+		snprintf(msg,sizeof(msg),"OrbitController: RDR barrier_create() failure--%s",
 									rtems_status_text(rc));
 		throw OrbitControlException(msg);
 	}
@@ -72,7 +86,7 @@ OrbitController::OrbitController() :
 	}
 	for(uint32_t i=0; i<NumAdcModules; i++) {
 		adcArray.push_back(new Ics110blModule(crateArray[i],ICS110B_DEFAULT_BASEADDR));
-		adcArray[i]->initialize(1.0,INTERNAL_CLOCK,ICS110B_INTERNAL);
+		adcArray[i]->initialize(adcSampleRate,INTERNAL_CLOCK,ICS110B_INTERNAL);
 		syslog(LOG_INFO,"%s[%u]: framerate=%g kHz, ch/Frame = %d\n",
 									adcArray[i]->getType(),i,
 									adcArray[i]->getFrameRate(),
@@ -85,19 +99,31 @@ OrbitController::OrbitController() :
 		rdrArray.push_back(new AdcReader(adcArray[i], rdrBarrierId));
 		rdrArray[i]->start(0);
 	}
-	rc = rtems_barrier_wait(rdrBarrierId, 50000);/*FIXME--debugging timeouts*/
+	rendezvousWithAdcReaders();
+	initialized = true;
+	syslog(LOG_INFO, "OrbitController: initialized and synchronized with AdcReaders...\n");
+}
+
+void OrbitController::start(rtems_task_argument arg) {
+	if(initialized==false) {
+		initialize(10.1);
+	}
+	//fire up the OrbitController thread:
+	this->arg = arg;
+	rtems_status_code rc = rtems_task_start(tid,threadStart,(rtems_task_argument)this);
 	if(rc != RTEMS_SUCCESSFUL) {
-		//Fatal
+		//fatal
 		char msg[256];
-		snprintf(msg,strlen(msg),"OrbitController: RDR barrier_wait() failure--%s",
+		snprintf(msg,sizeof(msg),"Failed to start OrbitController thread: %s",
 									rtems_status_text(rc));
 		throw OrbitControlException(msg);
 	}
-	syslog(LOG_INFO, "OrbitController: synchronized with AdcReaders...\n");
 }
 
-OrbitController::~OrbitController() {
-	syslog(LOG_INFO, "OrbitController dtor!!\n");
+void OrbitController::destroyInstance() {
+	syslog(LOG_INFO, "Destroying OrbitController instance!!\n");
+	stopAdcAcquisition();
+	resetAdcFifos();
 	if(tid) { rtems_task_delete(tid); }
 	if(isrBarrierId) { rtems_barrier_delete(isrBarrierId); }
 	if(rdrBarrierId) { rtems_barrier_delete(rdrBarrierId); }
@@ -105,21 +131,10 @@ OrbitController::~OrbitController() {
 	for(uint32_t i=0; i<rdrArray.size(); i++) { delete rdrArray[i]; }
 	for(uint32_t i=0; i<adcArray.size(); i++) { delete adcArray[i]; }
 	for(uint32_t i=0; i<crateArray.size(); i++) { delete crateArray[i]; }
-}
-
-void OrbitController::start(rtems_task_argument arg) {
-	rtems_status_code rc;
-	this->arg = arg;
-	rc = rtems_task_start(tid,threadStart,(rtems_task_argument)this);
-	if(rc != RTEMS_SUCCESSFUL) {
-		//fatal
-		char msg[256];
-		snprintf(msg,strlen(msg),"Failed to start OrbitController thread: %s",
-									rtems_status_text(rc));
-		throw OrbitControlException(msg);
-	}
+	instance = 0;
 }
 /*********************** private interface *****************************************/
+
 rtems_task OrbitController::threadStart(rtems_task_argument arg) {
 	OrbitController *oc = (OrbitController*)arg;
 	oc->threadBody(oc->arg);
@@ -130,14 +145,20 @@ rtems_task OrbitController::threadBody(rtems_task_argument arg) {
 	//start on the "edge" of a clock-tick:
 	rtems_task_wake_after(2);
 	startAdcAcquisition();
-	for(int j=0; j<10; j++) {
-		/* Wait for notification of ADC "fifo-half-full" event... */
+	for(int j=0; j<10000; j++) {
+		//Wait for notification of ADC "fifo-half-full" event...
 		rendezvousWithIsr();
-
 		stopAdcAcquisition();
+		activateAdcReaders();
+		//Wait (block) 'til AdcReaders have completed their block-reads:
+		rendezvousWithAdcReaders();
 		resetAdcFifos();
 		startAdcAcquisition();
 		enableAdcInterrupts();
+		//FIXME -- temporary debugging!!
+		for(uint32_t i=0; i<NumAdcModules; i++) {
+			delete rdSegments[i];
+		}
 	}
 	stopAdcAcquisition();
 	resetAdcFifos();
@@ -178,7 +199,7 @@ void OrbitController::rendezvousWithIsr() {
 	if(rc != RTEMS_SUCCESSFUL) {
 		//Fatal
 		char msg[256];
-		snprintf(msg,strlen(msg),"OrbitController: ISR barrier_wait() failure--%s",
+		snprintf(msg,sizeof(msg),"OrbitController: ISR barrier_wait() failure--%s",
 									rtems_status_text(rc));
 		throw OrbitControlException(msg);
 	}
@@ -190,9 +211,17 @@ void OrbitController::rendezvousWithAdcReaders() {
 	if(rc != RTEMS_SUCCESSFUL) {
 		//Fatal
 		char msg[256];
-		snprintf(msg,strlen(msg),"OrbitController: RDR barrier_wait() failure--%s",
+		snprintf(msg,sizeof(msg),"OrbitController: RDR barrier_wait() failure--%s",
 									rtems_status_text(rc));
 		throw OrbitControlException(msg);
 	}
 }
 
+void OrbitController::activateAdcReaders() {
+	for(uint32_t i=0; i<NumAdcModules; i++) {
+		rdSegments[i] = new AdcData(adcArray[i],
+							HALF_FIFO_LENGTH/adcArray[i]->getChannelsPerFrame());
+		//this'll unblock the associated AdcReader thread:
+		rdrArray[i]->read(rdSegments[i]);
+	}
+}

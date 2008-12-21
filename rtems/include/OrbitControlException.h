@@ -18,7 +18,8 @@ public:
 	OrbitControlException(const string& msg = "", int rc=0)
 	: runtime_error(msg),returncode(rc)
 	{
-		syslog(LOG_INFO, "\n\n%s rc=%d\n\n",msg.c_str(),returncode);
+		if(rc) { syslog(LOG_INFO, "\n\n%s rc=%d\n\n",msg.c_str(),returncode); }
+		else { syslog(LOG_INFO, "\n\n%s\n\n",msg.c_str()); }
 	}
 private:
 	int returncode;

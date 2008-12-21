@@ -33,7 +33,7 @@ AdcReader::AdcReader(Ics110blModule* mod, rtems_id bid) :
 	if(rc != RTEMS_SUCCESSFUL) {
 		//Fatal...
 		char msg[256];
-		snprintf(msg,strlen(msg),"AdcReader[%d]: create_task() failure--%s",
+		snprintf(msg,sizeof(msg),"AdcReader[%d]: create_task() failure--%s",
 									instance,rtems_status_text(rc));
 		throw OrbitControlException(msg);
 	}
@@ -75,24 +75,29 @@ rtems_task AdcReader::threadBody(rtems_task_argument arg) {
 		rc = rtems_barrier_wait(barrierId, 50000);
 		if(rc != RTEMS_SUCCESSFUL) {
 			//Fatal: bail out
-			string msg("AdcReader: barrier_wait()--");
-			msg += rtems_status_text(rc);
-			throw OrbitControlException(msg,rc);
+			char msg[256];//("AdcReader: barrier_wait()--");
+			snprintf(msg,sizeof(msg),"AdcReader[%d]: barrier_wait() failure--%s",
+										instance,rtems_status_text(rc));
+			throw OrbitControlException(msg);
 		}
 		/* block for the controller's signal... */
-		rc = rtems_event_receive(RTEMS_EVENT_ANY,RTEMS_WAIT,RTEMS_NO_TIMEOUT,&eventsIn);
+		rc = rtems_event_receive(readEvent,
+								RTEMS_EVENT_ANY|RTEMS_WAIT,
+								RTEMS_NO_TIMEOUT,
+								&eventsIn);
 		if(rc != RTEMS_SUCCESSFUL) {
 			//also Fatal: bail...
-			string msg("AdcReader: event_receive()--");
-			msg += rtems_status_text(rc);
-			throw OrbitControlException(msg,rc);
+			char msg[256];
+			snprintf(msg,sizeof(msg),"AdcReader[%d]: event_receive failure()--%s",
+										instance,rtems_status_text(rc));
+			throw OrbitControlException(msg);
 		}
 		/* chk for FIFO-FULL or FIFO-not-1/2-FULL conditions */
 		adcStatus = adc->getStatus();
 		if((adcStatus&ICS110B_FIFO_FULL) || !(adcStatus&ICS110B_FIFO_HALF_FULL)) {
 			//this should "never happen": Fatal if it does...
 			char msg[256];
-			snprintf(msg,strlen(msg),"AdcReader[%d] (pre-BLT) has abnormal status=%#hx",instance, adcStatus);
+			snprintf(msg,sizeof(msg),"AdcReader[%d] (pre-BLT) has abnormal status=%#hx",instance, adcStatus);
 			throw OrbitControlException(msg);
 		}
 		/* get the data... */
@@ -103,19 +108,19 @@ rtems_task AdcReader::threadBody(rtems_task_argument arg) {
 		if((adcStatus&ICS110B_FIFO_HALF_FULL) || (adcStatus&ICS110B_FIFO_EMPTY)) {
 			//again, this should "never happen": Fatal if it does...
 			char msg[256];
-			snprintf(msg,strlen(msg),"AdcReader[%d] (post-BLT) has abnormal status=%#hx",instance, adcStatus);
+			snprintf(msg,sizeof(msg),"AdcReader[%d] (post-BLT) has abnormal status=%#hx",instance, adcStatus);
 			throw OrbitControlException(msg);
 		}
 		if(readStatus) {
 			//probably fatal...
 			char msg[256];
-			snprintf(msg,strlen(msg),"AdcReader[%d] BLT problem: status = %d", instance, readStatus);
+			snprintf(msg,sizeof(msg),"AdcReader[%d] BLT problem: status = %d", instance, readStatus);
 			throw OrbitControlException(msg);
 		}
 		if(wordsRead != wordsRequested) {
 			//also probably fatal...
 			char msg[256];
-			snprintf(msg,strlen(msg),"AdcReader[%d]: asked for %u words, but read only %u",
+			snprintf(msg,sizeof(msg),"AdcReader[%d]: asked for %u words, but read only %u",
 										instance,
 										(unsigned int)wordsRequested,
 										(unsigned int)wordsRead);
@@ -132,7 +137,7 @@ void AdcReader::start(rtems_task_argument arg) {
 	rc = rtems_task_start(tid,threadStart,(rtems_task_argument)this);
 	if(rc != RTEMS_SUCCESSFUL) {
 		char msg[256];
-		snprintf(msg,strlen(msg),"AdcReader[%d]: task_start() failure--%s",
+		snprintf(msg,sizeof(msg),"AdcReader[%d]: task_start() failure--%s",
 									instance,rtems_status_text(rc));
 		throw OrbitControlException(msg);
 	}
