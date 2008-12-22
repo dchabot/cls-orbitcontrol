@@ -6,6 +6,8 @@
  */
 
 #include <AdcData.h>
+#include <syslog.h>
+
 
 AdcData::AdcData(Ics110blModule* adc, uint32_t frames) :
 	//ctor-initializer list
@@ -16,5 +18,6 @@ AdcData::AdcData(Ics110blModule* adc, uint32_t frames) :
 }
 
 AdcData::~AdcData() {
+	syslog(LOG_INFO, "AdcData dtor!!\n");
 	delete []buf;
 }

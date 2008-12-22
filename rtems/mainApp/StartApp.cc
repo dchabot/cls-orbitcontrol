@@ -26,7 +26,7 @@ extern "C" void startApp() {
 	try {
 		//oc->initialize(1.0);
 		oc->start(0);
-		for(;;) {
+		for(int i=0; i<12; i++) {
 			rtems_task_wake_after(5000);
 		}
 	}
