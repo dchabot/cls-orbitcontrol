@@ -27,7 +27,18 @@ OrbitController::OrbitController() :
 	initialized(false)
 { }
 
-OrbitController::~OrbitController() { }
+OrbitController::~OrbitController() {
+	stopAdcAcquisition();
+	resetAdcFifos();
+	if(tid) { rtems_task_delete(tid); }
+	if(isrBarrierId) { rtems_barrier_delete(isrBarrierId); }
+	if(rdrBarrierId) { rtems_barrier_delete(rdrBarrierId); }
+	isrArray.clear();
+	rdrArray.clear();
+	adcArray.clear();
+	crateArray.clear();
+	instance = 0;
+}
 
 OrbitController* OrbitController::getInstance() {
 	//FIXME -- not thread-safe!!
@@ -35,6 +46,11 @@ OrbitController* OrbitController::getInstance() {
 		instance = new OrbitController();
 	}
 	return instance;
+}
+
+void OrbitController::destroyInstance() {
+	syslog(LOG_INFO, "Destroying OrbitController instance!!\n");
+	delete this;
 }
 
 void OrbitController::initialize(const double adcSampleRate) {
@@ -120,19 +136,6 @@ void OrbitController::start(rtems_task_argument arg) {
 	}
 }
 
-void OrbitController::destroyInstance() {
-	syslog(LOG_INFO, "Destroying OrbitController instance!!\n");
-	stopAdcAcquisition();
-	resetAdcFifos();
-	if(tid) { rtems_task_delete(tid); }
-	if(isrBarrierId) { rtems_barrier_delete(isrBarrierId); }
-	if(rdrBarrierId) { rtems_barrier_delete(rdrBarrierId); }
-	for(uint32_t i=0; i<isrArray.size(); i++) { delete isrArray[i]; }
-	for(uint32_t i=0; i<rdrArray.size(); i++) { delete rdrArray[i]; }
-	for(uint32_t i=0; i<adcArray.size(); i++) { delete adcArray[i]; }
-	for(uint32_t i=0; i<crateArray.size(); i++) { delete crateArray[i]; }
-	instance = 0;
-}
 /*********************** private interface *****************************************/
 
 rtems_task OrbitController::threadStart(rtems_task_argument arg) {
