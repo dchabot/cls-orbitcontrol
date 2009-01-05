@@ -21,8 +21,12 @@
 
 #include <syslog.h>
 
-static long init_record(struct subArrayRecord* sar);
-static long read_sa(struct subArrayRecord* sar);
+#ifdef __cplusplus
+	extern "C" {
+#endif
+
+static long init_record(void* sar);
+static long read_sa(void* sar);
 
 struct {
     long        number;
@@ -46,13 +50,14 @@ typedef struct {
 	epicsUInt32 indx;
 } SubArrayPvt;
 
-static long init_record(struct subArrayRecord* sar) {
+static long init_record(void* sar) {
+	struct subArrayRecord* psar = (subArrayRecord*)sar;
 	struct dbAddr *pr;
 	SubArrayPvt *pvt = NULL;
 
-	pr = dbGetPdbAddrFromLink(&sar->inp);
+	pr = dbGetPdbAddrFromLink(&psar->inp);
 	if(pr == NULL) {
-		syslog(LOG_INFO,"Can't get dbAddr ptr from dbGetPdbAddrFromLink(&sar->inp)!!\n");
+		syslog(LOG_INFO,"Can't get dbAddr ptr from dbGetPdbAddrFromLink(&psar->inp)!!\n");
 		return(-1);
 	}
 
@@ -62,8 +67,8 @@ static long init_record(struct subArrayRecord* sar) {
 		return -1;
 	}
 	pvt->wfr = (struct waveformRecord*)(pr->precord);
-	pvt->indx = sar->indx;
-	sar->dpvt = pvt;
+	pvt->indx = psar->indx;
+	psar->dpvt = pvt;
 
 	return 0;
 }
@@ -81,14 +86,19 @@ static long init_record(struct subArrayRecord* sar) {
  * we hack around it by recording the originally assigned indx
  * in a struct SubArrayPvt, along with the wfr pointer... :-(
  */
-static long read_sa(struct subArrayRecord* sar) {
-	SubArrayPvt *pvt = (SubArrayPvt*)sar->dpvt;
-	double *sarBuf = (double*)sar->bptr;
+static long read_sa(void* sar) {
+	struct subArrayRecord* psar = (subArrayRecord*)sar;
+	SubArrayPvt *pvt = (SubArrayPvt*)psar->dpvt;
+	double *psarBuf = (double*)psar->bptr;
 	double *wfrBuf = (double*)pvt->wfr->bptr;
 
 	/*copy value into our buffer*/
-	*sarBuf = wfrBuf[pvt->indx];
+	*psarBuf = wfrBuf[pvt->indx];
 
-	sar->nord = sar->nelm;
+	psar->nord = psar->nelm;
 	return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif

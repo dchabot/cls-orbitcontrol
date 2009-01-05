@@ -11,6 +11,21 @@
 #include <rtems.h>
 #include <AdcData.h>
 #include <AdcReader.h> /* for definition of RawDataSegment */
+#include <syslog.h>
+#include <vector>
+using std::vector;
+
+struct BPMData {
+	uint32_t numElements;
+	double* buf;
+	BPMData(uint32_t numelem) : numElements(numelem) {
+		buf = new double[numelem];//FIXME
+	}
+	~BPMData() {
+		delete []buf;
+		syslog(LOG_INFO, "~BPMAverages()\n");
+	}
+};
 
 /**
  * A Singleton class, accessible via DataHandler::getInstance().
@@ -19,13 +34,16 @@ class DataHandler {
 public:
 	static DataHandler* getInstance();
 	void destroyInstance();
-	void enqueRawData(RawDataSegment*) const;
+	void enqueRawData(AdcData* rdSegments) const;
 	void start(rtems_task_argument);
-	void sumBPMChannelData(double* sums, RawDataSegment* rdSegments);
+	uint32_t sumBPMChannelData(double* sums, AdcData* rdSegments[]);
 	void scaleBPMAverages(double* buf, uint32_t numSamples) const;
 	void sortBPMData(double* sortedArray, double* rawArray) const;
-	uint32_t getChannelsPerFrame() const;
-	void setChannelsPerFrame(uint32_t ch);
+	void clientRegister(rtems_id threadId);
+	void clientUnregister(rtems_id threadId);
+	BPMData* getBPMAverages();
+	uint32_t getSamplesPerAvg() const;
+	void setSamplesPerAvg(uint32_t n);
 
 private:
 	DataHandler();
@@ -36,6 +54,7 @@ private:
 	static DataHandler *instance;
 	static rtems_task threadStart(rtems_task_argument);
 	rtems_task threadBody(rtems_task_argument);
+	void deliverBPMAverages();
 	rtems_task_argument arg;
 	rtems_task_priority priority;
 	rtems_id tid;
@@ -43,15 +62,14 @@ private:
 	rtems_id inpQueueId;
 	rtems_name inpQueueName;
 	uint32_t adcChannelsPerFrame;
+	AdcData** ds;
+	vector<rtems_id> clients;
+	static const rtems_event_set newDataEvent=1;
+	double sums[108];//FIXME
+	double sorted[108];//FIXME
+	uint32_t samplesPerAvg;
 };
 
-inline uint32_t DataHandler::getChannelsPerFrame() const {
-	return adcChannelsPerFrame;
-}
-
-inline void DataHandler::setChannelsPerFrame(uint32_t ch) {
-	adcChannelsPerFrame = ch;
-}
 /* here are the ADC channel mappings based on the current drawings*/
 /* these channels may be moved around in the future */
 /* structure is x,y,x,y,x,y... map positions indicate the X positions ONLY ! */

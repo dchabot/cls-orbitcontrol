@@ -20,12 +20,14 @@ public:
 	virtual ~AdcData();
 	int32_t* getBuffer() const;
 	uint32_t getFrames() const;
+	uint32_t getChannelsPerFrame() const;
 	uint32_t getBufferSize() const;
 
 private:
 	AdcData();
 	AdcData(const AdcData&);
 	const uint32_t numFrames;
+	const uint32_t channelsPerFrame;
 	const uint32_t bufSize;
 	int32_t *buf;
 };
@@ -37,6 +39,13 @@ inline uint32_t AdcData::getFrames() const {
 	return numFrames;
 }
 
+/**
+ *
+ * @return the number of channels per sampling frame
+ */
+inline uint32_t AdcData::getChannelsPerFrame() const {
+	return channelsPerFrame;
+}
 /**
  * @return buffer size in number of channels contain (4 bytes/channel)
  */

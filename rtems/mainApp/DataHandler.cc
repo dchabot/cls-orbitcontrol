@@ -9,9 +9,8 @@
 #include <OrbitController.h>
 #include <OrbitControlException.h>
 #include <cstdio>
+#include <cstring>
 #include <rtems/error.h>
-#include <syslog.h>
-#include <utils.h>
 #include <bpmDefs.h> /* contains x/y channel scaling factors */
 #include <ics110bl.h> /* need the definition of ADC_PER_VOLT */
 
@@ -22,7 +21,8 @@ DataHandler* DataHandler::instance = 0;
 DataHandler::DataHandler() :
 	//ctor-initializer list
 	arg(0),priority(OrbitControllerPriority+3),
-	tid(0),inpQueueId(0)
+	tid(0),inpQueueId(0),
+	samplesPerAvg(5000)
 { 	syslog(LOG_INFO, "DataHandler instance ctor!!\n"); }
 
 DataHandler* DataHandler::getInstance() {
@@ -35,31 +35,38 @@ DataHandler* DataHandler::getInstance() {
 void DataHandler::destroyInstance() {
 	delete instance;
 }
-
-DataHandler::~DataHandler() {
-	if(tid) { rtems_task_delete(tid); }
-	if(inpQueueId) { rtems_message_queue_delete(inpQueueId); }
-	syslog(LOG_INFO, "DataHandler dtor!!\n");
+/** NOTE: data clients must first make an initial call to clientRegister(threadID) */
+BPMData* DataHandler::getBPMAverages() {
+	rtems_event_set eventsOut = 0;
+	//block here, waiting for data
+	rtems_status_code rc = rtems_event_receive(newDataEvent,RTEMS_EVENT_ANY|RTEMS_LOCAL,RTEMS_NO_TIMEOUT,&eventsOut);
+	TestDirective(rc,"DataHander: msg_q_rcv() failure");
+	BPMData* avgs = new BPMData(108);//FIXME
+	memcpy(avgs->buf,sorted,sizeof(double)*avgs->numElements);
+	return avgs;
 }
 
-rtems_task DataHandler::threadStart(rtems_task_argument arg) {
-	DataHandler *dh = (DataHandler*)arg;
-	dh->threadBody(dh->arg);
-}
-
-rtems_task DataHandler::threadBody(rtems_task_argument arg) {
-
-}
-
-void DataHandler::enqueRawData(RawDataSegment *ds) const {
-	rtems_status_code rc = rtems_message_queue_send(inpQueueId, ds, sizeof(RawDataSegment)*NumAdcModules);
-	if(rc != RTEMS_SUCCESSFUL) {
-		//Fatal
-		char msg[256];
-		snprintf(msg,sizeof(msg),"DataHandler: msg_q_send() failure--%s",
-									rtems_status_text(rc));
-		throw OrbitControlException(msg);
+void DataHandler::clientRegister(rtems_id threadId) {
+	for(uint32_t i=0; i<clients.size(); i++) {
+		if(clients[i]==threadId) {
+			return;//already registered
+		}
 	}
+	clients.push_back(threadId);
+}
+
+void DataHandler::clientUnregister(rtems_id threadId) {
+	for(uint32_t i=0; i<clients.size(); i++) {
+		if(clients[i]==threadId) {
+			clients.erase(clients.begin()+i);
+			return;
+		}
+	}
+}
+
+void DataHandler::enqueRawData(AdcData* rdSegment) const {
+	rtems_status_code rc = rtems_message_queue_send(inpQueueId, ds, sizeof(AdcData)*NumAdcModules);
+	TestDirective(rc,"DataHandler: msg_q_send() failure");
 }
 
 /** Create thread and input message queue, and start the thread */
@@ -72,13 +79,8 @@ void DataHandler::start(rtems_task_argument arg) {
 							RTEMS_FLOATING_POINT|RTEMS_LOCAL,
 							RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),
 							&tid);
-	if(rc != RTEMS_SUCCESSFUL) {
-		//Fatal
-		char msg[256];
-		snprintf(msg,sizeof(msg),"DataHandler: task_create() failure--%s",
-									rtems_status_text(rc));
-		throw OrbitControlException(msg);
-	}
+	TestDirective(rc,"DataHandler: task_create() failure");
+
 	/* raw-data queue: fed by OrbitController */
 	inpQueueName = rtems_build_name('D','H','I','q');
 	rc = rtems_message_queue_create(inpQueueName,
@@ -86,24 +88,12 @@ void DataHandler::start(rtems_task_argument arg) {
 									sizeof(RawDataSegment)*NumAdcModules/*msg size*/,
 									RTEMS_LOCAL|RTEMS_FIFO,
 									&inpQueueId);
-	if(rc != RTEMS_SUCCESSFUL) {
-		//Fatal
-		char msg[256];
-		snprintf(msg,sizeof(msg),"DataHandler: msg_q_create() failure--%s",
-									rtems_status_text(rc));
-		throw OrbitControlException(msg);
-	}
+	TestDirective(rc,"DataHandler: input msg_q_create() failure");
+
 	this->arg = arg;
 	rc = rtems_task_start(tid,threadStart,(rtems_task_argument)this);
-	if(rc != RTEMS_SUCCESSFUL) {
-		//Fatal
-		char msg[256];
-		snprintf(msg,sizeof(msg),"DataHandler: task_start() failure--%s",
-									rtems_status_text(rc));
-		throw OrbitControlException(msg);
-	}
+	TestDirective(rc,"DataHandler: task_start() failure");
 	syslog(LOG_INFO, "Started DataHandler with priority %d\n",priority);
-
 }
 
 void DataHandler::scaleBPMAverages(double *buf, uint32_t numSamples) const {
@@ -167,44 +157,103 @@ void DataHandler::sortBPMData(double *sortedArray, double *rawArray) const {
  * @param sums
  * @param rdSegments Pointer to an array of (4) RawDataSegments.
  */
-void DataHandler::sumBPMChannelData(double* sums, RawDataSegment* rdSegments) {
+uint32_t DataHandler::sumBPMChannelData(double* sums, AdcData* rdSegments[]) {
 	uint32_t nthFrame,nthAdc,nthChannel;
-	int32_t numSamplesSummed=0;
+	uint32_t numSamplesSummed=0;
 
 	/* XXX -- assumes each rdSegment has an equal # of frames... */
-	for(nthFrame=0; nthFrame<rdSegments[0].numFrames; nthFrame++) { /* for each ADC frame in rdSegment[].buf... */
-		int nthFrameOffset = nthFrame*adcChannelsPerFrame;
+	for(nthFrame=0; nthFrame<rdSegments[nthFrame]->getFrames(); nthFrame++) { /* for each ADC frame in rdSegment[].buf... */
+		int nthFrameOffset = nthFrame*rdSegments[nthFrame]->getChannelsPerFrame();
 
 		for(nthAdc=0; nthAdc<NumAdcModules; nthAdc++) { /* for each ADC... */
-			int nthAdcOffset = nthAdc*adcChannelsPerFrame;
+			int nthAdcOffset = nthAdc*rdSegments[nthAdc]->getChannelsPerFrame();
 
-			for(nthChannel=0; nthChannel<adcChannelsPerFrame; nthChannel++) { /* for each channel of this frame... */
-				sums[nthAdcOffset+nthChannel] += (double)(rdSegments[nthAdc].buf[nthFrameOffset+nthChannel]);
+			for(nthChannel=0; nthChannel<rdSegments[nthAdc]->getChannelsPerFrame(); nthChannel++) { /* for each channel of this frame... */
+				sums[nthAdcOffset+nthChannel] += (double)(rdSegments[nthAdc]->getBuffer()[nthFrameOffset+nthChannel]);
 				//sumsSqrd[nthAdcOffset+nthChannel] += pow(sums[nthAdcOffset+nthChannel],2);
 			}
 
 		}
 		numSamplesSummed++;
-
-		/*if(numSamplesSummed==localSamplesPerAvg) {
-			 pass the avg'd BPM data on to the CS-interface
-			TransmitAvgs(sums);
-			 zero the array of running-sums,reset counter, update num pts in avg
-			memset(sums, 0, sizeof(double)*sizeof(sums)/sizeof(sums[0]));
-			//memset(sumsSqrd, 0, sizeof(double)*sizeof(sumsSqrd)/sizeof(sumsSqrd[0]));
-			numSamplesSummed=0;
-			 XXX - SamplesPerAvg can be set via orbitcontrolUI app
-			if(localSamplesPerAvg != SamplesPerAvg) {
-				syslog(LOG_INFO, "DataHandler: changing localSamplesPerAvg=%d to\n\tSamplesPerAvg=%d\n",
-						localSamplesPerAvg,SamplesPerAvg);
-				localSamplesPerAvg = SamplesPerAvg;
-			}
-		}*/
-
 	}
 
 	/* release allocated memory */
 	for(nthAdc=0; nthAdc<NumAdcModules; nthAdc++) {
-		//free(rdSegments[nthAdc].buf);
+		delete rdSegments[nthAdc];
+	}
+
+	return numSamplesSummed;
+}
+
+/*************************** private interface ****************************************/
+DataHandler::~DataHandler() {
+	if(tid) { rtems_task_delete(tid); }
+	if(inpQueueId) { rtems_message_queue_delete(inpQueueId); }
+	syslog(LOG_INFO, "DataHandler dtor!!\n");
+}
+
+rtems_task DataHandler::threadStart(rtems_task_argument arg) {
+	DataHandler *dh = (DataHandler*)arg;
+	dh->threadBody(dh->arg);
+}
+
+rtems_task DataHandler::threadBody(rtems_task_argument arg) {
+	uint32_t localSamplesPerAvg = samplesPerAvg;
+	uint32_t nthFrame,nthAdc,nthChannel;
+	uint32_t numSamplesSummed=0;
+
+	syslog(LOG_INFO, "DataHandler: entering main loop...\n");
+	for(;;) {
+		size_t size = 0;
+		rtems_status_code rc = rtems_message_queue_receive(inpQueueId,ds,&size,
+									RTEMS_LOCAL|RTEMS_WAIT,RTEMS_NO_TIMEOUT);
+		TestDirective(rc,"DataHandler: msg_q_rcv() failure");
+
+		/* XXX -- assumes each rdSegment has an equal # of frames... */
+		for(nthFrame=0; nthFrame<ds[nthFrame]->getFrames(); nthFrame++) { /* for each ADC frame in rdSegment[].buf... */
+			int nthFrameOffset = nthFrame*ds[nthFrame]->getChannelsPerFrame();
+
+			for(nthAdc=0; nthAdc<NumAdcModules; nthAdc++) { /* for each ADC... */
+				int nthAdcOffset = nthAdc*ds[nthAdc]->getChannelsPerFrame();
+
+				for(nthChannel=0; nthChannel<ds[nthAdc]->getChannelsPerFrame(); nthChannel++) { /* for each channel of this frame... */
+					sums[nthAdcOffset+nthChannel] += (double)(ds[nthAdc]->getBuffer()[nthFrameOffset+nthChannel]);
+					//sumsSqrd[nthAdcOffset+nthChannel] += pow(sums[nthAdcOffset+nthChannel],2);
+				}
+
+			}
+			numSamplesSummed++;
+		}
+		if(numSamplesSummed==localSamplesPerAvg) {
+			sortBPMData(sorted,sums);
+			scaleBPMAverages(sorted,localSamplesPerAvg);
+			/* pass the avg'd BPM data on to the CS-interface */
+			deliverBPMAverages();
+			/* zero the array of running-sums,reset counter, update num pts in avg */
+			memset(sums, 0, sizeof(double)*sizeof(sums)/sizeof(sums[0]));
+			//memset(sumsSqrd, 0, sizeof(double)*sizeof(sumsSqrd)/sizeof(sumsSqrd[0]));
+			numSamplesSummed=0;
+			/* XXX - SamplesPerAvg can be set via orbitcontrolUI app */
+			if(localSamplesPerAvg != samplesPerAvg) {
+				syslog(LOG_INFO, "DataHandler: changing localSamplesPerAvg=%d to\n\tSamplesPerAvg=%d\n",
+						localSamplesPerAvg,samplesPerAvg);
+				localSamplesPerAvg = samplesPerAvg;
+			}
+		}
+		/* release allocated memory */
+		for(nthAdc=0; nthAdc<NumAdcModules; nthAdc++) {
+			delete ds[nthAdc];
+		}
+	}
+}
+
+void DataHandler::deliverBPMAverages() {
+	for(uint32_t i=0; i<clients.size(); i++) {
+		//wake up sleeping client-threads:
+		rtems_status_code rc = rtems_event_send(clients[i],newDataEvent);
+		if(rc != RTEMS_SUCCESSFUL) {
+			//not fatal; just report it
+			syslog(LOG_INFO, "DataHandler: event_send() failure--%s\n",rtems_status_text(rc));
+		}
 	}
 }

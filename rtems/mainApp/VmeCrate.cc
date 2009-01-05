@@ -17,7 +17,6 @@
 #include <syslog.h>
 
 #include <sis1100_api.h>
-#include <utils.h>
 #include <string>
 
 using std::string;
@@ -46,7 +45,6 @@ VmeCrate::VmeCrate(uint32_t crateId) :
 	if(fd < 0) {
 		string err("Failed to open ");
 		err += devName;
-		syslog(LOG_INFO, "%s: %s\n",err.c_str(),strerror(fd));
 		err += ": ";
 		err += strerror(fd);
 		throw OrbitControlException(err.c_str());

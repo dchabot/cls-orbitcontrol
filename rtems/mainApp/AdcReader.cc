@@ -11,7 +11,6 @@
 #include <cstdio>
 #include <rtems/error.h>
 #include <syslog.h>
-#include <utils.h>
 
 AdcReader::AdcReader(Ics110blModule* mod, rtems_id bid) :
 	//ctor-initializer list
@@ -20,10 +19,9 @@ AdcReader::AdcReader(Ics110blModule* mod, rtems_id bid) :
 	adc(mod),data(NULL)
 {
 	static int i = 0;
-	rtems_status_code rc;
 	/* these threads are lower priority than their master (OrbitController)... */
 	threadName = rtems_build_name('R','D', 'R',(char)(i+48));
-	rc = rtems_task_create(threadName,
+	rtems_status_code rc = rtems_task_create(threadName,
 							priority,
 							RTEMS_MINIMUM_STACK_SIZE*8,
 							RTEMS_NO_FLOATING_POINT|RTEMS_LOCAL,
@@ -37,7 +35,6 @@ AdcReader::AdcReader(Ics110blModule* mod, rtems_id bid) :
 									instance,rtems_status_text(rc));
 		throw OrbitControlException(msg);
 	}
-
 	i++;
 }
 
@@ -49,14 +46,6 @@ AdcReader::~AdcReader() {
 /* Since threadStart() is a static method, it has no "this" ptr
  * hidden in its call stack. Therefore, its an acceptable thread-entry-point for the
  * native c-function, rtems_task_start().
- *
- * WTF ?!?!... maybe some c++ guru can explain to me why threadBody() chokes (hangs sys)
- * if I use references(&) in threadStart() instead of good 'ol pointers...?
- *
- * Or, for that matter, how am I even able to call a non-static method (threadBody())
- * from within the static method threadStart() ? Shouldn't the compiler catch that ??
- *
- * Does the use of a pointer here (instead of reference) make all this magic possible ??
  */
 rtems_task AdcReader::threadStart(rtems_task_argument arg) {
 	AdcReader *rdr = (AdcReader*)arg;
@@ -64,15 +53,13 @@ rtems_task AdcReader::threadStart(rtems_task_argument arg) {
 }
 
 rtems_task AdcReader::threadBody(rtems_task_argument arg) {
-	rtems_status_code rc;
 	uint32_t wordsRequested,wordsRead;
 
-	syslog(LOG_INFO, "AdcReader#%d is alive!!!\n",instance);
 	for(;;) {
 		uint16_t adcStatus = 0;
 		rtems_event_set eventsIn = 0;
 
-		rc = rtems_barrier_wait(barrierId, 50000);
+		rtems_status_code rc = rtems_barrier_wait(barrierId, 50000);
 		if(rc != RTEMS_SUCCESSFUL) {
 			//Fatal: bail out
 			char msg[256];//("AdcReader: barrier_wait()--");
@@ -126,9 +113,7 @@ rtems_task AdcReader::threadBody(rtems_task_argument arg) {
 										(unsigned int)wordsRead);
 			throw OrbitControlException(msg);
 		}
-	}
-	syslog(LOG_INFO, "AdcReader[%d]: deleting self", instance);
-	rtems_task_delete(tid);
+	}//end for(;;)
 }
 
 void AdcReader::start(rtems_task_argument arg) {

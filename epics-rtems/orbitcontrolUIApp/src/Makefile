@@ -9,8 +9,8 @@ include $(TOP)/configure/CONFIG
 # Build the IOC application
 
 USR_CFLAGS_RTEMS += -g -I ../../../../rtems/include
-USR_CXXFLAGS_RTEMS += -g -I ../../../../rtems/include
-USR_LDFLAGS_RTEMS += -g
+USR_CXXFLAGS_RTEMS += ${USR_CFLAGS_RTEMS}
+USR_LDFLAGS_RTEMS += -g -Wl,-Map,linkmap
 
 PROD_IOC_RTEMS = orbitcontrolUI
 # orbitcontrolUI.dbd will be created and installed
@@ -20,11 +20,11 @@ DBD += orbitcontrolUI.dbd
 orbitcontrolUI_SRCS += orbitcontrolUI_registerRecordDeviceDriver.cpp
 
 # custom device support:
-orbitcontrolUI_SRCS += devSupBPMWaveform.c
-orbitcontrolUI_SRCS += devSupOCMSetpoint.c
-orbitcontrolUI_SRCS += devSupBPMSubArray.c
-orbitcontrolUI_SRCS += devSupOCMWaveform.c
-orbitcontrolUI_SRCS += devSupBPMSamplesSetpoint.c
+orbitcontrolUI_SRCS += devSupBPMWaveform.cc
+orbitcontrolUI_SRCS += devSupOCMSetpoint.cc
+orbitcontrolUI_SRCS += devSupBPMSubArray.cc
+#orbitcontrolUI_SRCS += devSupOCMWaveform.cc
+#orbitcontrolUI_SRCS += devSupBPMSamplesSetpoint.cc
 
 # Build the main IOC entry point on workstation OSs.
 orbitcontrolUI_SRCS_DEFAULT += orbitcontrolUIMain.cpp

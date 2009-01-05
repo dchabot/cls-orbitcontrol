@@ -4,5 +4,5 @@ include "base.dbd"
 device(waveform, INST_IO, devSupBPMWaveform, "BPM Array")
 device(longout, INST_IO, devSupOCMSetpoint, "PwrSupply Setpoint")
 device(subArray, PV_LINK, devSupBPMSubArray, "BPM SubArray")
-device(waveform, CONSTANT, devSupOCMWaveform, "OCM Array")
-device(longout, INST_IO, devSupBPMSamplesSetpoint, "BPM NumSamples")
+#device(waveform, CONSTANT, devSupOCMWaveform, "OCM Array")
+#device(longout, INST_IO, devSupBPMSamplesSetpoint, "BPM NumSamples")

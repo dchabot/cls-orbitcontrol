@@ -21,8 +21,12 @@
 
 #include <syslog.h>
 
-static long init_record(struct longoutRecord* lor);
-static long write_longout(struct longoutRecord* lor);
+#ifdef __cplusplus
+	extern "C" {
+#endif
+
+static long init_record(void* lor);
+static long write_longout(void* lor);
 
 struct {
     long        number;
@@ -44,29 +48,34 @@ epicsExportAddress(dset,devSupBPMSamplesSetpoint);
 
 
 static long
-init_record(struct longoutRecord* lor) {
-
+init_record(void* lor) {
+	struct longoutRecord* lorp = (longoutRecord*)lor;
 	/*chk INP type:*/
-	if (lor->out.type != INST_IO) {
-		syslog(LOG_INFO,"%s: OUT field type should be INST_IO\n", lor->name);
+	if (lorp->out.type != INST_IO) {
+		syslog(LOG_INFO,"%s: OUT field type should be INST_IO\n", lorp->name);
 		return (S_db_badField);
 	}
-	syslog(LOG_INFO,"%s->out=%s\n",lor->name,lor->out.value.instio.string);
+	syslog(LOG_INFO,"%s->out=%s\n",lorp->name,lorp->out.value.instio.string);
 
 	return 0;
 }
 
 static long
-write_longout(struct longoutRecord* lor) {
-	extern uint32_t SamplesPerAvg;
+write_longout(void* lor) {
+	struct longoutRecord* lorp = (longoutRecord*)lor;
+	//extern uint32_t SamplesPerAvg;
 
-	if((lor->val < lor->hopr) && (lor->val > lor->lopr)) {
-		SamplesPerAvg = lor->val;
+	if((lorp->val < lorp->hopr) && (lorp->val > lorp->lopr)) {
+		//SamplesPerAvg = lorp->val;
 	}
 	else {
-		syslog(LOG_INFO," val %d outside acceptable range!!\n",lor->val);
+		syslog(LOG_INFO," val %d outside acceptable range!!\n",lorp->val);
 		return -1;
 	}
 
 	return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif

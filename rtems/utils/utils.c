@@ -22,9 +22,9 @@ void FatalErrorHandler(FatalErrorCallback cb) {
 	}
 }
 
-int TestDirective(rtems_status_code rc, const char* msg) {
+int TestDirective(rtems_status_code rc, const char* str) {
 	if(rc != RTEMS_SUCCESSFUL) {
-		syslog(LOG_INFO, "Directive, %s, failed: %s\n",msg,rtems_status_text(rc));
+		syslog(LOG_INFO, "Directive, %s, failed: %s\n",str,rtems_status_text(rc));
 		return -1;
 	}
 	return 0;

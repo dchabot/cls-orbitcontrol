@@ -16,20 +16,21 @@ C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
 
 # C++ source names, if any, go here -- minus the .cc
 CC_PIECES=VmeCrate VmeModule Ics110blModule Vmic2536Module
-CC_PIECES+=OrbitController
+CC_PIECES+=OrbitController OrbitControlException
 CC_PIECES+=StartApp AdcReader DataHandler
-CC_PIECES+=AdcIsr AdcData
+CC_PIECES+=AdcIsr AdcData PowerSupplyBulk PowerSupplyChannel
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
 
 H_PIECES=${INCLUDE_DIR}/bpmDefs
 H_PIECES+=${INCLUDE_DIR}/AdcReaderThread ${INCLUDE_DIR}/OrbitController
+H_PIECES+=${INCLUDE_DIR}/OrbitControlException
 H_PIECES+=${INCLUDE_DIR}/DataHandler ${INCLUDE_DIR}/PSController
 H_PIECES+=${INCLUDE_DIR}/VmeCrate ${INCLUDE_DIR}/VmeModule
 H_PIECES+=${INCLUDE_DIR}/Ics110blModule ${INCLUDE_DIR}/Vmic2536Module
-H_PIECES+=${INCLUDE_DIR}/AdcReader ${INCLUDE_DIR}/OrbitController
-H_PIECES+=${INCLUDE_DIR}/AdcData ${INCLUDE_DIR}/AdcIsr
+H_PIECES+=${INCLUDE_DIR}/AdcReader ${INCLUDE_DIR}/AdcData ${INCLUDE_DIR}/AdcIsr
+H_PIECES+=${INCLUDE_DIR}/PowerSupplyBulk ${INCLUDE_DIR}/PowerSupplyChannel
 H_FILES=$(H_PIECES:%=%.h)
 
 # Assembly source names, if any, go here -- minus the .S

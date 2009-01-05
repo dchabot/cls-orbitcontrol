@@ -26,9 +26,10 @@ Vmic2536Module::~Vmic2536Module() {
 void Vmic2536Module::initialize() {
 	uint16_t id = getId();
 	if(id != VMIC_2536_BOARD_ID) {
-		syslog(LOG_INFO, "VMIC-2536: crate %d, addr %#x, incorrect board ID: %#x\n",
+		char str[128];
+		snprintf(str,sizeof(str),"Problem initializing VMIC-2536: crate %d, addr %#x, incorrect board ID: %#x\n",
 						crate->getId(), vmeBaseAddr, id);
-		throw OrbitControlException("Problem initializing VMIC-2536!!!");
+		throw OrbitControlException(str);
 	}
 	/* turn off the test mode and enable the output register */
 	setControl(VMIC_2536_INIT);

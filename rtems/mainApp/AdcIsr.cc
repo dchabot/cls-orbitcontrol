@@ -8,7 +8,6 @@
 #include <AdcIsr.h>
 #include <sis1100_api.h>
 #include <syslog.h>
-#include <utils.h>
 #include <OrbitControlException.h>
 
 
@@ -56,8 +55,10 @@ void AdcIsr::isr(void *arg, uint8_t vector) {
 	parg->adc->disableInterrupt();
 	/* inform the OrbitController of this event*/
 	rc = rtems_barrier_wait(parg->bid,RTEMS_NO_TIMEOUT);
-	//don't throw() from here:
-	TestDirective(rc, "AdcIsr -- rtems_barrier_wait()");
+	//don't throw() from here (interrupt context):
+	if(rc != RTEMS_SUCCESSFUL) {
+		syslog(LOG_INFO,"AdcIsr -- rtems_barrier_wait() failure--%s",rtems_status_text(rc));
+	}
 }
 
 

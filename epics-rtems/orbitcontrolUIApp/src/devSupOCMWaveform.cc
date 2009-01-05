@@ -13,11 +13,14 @@
 #include <epicsExport.h>
 #include <epicsThread.h>
 #include <epicsMessageQueue.h>
-#include "devSupOCMWaveform.h"
 #include <syslog.h>
 
-static long init_record(struct waveformRecord* wfr);
-static long read_wf(struct waveformRecord* wfr);
+#ifdef __cplusplus
+	extern "C" {
+#endif
+
+static long init_record(void* wfr);
+static long read_wf(void* wfr);
 
 struct {
     long        number;
@@ -37,21 +40,22 @@ struct {
 epicsExportAddress(dset,devSupOCMWaveform);
 
 
-static long init_record(struct waveformRecord* wfr) {
+static long init_record(void* wfr) {
+	waveformRecord* wfrp = (waveformRecord*)wfr;
 	static epicsMessageQueueId qid = NULL;
 	extern rtems_id OcmSetpointQID;
 
 	syslog(LOG_INFO,"Init OCM Waveform\n");
 	/* chk INP type: has to be "caput()-able" */
-	if (wfr->inp.type != CONSTANT) {
-		syslog(LOG_INFO,"%s: INP field type must be CONSTANT\n", wfr->name);
+	if (wfrp->inp.type != CONSTANT) {
+		syslog(LOG_INFO,"%s: INP field type must be CONSTANT\n", wfrp->name);
 		return (S_db_badField);
 	}
-	syslog(LOG_INFO,"wfr->inp.value.constantStr=%s\n",wfr->inp.value.constantStr);
+	syslog(LOG_INFO,"wfrp->inp.value.constantStr=%s\n",wfrp->inp.value.constantStr);
 	/* XXX -- Record Ref Manual says mem is allocated
 	 * for buffer before we get here (pg 301)
 	 */
-	if(wfr->bptr == NULL) {
+	if(wfrp->bptr == NULL) {
 		/*allocate mem for record buffer using NELM and FTVL.*/
 		syslog(LOG_INFO,"BPTR is NULL !!\n");
 		return -1;
@@ -65,7 +69,7 @@ static long init_record(struct waveformRecord* wfr) {
 	}
 	OcmSetpointQID = qid->id;
 	/* we'll need the QID in read_wf() */
-	wfr->dpvt = qid;
+	wfrp->dpvt = qid;
 
 	return 0;
 }
@@ -74,27 +78,32 @@ static long init_record(struct waveformRecord* wfr) {
  * copy BPTR contents to a malloc'd buf and ship off a message to
  * the OrbitController
  */
-static long read_wf(struct waveformRecord* wfr) {
+static long read_wf(void* wfr) {
+	waveformRecord* wfrp = (waveformRecord*)wfr;
 	int rc;
 	spMsg msg;
 	int32_t *buf = NULL;
-	ssize_t numBytes = wfr->nelm*dbValueSize(wfr->ftvl);
+	ssize_t numBytes = wfrp->nelm*dbValueSize(wfrp->ftvl);
 
 	buf = calloc(1, numBytes);
 	if(buf==NULL) {
 		syslog(LOG_INFO, "Couldn't alloc-mem for OCM setpoint buffer!!\n");
 		return -1;
 	}
-	memcpy(buf, wfr->bptr, numBytes);
+	memcpy(buf, wfrp->bptr, numBytes);
 	msg.buf = buf;
-	msg.numsp = wfr->nelm;
+	msg.numsp = wfrp->nelm;
 
-	rc = epicsMessageQueueTrySend((epicsMessageQueueId)(wfr->dpvt),&msg,sizeof(spMsg));
+	rc = epicsMessageQueueTrySend((epicsMessageQueueId)(wfrp->dpvt),&msg,sizeof(spMsg));
 	if(rc < 0) {
 		syslog(LOG_INFO,"Failure of epicsMessageQueueTrySend()!! rc=%d\n",rc);
 		if(buf) { free(buf); }
 		return -1;
 	}
-	wfr->nord = wfr->nelm;
+	wfrp->nord = wfrp->nelm;
     return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif

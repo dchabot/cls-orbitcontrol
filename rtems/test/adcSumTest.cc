@@ -114,7 +114,8 @@ extern "C" void adcSumTest(int numIters) {
 	rtems_interrupt_level level;
 	const uint32_t NumAdcModules=4;
 	static DataSegment rdSegments[NumAdcModules];
-	static int64_t sums[NumAdcModules*AdcChannelsPerFrame];
+	static double sums[NumAdcModules*AdcChannelsPerFrame];
+	static double sumsSqrd[NumAdcModules*AdcChannelsPerFrame];
 	static double sorted[NumAdcModules*AdcChannelsPerFrame];
 
 	now=then=tmp=0;
@@ -151,14 +152,16 @@ extern "C" void adcSumTest(int numIters) {
 					int nthAdcOffset = nthAdc*AdcChannelsPerFrame;
 
 					for(nthChannel=0; nthChannel<AdcChannelsPerFrame; nthChannel++) { /* for each channel of this frame... */
-						sums[nthAdcOffset+nthChannel] += (int64_t)(rdSegments[nthAdc].buf[nthFrameOffset+nthChannel]);
-						//sumsSqrd[nthAdcOffset+nthChannel] += pow(sums[nthAdcOffset+nthChannel],2);
+						sums[nthAdcOffset+nthChannel] += (double)(rdSegments[nthAdc].buf[nthFrameOffset+nthChannel]);
+						sumsSqrd[nthAdcOffset+nthChannel] += pow(sums[nthAdcOffset+nthChannel],2);
 					}
 
 				}
 				numSamplesSummed++;
 			}
 			sortBPMData(sorted, (double*)sums);
+			scaleBPMAverages(sorted, numSamplesSummed);
+			sortBPMData(sorted, (double*)sumsSqrd);
 			scaleBPMAverages(sorted, numSamplesSummed);
 			rdtscll(now);
 

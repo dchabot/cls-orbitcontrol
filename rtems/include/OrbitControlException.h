@@ -8,6 +8,8 @@
 #ifndef ORBITCONTROLEXCEPTION_H_
 #define ORBITCONTROLEXCEPTION_H_
 
+#include <rtems.h>
+#include <rtems/error.h>
 #include <syslog.h>
 #include <stdexcept>
 using std::runtime_error;
@@ -25,4 +27,5 @@ private:
 	int returncode;
 };
 
+void TestDirective(rtems_status_code rc, const char* str);
 #endif /* ORBITCONTROLEXCEPTION_H_ */

@@ -15,9 +15,8 @@
 #include <AdcIsr.h>
 #include <AdcData.h>
 #include <DataHandler.h>
-//if we're using <vector>, in seems like we're req'd to drag in <iterator> as well :-(
+#include <PowerSupplyChannel.h>
 #include <vector>
-#include <iterator>
 #include <rtems.h>
 #include <stdint.h>
 
@@ -28,17 +27,30 @@ const rtems_task_priority OrbitControllerPriority=50;
 const uint32_t NumAdcModules = 4;
 const uint32_t NumAdcReaders = 4;
 const uint32_t NumVmeCrates = 4;
+//FIXME -- this should be implemented as a class, 'cause c++ enums suck ass :-(
+enum OrbitControllerMode {ASSISTED=0,AUTONOMOUS=1};
+
+
+
+struct SetpointMsg {
+	SetpointMsg(char* prefix, int32_t setpoint):channelPrefix(prefix),sp(setpoint){}
+	~SetpointMsg(){}
+	char* channelPrefix;
+	int32_t sp;
+};
 
 /**
- * A Singleton class for managing the storage-ring orbit control system.
+ * A Singleton class for managing the storage-ring orbit control system. Based on
+ * GoF pattern (pg 127).
  *
- * After obtaining an object instance via OrbitController::getInstance(),
- * the initialize() method should be invoked prior to calling start(dbl rate).
+ * After obtaining THE object instance via OrbitController::getInstance(),
+ * the initialize(dbl rate) method should be invoked prior to calling start().
  *
  * If initialize() is NOT called prior to start(), the ICS-110BL ADCz will be configured
  * with a default sample-rate (aka frame-rate) of 10 kHz.
  *
- * Don't forget to call destroyInstance() to release all resources!!
+ * XXX -- don't forget to call destroyInstance() to release all resources !!!
+ *
  */
 class OrbitController {
 public:
@@ -46,6 +58,12 @@ public:
 	void initialize(const double adcSampleRate);
 	void start(rtems_task_argument arg);
 	void destroyInstance();
+	double getAdcFrameRateSetpoint() const;
+	double getAdcFrameRateFeedback() const;
+	OrbitControllerMode getMode() const;
+	void setMode(OrbitControllerMode mode);
+	void enquePowerSupplySetpoint(char* chId, int32_t setpoint);
+	PowerSupplyChannel* getPowerSupplyChannel(char* chId) const;
 
 private:
 	OrbitController();
@@ -72,6 +90,8 @@ private:
 
 	rtems_interval rtemsTicksPerSecond;
 	uint32_t adcFramesPerTick;
+	double adcFrameRateSetpoint;
+	double adcFrameRateFeedback;
 
 	rtems_id isrBarrierId;
 	rtems_name isrBarrierName;
@@ -86,6 +106,26 @@ private:
 	AdcData* rdSegments[NumAdcModules];
 
 	bool initialized;
+	OrbitControllerMode mode;
+
+	rtems_id spQueueId;
+	rtems_name spQueueName;
 };
 
+
+inline double OrbitController::getAdcFrameRateSetpoint() const {
+	return adcFrameRateSetpoint;
+}
+
+inline double OrbitController::getAdcFrameRateFeedback() const {
+	return adcFrameRateFeedback;
+}
+
+inline OrbitControllerMode OrbitController::getMode() const {
+	return mode;
+}
+
+inline void OrbitController::setMode(OrbitControllerMode mode) {
+	this->mode = mode;
+}
 #endif /* ORBITCONTROLLER_H_ */

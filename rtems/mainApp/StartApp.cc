@@ -8,21 +8,21 @@
 #include <VmeCrate.h>
 #include <Ics110blModule.h>
 #include <Vmic2536Module.h>
-#include "DataHandler.h"
+#include <DataHandler.h>
 #include <AdcReader.h>
 #include <AdcData.h>
 #include <syslog.h>
 #include <rtems.h>
-#include "OrbitController.h"
+#include <OrbitController.h>
 #include <OrbitControlException.h>
 
 #include <iostream>
 using std::cout;
 using std::endl;
 
-/* to avoid c++ name-mangling, make this callable from "c"... (i.e. CEXP cmdline) */
+/* avoid c++ name-mangling, make this callable from "c"... (i.e. CEXP cmdline) */
 extern "C" void startApp() {
-	OrbitController *oc = OrbitController::getInstance();
+	OrbitController* oc = OrbitController::getInstance();
 	try {
 		//oc->initialize(1.0);
 		oc->start(0);
