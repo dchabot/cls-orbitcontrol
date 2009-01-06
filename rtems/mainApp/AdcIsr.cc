@@ -39,7 +39,6 @@ AdcIsr::~AdcIsr() {
 		//DO NOT THROW EXCEPTIONS FROM DTORS !!!!!!!
 		syslog(LOG_INFO, "Failed to remove ADC Isr\n");
 	}
-	syslog(LOG_INFO, "AdcIsr dtor!!\n");
 }
 
 /***************************** private interface ***********************************/

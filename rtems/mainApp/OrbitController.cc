@@ -29,20 +29,7 @@ OrbitController::OrbitController() :
 	spQueueId(0),spQueueName(0)
 { }
 
-OrbitController::~OrbitController() {
-	syslog(LOG_INFO, "Destroying OrbitController instance!!\n");
-	stopAdcAcquisition();
-	resetAdcFifos();
-	if(tid) { rtems_task_delete(tid); }
-	if(spQueueId) { rtems_message_queue_delete(spQueueId); }
-	if(isrBarrierId) { rtems_barrier_delete(isrBarrierId); }
-	if(rdrBarrierId) { rtems_barrier_delete(rdrBarrierId); }
-	isrArray.clear();
-	rdrArray.clear();
-	adcArray.clear();
-	crateArray.clear();
-	instance = 0;
-}
+OrbitController::~OrbitController() { }
 
 OrbitController* OrbitController::getInstance() {
 	//FIXME -- not thread-safe!!
@@ -57,6 +44,7 @@ void OrbitController::destroyInstance() {
 	stopAdcAcquisition();
 	resetAdcFifos();
 	if(tid) { rtems_task_delete(tid); }
+	if(spQueueId) { rtems_message_queue_delete(spQueueId); }
 	if(isrBarrierId) { rtems_barrier_delete(isrBarrierId); }
 	if(rdrBarrierId) { rtems_barrier_delete(rdrBarrierId); }
 	/* XXX -- vector.clear() will NOT call item dtors if items are pointers!! */
@@ -66,6 +54,8 @@ void OrbitController::destroyInstance() {
 	rdrArray.clear();
 	for(uint32_t i=0; i<adcArray.size(); i++) { delete adcArray[i]; }
 	adcArray.clear();
+	for(uint32_t i=0; i<dioArray.size(); i++) { delete dioArray[i]; }
+	dioArray.clear();
 	for(uint32_t i=0; i<crateArray.size(); i++) { delete crateArray[i]; }
 	crateArray.clear();
 	instance = 0;
@@ -138,7 +128,7 @@ void OrbitController::initialize(const double adcSampleRate) {
 
 void OrbitController::start(rtems_task_argument arg) {
 	if(initialized==false) {
-		initialize(10.1);
+		initialize();
 	}
 	//fire up the OrbitController thread:
 	this->arg = arg;
@@ -159,11 +149,11 @@ rtems_task OrbitController::threadStart(rtems_task_argument arg) {
 }
 
 rtems_task OrbitController::threadBody(rtems_task_argument arg) {
-	syslog(LOG_INFO, "Started OrbitController with priority %d\n",priority);
+	syslog(LOG_INFO, "OrbitController: entering main processing loop\n");
 	//start on the "edge" of a clock-tick:
 	rtems_task_wake_after(2);
 	startAdcAcquisition();
-	for(int j=0; j<1000; j++) {
+	for(int j=0; j<1000000; j++) {
 		//Wait for notification of ADC "fifo-half-full" event...
 		rendezvousWithIsr();
 		stopAdcAcquisition();
@@ -180,6 +170,8 @@ rtems_task OrbitController::threadBody(rtems_task_argument arg) {
 	}
 	stopAdcAcquisition();
 	resetAdcFifos();
+	//FIXME -- temporary!!!
+	rtems_event_send((rtems_id)arg,1);
 	rtems_task_delete(tid);
 }
 

@@ -25,10 +25,10 @@ extern "C" void startApp() {
 	OrbitController* oc = OrbitController::getInstance();
 	try {
 		//oc->initialize(1.0);
-		oc->start(0);
-		for(int i=0; i<12; i++) {
-			rtems_task_wake_after(5000);
-		}
+		oc->start(rtems_task_self());
+		rtems_event_set evOut = 0;
+		rtems_event_receive(1,RTEMS_EVENT_ANY,RTEMS_NO_TIMEOUT,&evOut);
+		syslog(LOG_INFO, "startApp(): Caught event !!\n");
 	}
 	catch(OrbitControlException& ex) {
 		cout << "Caught Exception!!!" << endl;

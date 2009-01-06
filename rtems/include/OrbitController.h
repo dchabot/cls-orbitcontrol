@@ -55,7 +55,7 @@ struct SetpointMsg {
 class OrbitController {
 public:
 	static OrbitController* getInstance();
-	void initialize(const double adcSampleRate);
+	void initialize(const double adcSampleRate=10.1);
 	void start(rtems_task_argument arg);
 	void destroyInstance();
 	double getAdcFrameRateSetpoint() const;

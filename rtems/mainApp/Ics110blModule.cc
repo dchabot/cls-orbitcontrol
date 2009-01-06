@@ -34,7 +34,6 @@ Ics110blModule::~Ics110blModule() {
 		disableInterrupt();
 		resetFifo();
 	}
-	syslog(LOG_INFO, "Ics110blModule dtor!!\n");
 }
 
 /** Assumes Ics110blModule::channelsPerFrame has already been set */

@@ -21,7 +21,5 @@ VmeModule::VmeModule(VmeCrate* c, uint32_t vmeAddr) :
 	pcA32BaseAddr = crate->getA32BaseAddr();
 }
 
-VmeModule::~VmeModule() {
-	syslog(LOG_INFO,"Destroying VME module, type=%s",type);
-}
+VmeModule::~VmeModule() { }
 

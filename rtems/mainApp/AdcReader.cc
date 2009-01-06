@@ -40,7 +40,6 @@ AdcReader::AdcReader(Ics110blModule* mod, rtems_id bid) :
 
 AdcReader::~AdcReader() {
 	rtems_task_delete(tid);
-	syslog(LOG_INFO, "AdcReader %d dtor!!\n",instance);
 }
 
 /* Since threadStart() is a static method, it has no "this" ptr

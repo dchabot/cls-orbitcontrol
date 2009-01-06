@@ -19,9 +19,7 @@ Vmic2536Module::Vmic2536Module(VmeCrate* c, uint32_t vmeAddr) :
 	initialized = false;
 }
 
-Vmic2536Module::~Vmic2536Module() {
-	syslog(LOG_INFO, "Vmic2536Module dtor!!\n");
-}
+Vmic2536Module::~Vmic2536Module() { }
 
 void Vmic2536Module::initialize() {
 	uint16_t id = getId();

@@ -6,7 +6,7 @@
  */
 
 #include <AdcData.h>
-
+#include <syslog.h>
 
 AdcData::AdcData(Ics110blModule* adc, uint32_t frames) :
 	//ctor-initializer list

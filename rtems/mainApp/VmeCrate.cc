@@ -68,8 +68,7 @@ VmeCrate::VmeCrate(uint32_t crateId) :
 VmeCrate::~VmeCrate() {
 	int rc = vme_clr_mmap_entry(fd, &a24BaseAddr, (1<<24)-1);
 	if(rc) {
-		syslog(LOG_INFO,"vme_clr_mmap_entry() failure!! crate#=%d rc=%d\n",id,rc);
+		syslog(LOG_INFO,"VME crate %d: vme_clr_mmap_entry() failure!! rc=%d\n",id,rc);
 	}
 	close(fd);
-	syslog(LOG_INFO,"VmeCrate %d dtor!!\n",id);
 }
