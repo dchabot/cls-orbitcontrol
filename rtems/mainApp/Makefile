@@ -18,7 +18,7 @@ C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
 CC_PIECES=VmeCrate VmeModule Ics110blModule Vmic2536Module
 CC_PIECES+=OrbitController OrbitControlException
 CC_PIECES+=StartApp AdcReader DataHandler
-CC_PIECES+=AdcIsr AdcData PowerSupplyBulk PowerSupplyChannel
+CC_PIECES+=AdcIsr PowerSupplyBulk PowerSupplyChannel
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 

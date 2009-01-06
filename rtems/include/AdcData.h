@@ -16,8 +16,15 @@
  */
 class AdcData {
 public:
-	AdcData(Ics110blModule* adc, uint32_t numFrames);
-	virtual ~AdcData();
+	AdcData(Ics110blModule* adc, uint32_t frames) :
+		//ctor-initializer list
+		numFrames(frames),
+		channelsPerFrame(adc->getChannelsPerFrame()),
+		bufSize(adc->getChannelsPerFrame()*numFrames)
+	{
+		buf = new int32_t[bufSize];
+	}
+	~AdcData() { delete []buf; }
 	int32_t* getBuffer() const;
 	uint32_t getFrames() const;
 	uint32_t getChannelsPerFrame() const;

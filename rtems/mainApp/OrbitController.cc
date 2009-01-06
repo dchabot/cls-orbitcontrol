@@ -153,7 +153,7 @@ rtems_task OrbitController::threadBody(rtems_task_argument arg) {
 	//start on the "edge" of a clock-tick:
 	rtems_task_wake_after(2);
 	startAdcAcquisition();
-	for(int j=0; j<1000000; j++) {
+	for(int j=0; j<10000; j++) {
 		//Wait for notification of ADC "fifo-half-full" event...
 		rendezvousWithIsr();
 		stopAdcAcquisition();
