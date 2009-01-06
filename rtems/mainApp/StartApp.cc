@@ -15,6 +15,7 @@
 #include <rtems.h>
 #include <OrbitController.h>
 #include <OrbitControlException.h>
+#include <Bpm.h>
 
 #include <iostream>
 using std::cout;
@@ -22,6 +23,7 @@ using std::endl;
 
 /* avoid c++ name-mangling, make this callable from "c"... (i.e. CEXP cmdline) */
 extern "C" void startApp() {
+	Bpm b("myBPM");
 	OrbitController* oc = OrbitController::getInstance();
 	try {
 		//oc->initialize(1.0);
@@ -36,7 +38,7 @@ extern "C" void startApp() {
 	}
 	catch(...) {
 		syslog(LOG_INFO,"Caught an exception!!\n");
-		//re-throw to someone who gives a sh*t :-)
+		//re-throw it up the stack; not much we can do here anyway... :-)
 		throw;
 	}
 

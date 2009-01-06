@@ -7,7 +7,6 @@
 
 #include <OrbitController.h>
 #include <OrbitControlException.h>
-#include <cstdio>
 #include <rtems/error.h>
 #include <sis1100_api.h>
 #include <syslog.h>
@@ -88,17 +87,11 @@ void OrbitController::initialize(const double adcSampleRate) {
 	spQueueName = rtems_build_name('S','P','Q','1');
 	rc = rtems_message_queue_create(spQueueName,
 									48+1/*FIXME -- max msgs in queue*/,
-									8 /*FIXME -- max msg size (bytes)*/,
+									sizeof(SetpointMsg)/*max msg size (bytes)*/,
 									RTEMS_LOCAL|RTEMS_FIFO,
 									&spQueueId);
 	TestDirective(rc, "OrbitController: power-supply msg_queue_create() failure");
-	if(rc != RTEMS_SUCCESSFUL) {
-		//fatal
-		char msg[256];
-		snprintf(msg,sizeof(msg),"OrbitController: power-supply msg_queue_create() failure--%s",
-									rtems_status_text(rc));
-		throw OrbitControlException(msg);
-	}
+
 	rtems_clock_get(RTEMS_CLOCK_GET_TICKS_PER_SECOND, &rtemsTicksPerSecond);
 	//initialize hardware control...
 	for(uint32_t i=0; i<NumVmeCrates; i++) {
@@ -153,7 +146,7 @@ rtems_task OrbitController::threadBody(rtems_task_argument arg) {
 	//start on the "edge" of a clock-tick:
 	rtems_task_wake_after(2);
 	startAdcAcquisition();
-	for(int j=0; j<10000; j++) {
+	for(int j=0; j<100; j++) {
 		//Wait for notification of ADC "fifo-half-full" event...
 		rendezvousWithIsr();
 		stopAdcAcquisition();

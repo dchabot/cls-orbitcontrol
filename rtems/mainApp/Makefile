@@ -23,7 +23,7 @@ CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
 
-H_PIECES=${INCLUDE_DIR}/bpmDefs
+H_PIECES=${INCLUDE_DIR}/bpmDefs ${INCLUDE_DIR}/Bpm
 H_PIECES+=${INCLUDE_DIR}/AdcReaderThread ${INCLUDE_DIR}/OrbitController
 H_PIECES+=${INCLUDE_DIR}/OrbitControlException
 H_PIECES+=${INCLUDE_DIR}/DataHandler ${INCLUDE_DIR}/PSController

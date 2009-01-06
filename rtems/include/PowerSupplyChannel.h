@@ -35,16 +35,7 @@ public:
 	bool isInCorrection() const;
 	void includeInCorrection();
 	void omitFromCorrection();
-	/** setSetpoint(int sp) will change the value of a channel's setpoint,
-	 * 	but activateSetpoint() is then req'd to effect the change.
-	 *
-	 * @param sp
-	 */
 	void setSetpoint(int32_t sp);
-	/**
-	 * activateSetpoint() will toggle the UPDATE bit of a power-supply bulk,
-	 * causing all (current?) setpoints to take effect.
-	 */
 	void activateSetpoint();
 	int32_t getSetpoint() const;
 	const char* getId() const;

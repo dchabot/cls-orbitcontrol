@@ -5,14 +5,6 @@
 extern "C" {
 #endif
 
-/* FIXME -- unused */
-typedef struct {
-	int rawX;
-	int rawY;
-	double position;
-	double intensity;
-}Bpm;
-
 /* conversion factors for each BPM: Volts/mm   */
 double XBPM_convFactor[54]= {
 	/*"1401-01:BPMx:val",*/		1.261,

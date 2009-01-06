@@ -19,6 +19,11 @@ PowerSupplyChannel::PowerSupplyChannel(const char* pvId,
 
 PowerSupplyChannel::~PowerSupplyChannel() { }
 
+/** setSetpoint(int sp) will change the value of a channel's setpoint,
+ * 	but activateSetpoint() is then req'd to effect the change.
+ *
+ * @param sp new setpoint value
+ */
 void PowerSupplyChannel::setSetpoint(int32_t sp) {
 	uint32_t value = 0;
 	int32_t dacSetPoint = 0;
@@ -42,6 +47,10 @@ void PowerSupplyChannel::setSetpoint(int32_t sp) {
 	usecSpinDelay(delay);
 }
 
+/**
+ * activateSetpoint() will toggle the UPDATE bit of a power-supply bulk,
+ * causing all (current?) setpoints to take effect.
+ */
 void PowerSupplyChannel::activateSetpoint() {
 	/* raise the UPDATE bit */
 	mod->setOutput(UPDATE);
