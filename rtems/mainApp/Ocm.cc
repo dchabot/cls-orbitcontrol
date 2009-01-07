@@ -1,30 +1,30 @@
 /*
- * PowerSupplyChannel.cc
+ * Ocm.cc
  *
  *  Created on: Dec 22, 2008
  *      Author: chabotd
  */
 
-#include <PowerSupplyChannel.h>
+#include <Ocm.h>
 #include <utils.h>
 
-PowerSupplyChannel::PowerSupplyChannel(const char* pvId,
-										Vmic2536Module* module,
-										uint8_t chan) :
+Ocm::Ocm(const char* pvId,
+			Vmic2536Module* module,
+			uint8_t chan) :
 	//ctor-initializer list
 	mod(module),channel(chan),
 	id(pvId),inCorrection(true),
 	setpoint(0),feedback(0),delay(30)//i.e. 30 usecs
 { }
 
-PowerSupplyChannel::~PowerSupplyChannel() { }
+Ocm::~Ocm() { }
 
 /** setSetpoint(int sp) will change the value of a channel's setpoint,
  * 	but activateSetpoint() is then req'd to effect the change.
  *
  * @param sp new setpoint value
  */
-void PowerSupplyChannel::setSetpoint(int32_t sp) {
+void Ocm::setSetpoint(int32_t sp) {
 	uint32_t value = 0;
 	int32_t dacSetPoint = 0;
 
@@ -51,7 +51,7 @@ void PowerSupplyChannel::setSetpoint(int32_t sp) {
  * activateSetpoint() will toggle the UPDATE bit of a power-supply bulk,
  * causing all (current?) setpoints to take effect.
  */
-void PowerSupplyChannel::activateSetpoint() {
+void Ocm::activateSetpoint() {
 	/* raise the UPDATE bit */
 	mod->setOutput(UPDATE);
 	/* wait some time */

@@ -8,11 +8,11 @@
 #ifndef POWERSUPPLYBULK_H_
 #define POWERSUPPLYBULK_H_
 
-#include <PowerSupplyChannel.h>
+#include <Ocm.h>
 
 class PowerSupplyBulk {
 public:
-	PowerSupplyBulk(PowerSupplyChannel* ch);
+	PowerSupplyBulk(Ocm* ch);
 	virtual ~PowerSupplyBulk();
 	/**
 	 * activateSetpoint() will toggle the UPDATE bit of a power-supply bulk,
@@ -25,7 +25,7 @@ private:
 	PowerSupplyBulk(const PowerSupplyBulk&);
 	const PowerSupplyBulk& operator=(const PowerSupplyBulk&);
 
-	PowerSupplyChannel* psch;
+	Ocm* psch;
 };
 
 #endif /* POWERSUPPLYBULK_H_ */

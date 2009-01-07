@@ -6,11 +6,9 @@
  */
 
 #include <PowerSupplyBulk.h>
-#include <PowerSupplyChannel.h>
-#include <utils.h>
 
 
-PowerSupplyBulk::PowerSupplyBulk(PowerSupplyChannel* ch) : psch(ch) { }
+PowerSupplyBulk::PowerSupplyBulk(Ocm* ch) : psch(ch) { }
 
 PowerSupplyBulk::~PowerSupplyBulk() { }
 

@@ -59,6 +59,12 @@ inline void Bpm::setYRef(double y) { yRef = y; }
 inline void Bpm::setXOffs(double x) { xOffs = x; }
 inline void Bpm::setYOffs(double y) { yOffs = y; }
 
+/** In the context of Orbit Control, isEnabled()==true
+ *  indicates that the BPM (x,y) are included in the orbit
+ *  control algorithm and calculation(s).
+ *
+ * @return
+ */
 inline bool Bpm::isEnabled() const { return enabled; }
 
 #endif /* BPM_H_ */

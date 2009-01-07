@@ -129,12 +129,40 @@ void OrbitController::start(rtems_task_argument arg) {
 	TestDirective(rc,"Failed to start OrbitController thread");
 }
 
-void OrbitController::enquePowerSupplySetpoint(char *chId, int32_t setpoint) {
-	SetpointMsg msg(chId, setpoint);
+void OrbitController::setOcmSetpoint(Ocm* ocm, int32_t val) {
+	enquePowerSupplySetpoint(ocm,val);
+}
+
+int32_t OrbitController::getOcmSetpoint(Ocm *ch) {
+	return 0;
+}
+
+void OrbitController::updateAllOcmSetpoints() {
+
+}
+
+void OrbitController::registerOcm(Ocm* ch) {
+
+}
+
+void OrbitController::deregisterOcm(Ocm* ch) {
+
+}
+
+void OrbitController::setVerticalResponseMatrix(double v[NumOcm][NumOcm]) {
+
+}
+
+void OrbitController::setHorizontalResponseMatrix(double h[NumOcm][NumOcm]) {
+
+}
+
+/*********************** private interface *****************************************/
+void OrbitController::enquePowerSupplySetpoint(Ocm* ocm, int32_t setpoint) {
+	SetpointMsg msg(ocm, setpoint);
 	rtems_status_code rc = rtems_message_queue_send(spQueueId,(void*)&msg,sizeof(msg));
 	TestDirective(rc,"OrbitController: msg_q_send failure");
 }
-/*********************** private interface *****************************************/
 
 rtems_task OrbitController::threadStart(rtems_task_argument arg) {
 	OrbitController *oc = (OrbitController*)arg;

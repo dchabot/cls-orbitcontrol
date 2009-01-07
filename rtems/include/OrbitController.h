@@ -8,6 +8,7 @@
 #ifndef ORBITCONTROLLER_H_
 #define ORBITCONTROLLER_H_
 
+#include <OcmController.h>
 #include <VmeCrate.h>
 #include <Ics110blModule.h>
 #include <Vmic2536Module.h>
@@ -15,7 +16,7 @@
 #include <AdcIsr.h>
 #include <AdcData.h>
 #include <DataHandler.h>
-#include <PowerSupplyChannel.h>
+#include <Ocm.h>
 #include <vector>
 #include <rtems.h>
 #include <stdint.h>
@@ -33,9 +34,9 @@ enum OrbitControllerMode {ASSISTED=0,AUTONOMOUS=1};
 
 
 struct SetpointMsg {
-	SetpointMsg(char* prefix, int32_t setpoint):channelPrefix(prefix),sp(setpoint){}
+	SetpointMsg(Ocm* ocm, int32_t setpoint):ocm(ocm),sp(setpoint){}
 	~SetpointMsg(){}
-	char* channelPrefix;
+	Ocm* ocm;
 	int32_t sp;
 };
 
@@ -52,7 +53,7 @@ struct SetpointMsg {
  * XXX -- don't forget to call destroyInstance() to release all resources !!!
  *
  */
-class OrbitController {
+class OrbitController : public OcmController {
 public:
 	static OrbitController* getInstance();
 	void initialize(const double adcSampleRate=10.1);
@@ -62,8 +63,15 @@ public:
 	double getAdcFrameRateFeedback() const;
 	OrbitControllerMode getMode() const;
 	void setMode(OrbitControllerMode mode);
-	void enquePowerSupplySetpoint(char* chId, int32_t setpoint);
-	PowerSupplyChannel* getPowerSupplyChannel(char* chId) const;
+	//virtual methods inherited from abstract base-class OcmController:
+	void setOcmSetpoint(Ocm* ch, int32_t val);
+	int32_t getOcmSetpoint(Ocm *ch);
+	void updateAllOcmSetpoints();
+	void registerOcm(Ocm* ch);
+	void deregisterOcm(Ocm* ch);
+	void setVerticalResponseMatrix(double v[NumOcm][NumOcm]);
+	void setHorizontalResponseMatrix(double h[NumOcm][NumOcm]);
+
 
 private:
 	OrbitController();
@@ -78,6 +86,8 @@ private:
 	void rendezvousWithIsr();
 	void rendezvousWithAdcReaders();
 	void activateAdcReaders();
+
+	void enquePowerSupplySetpoint(Ocm* ocm, int32_t setpoint);
 
 	static rtems_task threadStart(rtems_task_argument arg);
 	rtems_task threadBody(rtems_task_argument arg);

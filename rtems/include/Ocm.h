@@ -1,12 +1,12 @@
 /*
- * PowerSupplyChannel.h
+ * Ocm.h
  *
  *  Created on: Dec 22, 2008
  *      Author: chabotd
  */
 
-#ifndef POWERSUPPLYCHANNEL_H_
-#define POWERSUPPLYCHANNEL_H_
+#ifndef OCM_H_
+#define OCM_H_
 
 #include <stdint.h>
 #include <Vmic2536Module.h>
@@ -27,11 +27,12 @@
 #define UPDATE 0x80000000
 //#define DROP_UPDATE 0x7FFFFFFF
 
+const int NumOcm=48;
 
-class PowerSupplyChannel {
+class Ocm {
 public:
-	PowerSupplyChannel(const char* pvPrefix, Vmic2536Module* module, uint8_t chan);
-	virtual ~PowerSupplyChannel();
+	Ocm(const char* pvPrefix, Vmic2536Module* module, uint8_t chan);
+	virtual ~Ocm();
 	bool isInCorrection() const;
 	void includeInCorrection();
 	void omitFromCorrection();
@@ -43,9 +44,9 @@ public:
 	void setDelay(uint8_t usec);
 
 private:
-	PowerSupplyChannel();
-	PowerSupplyChannel(const PowerSupplyChannel&);
-	const PowerSupplyChannel& operator=(const PowerSupplyChannel&);
+	Ocm();
+	Ocm(const Ocm&);
+	const Ocm& operator=(const Ocm&);
 
 	Vmic2536Module* mod;
 	uint8_t channel;
@@ -56,31 +57,31 @@ private:
 	uint8_t delay; //opto-isolator on/off delay
 };
 
-inline bool PowerSupplyChannel::isInCorrection() const {
+inline bool Ocm::isInCorrection() const {
 	return inCorrection;
 }
 
-inline void PowerSupplyChannel::includeInCorrection() {
+inline void Ocm::includeInCorrection() {
 	inCorrection = true;
 }
 
-inline void PowerSupplyChannel::omitFromCorrection() {
+inline void Ocm::omitFromCorrection() {
 	inCorrection = false;
 }
 
-inline int32_t PowerSupplyChannel::getSetpoint() const {
+inline int32_t Ocm::getSetpoint() const {
 	return setpoint;
 }
 
-inline const char* PowerSupplyChannel::getId() const {
+inline const char* Ocm::getId() const {
 	return id;
 }
 
-inline uint8_t PowerSupplyChannel::getDelay() const {
+inline uint8_t Ocm::getDelay() const {
 	return delay;
 }
 
-inline void PowerSupplyChannel::setDelay(uint8_t usec) {
+inline void Ocm::setDelay(uint8_t usec) {
 	delay=usec;
 }
-#endif /* POWERSUPPLYCHANNEL_H_ */
+#endif /* OCM_H_ */
