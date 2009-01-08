@@ -12,16 +12,12 @@ include $(TOP)/configure/CONFIG
 ### This variable is used to switch between Experimental (testing on 10.51 vlan)
 ### and Production (10.50 vlan) record names. Be careful !!!
 ################################################################################
-IS_EXPERIMENT_CONFIG=true
+IS_EXPERIMENT_CONFIG=false
 
 #----------------------------------------------------
 # Create and install (or just install)
 # databases, templates, substitutions like this
-# for bulk distribution of BPM avgs (automatic via subArray record-type) 
-DB += BpmArray.db
 DB += SRBpms.db
-# for bulk distribution of OCM setpoints 
-DB += OcmArray.db
 # control of BPM mux/demux update rate
 DB += SamplesPerAvg.db
 # For control (setpoint) of individual OCM pwr supplies

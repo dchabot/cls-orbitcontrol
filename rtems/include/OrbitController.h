@@ -33,13 +33,6 @@ enum OrbitControllerMode {ASSISTED=0,AUTONOMOUS=1};
 
 
 
-struct SetpointMsg {
-	SetpointMsg(Ocm* ocm, int32_t setpoint):ocm(ocm),sp(setpoint){}
-	~SetpointMsg(){}
-	Ocm* ocm;
-	int32_t sp;
-};
-
 /**
  * A Singleton class for managing the storage-ring orbit control system. Based on
  * GoF pattern (pg 127).
@@ -63,12 +56,13 @@ public:
 	double getAdcFrameRateFeedback() const;
 	OrbitControllerMode getMode() const;
 	void setMode(OrbitControllerMode mode);
+
 	//virtual methods inherited from abstract base-class OcmController:
 	void setOcmSetpoint(Ocm* ch, int32_t val);
 	int32_t getOcmSetpoint(Ocm *ch);
 	void updateAllOcmSetpoints();
 	void registerOcm(Ocm* ch);
-	void deregisterOcm(Ocm* ch);
+	void unregisterOcm(Ocm* ch);
 	void setVerticalResponseMatrix(double v[NumOcm][NumOcm]);
 	void setHorizontalResponseMatrix(double h[NumOcm][NumOcm]);
 
@@ -87,7 +81,13 @@ private:
 	void rendezvousWithAdcReaders();
 	void activateAdcReaders();
 
-	void enquePowerSupplySetpoint(Ocm* ocm, int32_t setpoint);
+	//private struct for enqueueing OCM setpoint updates (single)
+	struct SetpointMsg {
+		SetpointMsg(Ocm* ocm, int32_t setpoint):ocm(ocm),sp(setpoint){}
+		~SetpointMsg(){}
+		Ocm* ocm;
+		int32_t sp;
+	};
 
 	static rtems_task threadStart(rtems_task_argument arg);
 	rtems_task threadBody(rtems_task_argument arg);

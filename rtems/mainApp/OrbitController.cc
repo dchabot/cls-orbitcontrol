@@ -130,7 +130,9 @@ void OrbitController::start(rtems_task_argument arg) {
 }
 
 void OrbitController::setOcmSetpoint(Ocm* ocm, int32_t val) {
-	enquePowerSupplySetpoint(ocm,val);
+	SetpointMsg msg(ocm, val);
+	rtems_status_code rc = rtems_message_queue_send(spQueueId,(void*)&msg,sizeof(msg));
+	TestDirective(rc,"OrbitController: msg_q_send failure");
 }
 
 int32_t OrbitController::getOcmSetpoint(Ocm *ch) {
@@ -145,7 +147,7 @@ void OrbitController::registerOcm(Ocm* ch) {
 
 }
 
-void OrbitController::deregisterOcm(Ocm* ch) {
+void OrbitController::unregisterOcm(Ocm* ch) {
 
 }
 
@@ -158,11 +160,6 @@ void OrbitController::setHorizontalResponseMatrix(double h[NumOcm][NumOcm]) {
 }
 
 /*********************** private interface *****************************************/
-void OrbitController::enquePowerSupplySetpoint(Ocm* ocm, int32_t setpoint) {
-	SetpointMsg msg(ocm, setpoint);
-	rtems_status_code rc = rtems_message_queue_send(spQueueId,(void*)&msg,sizeof(msg));
-	TestDirective(rc,"OrbitController: msg_q_send failure");
-}
 
 rtems_task OrbitController::threadStart(rtems_task_argument arg) {
 	OrbitController *oc = (OrbitController*)arg;

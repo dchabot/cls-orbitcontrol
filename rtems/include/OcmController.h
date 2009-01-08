@@ -19,7 +19,7 @@ public:
 	virtual int32_t getOcmSetpoint(Ocm *ch)=0;
 	virtual void updateAllOcmSetpoints()=0;
 	virtual void registerOcm(Ocm* ch)=0;
-	virtual void deregisterOcm(Ocm* ch)=0;
+	virtual void unregisterOcm(Ocm* ch)=0;
 	virtual void setVerticalResponseMatrix(double v[NumOcm][NumOcm])=0;
 	virtual void setHorizontalResponseMatrix(double h[NumOcm][NumOcm])=0;
 

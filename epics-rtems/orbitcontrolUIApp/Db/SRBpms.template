@@ -1,17 +1,77 @@
-#
-# Created on: Sep 16, 2008
-#     Author: chabotd
+### NOTE: although we've specified "NO CONVERSION" for BPM$(p):x and BPM$(p):y
+### record instances, we're going to abuse the adjustment slope (ASLO) field
+### by using it to control the Volts/mm conversion factor for each BPM object (see Bpm.h)
+### The Device Support read_ai() routine will perform the appropriate rval->val conversion. 
 
-record(subArray, "BPM$(clsName):$(xORy)") {
-	field(DTYP, "BPM SubArray")
-	field(INP, "bpm:mux")
+record(ai, "BPM$(clsName):x") {
+	field(DTYP, "BPM AnalogIn")
+	field(INP, "@xval")
 	field(SCAN, "Event")
 	field(EVNT, "$(event)")
 	field(PHAS, "$(phase)")
-	field(FTVL, "DOUBLE")
-	field(MALM, "1")
-	field(NELM, "1")
-	field(INDX, "$(wfIndex)")
+	field(EGU, "m")
+	field(LINR, "NO CONVERSION")
+	field(SMOO, "0")
+	field(ROFF, "0")
+	field(AOFF, "0")
+	field(ASLO, "$(x-voltsPerMilli)")
+}
+
+record(ai, "BPM$(clsName):y") {
+	field(DTYP, "BPM AnalogIn")
+	field(INP, "@yval")
+	field(SCAN, "Event")
+	field(EVNT, "$(event)")
+	field(PHAS, "$(phase)")
+	field(EGU, "m")
+	field(LINR, "NO CONVERSION")
+	field(SMOO, "0")
+	field(ROFF, "0")
+	field(AOFF, "0")
+	field(ASLO, "$(y-voltsPerMilli)")
+}
+
+record(ao, "BPM$(clsName):x:reference") {
+	field(DTYP, "BPM AnalogOut")
+	field(OUT, "@xreference")
+	field(SCAN, "Event")
+	field(EVNT, "$(event)")
+	field(PHAS, "$(phase)")
 	field(EGU, "m")
 }
 
+record(ao, "BPM$(clsName):y:reference") {
+	field(DTYP, "BPM AnalogOut")
+	field(OUT, "@yreference")
+	field(SCAN, "Event")
+	field(EVNT, "$(event)")
+	field(PHAS, "$(phase)")
+	field(EGU, "m")
+}
+
+record(ao, "BPM$(clsName):x:offset") {
+	field(DTYP, "BPM AnalogOut")
+	field(OUT, "@xoffset")
+	field(SCAN, "Event")
+	field(EVNT, "$(event)")
+	field(PHAS, "$(phase)")
+	field(EGU, "m")
+}
+
+record(ao, "BPM$(clsName):y:offset") {
+	field(DTYP, "BPM AnalogOut")
+	field(OUT, "@yoffset")
+	field(SCAN, "Event")
+	field(EVNT, "$(event)")
+	field(PHAS, "$(phase)")
+	field(EGU, "m")
+}
+
+record(bo, "BPM$(clsName):isInCorrection") {
+	field(DTYP, "BPM Boolean")
+	field(OMSL, "supervisory")
+	field(DOL, "$(isInCorrection)")
+	field(OUT, "@FOO")
+	field(ZNAM, "False")
+	field(ONAM, "True")
+}
