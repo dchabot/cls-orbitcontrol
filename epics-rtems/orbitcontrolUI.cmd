@@ -12,8 +12,8 @@ dbLoadDatabase("dbd/orbitcontrolUI.dbd")
 orbitcontrolUI_registerRecordDeviceDriver(pdbbase)
 
 ## Load record instances ####################################
-dbLoadRecords("db/SRBpms.db","event=13,phase=1")
-dbLoadRecords("db/SamplesPerAvg.db")
+dbLoadRecords("db/Bpms.db","event=13,phase=1")
+dbLoadRecords("db/BpmSamplesPerAvg.db")
 
 dbLoadRecords("db/SrOC2404-05.db")
 dbLoadRecords("db/SrOC2406-01.db")

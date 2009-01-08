@@ -17,9 +17,9 @@ IS_EXPERIMENT_CONFIG=false
 #----------------------------------------------------
 # Create and install (or just install)
 # databases, templates, substitutions like this
-DB += SRBpms.db
+DB += Bpms.db
 # control of BPM mux/demux update rate
-DB += SamplesPerAvg.db
+DB += BpmSamplesPerAvg.db
 # For control (setpoint) of individual OCM pwr supplies
 DB += SrOC2408-01.db SrOC2404-05.db SrOC2406-01.db SrOC2406-03.db 
 DB += SrChicane2408-01.db
@@ -31,7 +31,7 @@ DB += SrChicane2408-01.db
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
 # <anyname>_TEMPLATE = <templatename>
-BPM_TEMPLATES += SRBpms.template
+BPM_TEMPLATES += Bpms.template
 
 ifeq "${IS_EXPERIMENT_CONFIG}" "true"
 	SrOC_TEMPLATES += SrOC_exp.template
@@ -67,7 +67,7 @@ ifeq "${IS_EXPERIMENT_CONFIG}" "true"
 ../O.Common/SrChicane2408-01.db: ../SrChicane2408-01_exp.sub $(SrOC_TEMPLATES)
 	msi -S $< > $@
 
-../O.Common/SRBpms.db: ../SRBpms_exp.sub $(BPM_TEMPLATES)
+../O.Common/Bpms.db: ../Bpms_exp.sub $(BPM_TEMPLATES)
 	msi -S $< > $@
 	
 else
@@ -87,7 +87,7 @@ else
 ../O.Common/SrChicane2408-01.db: ../SrChicane2408-01.sub $(SrOC_TEMPLATES)
 	msi -S $< > $@
 	
-../O.Common/SRBpms.db: ../SRBpms.sub $(BPM_TEMPLATES)
+../O.Common/Bpms.db: ../Bpms.sub $(BPM_TEMPLATES)
 	msi -S $< > $@
 
 endif	

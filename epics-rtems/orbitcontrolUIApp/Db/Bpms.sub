@@ -1,4 +1,4 @@
-file SRBpms.template {
+file Bpms.template {
 #                    
     pattern
     {  clsName	x-voltsPerMilli	y-voltsPerMilli	isInCorrection }
