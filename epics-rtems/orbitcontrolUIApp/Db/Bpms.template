@@ -68,7 +68,7 @@ record(ao, "BPM$(clsName):y:offset") {
 }
 
 record(bo, "BPM$(clsName):isInCorrection") {
-	field(DTYP, "BPM Boolean")
+	field(DTYP, "BPM BinaryOut")
 	field(OMSL, "supervisory")
 	field(DOL, "$(isInCorrection)")
 	field(OUT, "@FOO")

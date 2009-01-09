@@ -18,8 +18,9 @@
 #include <recSup.h>
 #include <recGbl.h>
 #include <epicsExport.h>
-
 #include <syslog.h>
+#include <OrbitController.h>
+
 
 #ifdef __cplusplus
 	extern "C" {

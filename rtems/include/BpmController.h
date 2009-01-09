@@ -12,6 +12,7 @@
 
 class BpmController {
 public:
+	BpmController();
 	virtual ~BpmController();
 	virtual void registerBpm(Bpm* bpm)=0;
 	virtual void unregisterBpm(Bpm* bpm)=0;

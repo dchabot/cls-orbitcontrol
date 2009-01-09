@@ -1,7 +1,9 @@
 include "base.dbd"
 #include definitions for any other support applications needed
 # custom device support
-device(waveform, INST_IO, devSupBPMWaveform, "BPM Array")
+device(bo, INST_IO, devSupBPMBinaryOut, "BPM BinaryOut")
+device(ao, INST_IO, devSupBPMAnalogOut, "BPM AnalogOut")
+device(ai, INST_IO, devSupBPMAnalogIn, "BPM AnalogIn")
 device(longout, INST_IO, devSupOCMSetpoint, "PwrSupply Setpoint")
 device(subArray, PV_LINK, devSupBPMSubArray, "BPM SubArray")
 #device(waveform, CONSTANT, devSupOCMWaveform, "OCM Array")

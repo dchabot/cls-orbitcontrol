@@ -3,8 +3,6 @@
 # Created on: Sep 29, 2008
 #     Author: chabotd
 
-### NOTE: each BPM$(p):x or BPM$(p):y record MUST obtain a
-### reference to this record's value, as it's used for scaling purposes.
 record(longout, "BPM:samplesPerAvg") {
 	field(DESC, "Set BPM samples/avg")
 	field(DTYP, "BPM NumSamples")

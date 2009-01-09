@@ -8,6 +8,7 @@
 #ifndef ORBITCONTROLLER_H_
 #define ORBITCONTROLLER_H_
 
+#include <BpmController.h>
 #include <OcmController.h>
 #include <VmeCrate.h>
 #include <Ics110blModule.h>
@@ -66,6 +67,9 @@ public:
 	void setVerticalResponseMatrix(double v[NumOcm][NumOcm]);
 	void setHorizontalResponseMatrix(double h[NumOcm][NumOcm]);
 
+	//interface for access to internal BpmController object
+	BpmController* getBpmController() const;
+	void setBpmController(BpmController* ctlr);
 
 private:
 	OrbitController();
