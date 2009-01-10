@@ -16,7 +16,6 @@
 #include <AdcReader.h>
 #include <AdcIsr.h>
 #include <AdcData.h>
-#include <DataHandler.h>
 #include <Ocm.h>
 #include <vector>
 #include <rtems.h>

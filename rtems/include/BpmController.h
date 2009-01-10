@@ -9,6 +9,8 @@
 #define BPMCONTROLLER_H_
 
 #include <Bpm.h>
+#include <AdcData.h>
+
 
 class BpmController {
 public:
@@ -17,6 +19,7 @@ public:
 	virtual void registerBpm(Bpm* bpm)=0;
 	virtual void unregisterBpm(Bpm* bpm)=0;
 	virtual Bpm* getBpm(const string& id)=0;
+	virtual void enqueAdcData(AdcData** rdSegments)=0;
 };
 
 
