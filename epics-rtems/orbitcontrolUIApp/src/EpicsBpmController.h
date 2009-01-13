@@ -18,7 +18,11 @@
 #include <map>
 using std::string;
 using std::map;
+using std::iterator;
+using std::pair;
 
+
+typedef void (*BpmValueChangeCallback)(void*);
 
 class EpicsBpmController: public BpmController,public epicsThreadRunable {
 public:
@@ -27,8 +31,10 @@ public:
 	void registerBpm(Bpm* bpm);
 	void unregisterBpm(Bpm* bpm);
 	Bpm* getBpm(const string& id);
+	void setBpmValueChangeCallback(BpmValueChangeCallback cb, void* cbArg);
 	uint32_t getSamplesPerAvg() const { return samplesPerAvg; }
-	void setSamplesPerAvg(uint32_t num) { this->samplesPerAvg = num; }
+	void setSamplesPerAvg(uint32_t num) { samplesPerAvg = num; }
+	void showAllBpms();
 	void run();
 	void enqueAdcData(AdcData** rdSegments);
 
@@ -47,6 +53,8 @@ private:
 	const uint32_t maxMsgs;
 	epicsMessageQueue inpQ;
 	AdcData *ds[NumAdcModules];
+	BpmValueChangeCallback bpmCb;
+	void* bpmCbArg;
 };
 
 
