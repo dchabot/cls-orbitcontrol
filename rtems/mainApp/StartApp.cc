@@ -8,7 +8,6 @@
 #include <VmeCrate.h>
 #include <Ics110blModule.h>
 #include <Vmic2536Module.h>
-#include <DataHandler.h>
 #include <AdcReader.h>
 #include <AdcData.h>
 #include <syslog.h>
@@ -27,7 +26,7 @@ extern "C" void startApp() {
 	OrbitController* oc = OrbitController::getInstance();
 	try {
 		//oc->initialize(1.0);
-		oc->start(rtems_task_self());
+		oc->start(rtems_task_self(),0);
 		rtems_event_set evOut = 0;
 		rtems_event_receive(1,RTEMS_EVENT_ANY,RTEMS_NO_TIMEOUT,&evOut);
 		syslog(LOG_INFO, "startApp(): Caught event !!\n");

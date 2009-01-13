@@ -80,8 +80,7 @@ static long init_record(void* aor) {
 		return(S_db_badField);
 	}
 
-	OrbitController* oc = OrbitController::getInstance();
-	BpmController* bpmctlr = oc->getBpmController();
+	BpmController* bpmctlr = OrbitController::getInstance();
 	string id(aop->name);
 	size_t pos = id.find_first_of(":");
 	Bpm *bpm = bpmctlr->getBpm(id.substr(0,pos));

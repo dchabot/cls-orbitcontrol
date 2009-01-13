@@ -11,9 +11,13 @@
 #include <recSup.h>
 #include <recGbl.h>
 #include <epicsExport.h>
-#include <epicsThread.h>
-#include <epicsMessageQueue.h>
+#include <OrbitController.h>
 #include <syslog.h>
+#include <string>
+#include <stdexcept>
+using std::runtime_error;
+using std::string;
+
 
 #ifdef __cplusplus
 	extern "C" {
@@ -39,19 +43,27 @@ struct {
 };
 epicsExportAddress(dset,devSupOCMWaveform);
 
+enum wfType {xResp,yResp,xDisp};
+
+static wfType getRecType(string type) {
+	if(type.compare("x:responseVector")==0) { return xResp; }
+	else if(type.compare("y:responseVector")==0) { return yResp; }
+	else if(type.compare("x:dispersionVector")==0) { return xDisp; }
+	else {
+		type.append(": unknown record type!!! WTF ?!?!?!?");
+		throw runtime_error(type.c_str());
+	}
+}
 
 static long init_record(void* wfr) {
 	waveformRecord* wfrp = (waveformRecord*)wfr;
-	static epicsMessageQueueId qid = NULL;
-	extern rtems_id OcmSetpointQID;
 
-	syslog(LOG_INFO,"Init OCM Waveform\n");
+	syslog(LOG_INFO,"Init OCM Waveform: %s\n",wfrp->name);
 	/* chk INP type: has to be "caput()-able" */
 	if (wfrp->inp.type != CONSTANT) {
 		syslog(LOG_INFO,"%s: INP field type must be CONSTANT\n", wfrp->name);
 		return (S_db_badField);
 	}
-	syslog(LOG_INFO,"wfrp->inp.value.constantStr=%s\n",wfrp->inp.value.constantStr);
 	/* XXX -- Record Ref Manual says mem is allocated
 	 * for buffer before we get here (pg 301)
 	 */
@@ -60,46 +72,43 @@ static long init_record(void* wfr) {
 		syslog(LOG_INFO,"BPTR is NULL !!\n");
 		return -1;
 	}
-	/* initialize and block on msgQ */
-	qid = epicsMessageQueueCreate(OcmSetpointQueueCapacity,
-									sizeof(spMsg));
-	if(qid == NULL) {
-		syslog(LOG_INFO,"Couldn't create OCM-setpoint MsgQ!!\n");
+
+	try {
+		string name(wfrp->name);
+		size_t pos = name.find_first_of(":");
+		wfrp->dpvt = (void*)getRecType(name.substr(pos,name.npos));
+	}
+	catch(runtime_error& err) {
+		syslog(LOG_INFO, "%s",err.what());
 		return -1;
 	}
-	OcmSetpointQID = qid->id;
-	/* we'll need the QID in read_wf() */
-	wfrp->dpvt = qid;
 
 	return 0;
 }
 
 /*
- * copy BPTR contents to a malloc'd buf and ship off a message to
- * the OrbitController
+ * we're using read_wf() to write new values
  */
 static long read_wf(void* wfr) {
 	waveformRecord* wfrp = (waveformRecord*)wfr;
-	int rc;
-	spMsg msg;
-	int32_t *buf = NULL;
-	ssize_t numBytes = wfrp->nelm*dbValueSize(wfrp->ftvl);
+	OrbitController *oc = OrbitController::getInstance();
+	uint32_t type = (uint32_t)wfrp->dpvt;
 
-	buf = calloc(1, numBytes);
-	if(buf==NULL) {
-		syslog(LOG_INFO, "Couldn't alloc-mem for OCM setpoint buffer!!\n");
+	switch(type) {
+	case xResp:
+		oc->setHorizontalResponseMatrix((double*)wfrp->bptr);
+		break;
+	case yResp:
+		oc->setVerticalResponseMatrix((double*)wfrp->bptr);
+		break;
+	case xDisp:
+		oc->setDispersionVector((double*)wfrp->bptr);
+		break;
+	default:
+		syslog(LOG_INFO,"devSupOCMWaveform: read_wf() default case, AAARRRGGG!!!\n");
 		return -1;
 	}
-	memcpy(buf, wfrp->bptr, numBytes);
-	msg.buf = buf;
-	msg.numsp = wfrp->nelm;
 
-	rc = epicsMessageQueueTrySend((epicsMessageQueueId)(wfrp->dpvt),&msg,sizeof(spMsg));
-	if(rc < 0) {
-		syslog(LOG_INFO,"Failure of epicsMessageQueueTrySend()!! rc=%d\n",rc);
-		if(buf) { free(buf); }
-		return -1;
-	}
 	wfrp->nord = wfrp->nelm;
     return 0;
 }

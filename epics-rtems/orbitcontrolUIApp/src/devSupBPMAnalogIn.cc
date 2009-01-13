@@ -77,8 +77,7 @@ static long init_record(void* air) {
 		return(S_db_badField);
 	}
 
-	OrbitController *oc = OrbitController::getInstance();
-	BpmController* bpmctlr = oc->getBpmController();
+	BpmController* bpmctlr = OrbitController::getInstance();
 	string id(aip->name);
 	size_t pos = id.find_first_of(":");
 	Bpm *bpm = bpmctlr->getBpm(id.substr(0,pos));
@@ -94,10 +93,10 @@ static long init_record(void* air) {
 	try {
 		aiData *aid = new aiData(bpm,getRecType(type));
 		//FIXME -- what happens if aip->aslo is changed via caput ??
-		// Nothing: that's what!! Should refactor UI-controlled Bpm class-attributes
+		// Nothing: that's what!! Could refactor UI-controlled Bpm class-attributes
 		// into *pointers*. That way we could hook record fields into each object instance...
-		if(aid->type==xval) { bpm->setXVoltsPerMilli(aip->aslo); }
-		else { bpm->setYVoltsPerMilli(aip->aslo); }
+		if(aid->type==xval) { bpm->setXVoltsPerMilli(aip->eslo); }
+		else { bpm->setYVoltsPerMilli(aip->eslo); }
 		//hook our aiData object into this record instance
 		aip->dpvt = (void*)aid;
 	}
@@ -113,8 +112,14 @@ static long read_ai(void* air) {
 	aiRecord *aip = (aiRecord*)air;
 	aiData *aid = (aiData*)aip->dpvt;
 
-	if(aid->type == xval) { aip->val = aid->bpm->getX(); }
-	else { aip->val = aid->bpm->getY(); }
+	if(aid->type == xval) {
+		aip->val = aid->bpm->getX();
+		aid->bpm->setXVoltsPerMilli(aip->eslo);
+	}
+	else {
+		aip->val = aid->bpm->getY();
+		aid->bpm->setYVoltsPerMilli(aip->eslo);
+	}
 
 	return 0;
 }

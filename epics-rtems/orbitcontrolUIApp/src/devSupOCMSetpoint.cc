@@ -57,15 +57,36 @@ init_record(void* lor) {
 		return (S_db_badField);
 	}
 
-	/* strip off the ":dac" from the record name */
+	/* strip off the ":dac" from the record name; this will form the OCM's id */
+	string name(lorp->name);
+	size_t pos = name.find_first_of(":dac");
+	name = name.substr(0,pos);
+	char cbuf[128] = {0};
+	strncpy(cbuf,lorp->out.value.instio.string,sizeof(cbuf)/sizeof(cbuf[0]));
+	/* <rant> WTF doesn't c++ have a string tokenizer method ?!?!? </rant> */
+	/* parse out the params */
+	uint32_t crateId = strtoul(strtok(cbuf," "),NULL,10);
+	uint32_t vmeBaseAddr = strtoul(strtok(NULL," "),NULL,16);
+	uint8_t channel = (epicsUInt8)strtoul(strtok(NULL," "),NULL,10);
+	OcmController *ocmCtlr = OrbitController::getInstance();
+	Ocm *ocm = ocmCtlr->registerOcm(name,crateId,vmeBaseAddr,channel);
+	if(ocm == NULL) {
+		syslog(LOG_INFO, "devSupOCMSetpoint: %s -- couldn't register OCM!!\n",lorp->name);
+		return -1;
+	}
+	lorp->dpvt = (void*)ocm;
 	return 0;
 }
 
 static long
 write_longout(void* lor) {
 	longoutRecord* lorp = (longoutRecord*)lor;
+	Ocm *ocm = (Ocm*)lorp->dpvt;
+	OcmController *ocmCtlr = OrbitController::getInstance();
 
 	syslog(LOG_INFO, "Setting single channel, %s to %d\n",lorp->name,lorp->val);
+
+	ocmCtlr->setOcmSetpoint(ocm, lorp->val);
 	return 0;//SetSingleSetpoint(pvt->ctlr, lorp->val);
 }
 

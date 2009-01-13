@@ -1,7 +1,8 @@
 ### NOTE: although we've specified "NO CONVERSION" for BPM$(p):x and BPM$(p):y
-### record instances, we're going to abuse the adjustment slope (ASLO) field
+### record instances, we're going to abuse the engineering slope (ASLO) field
 ### by using it to control the Volts/mm conversion factor for each BPM object (see Bpm.h)
-### The Device Support read_ai() routine will perform the appropriate rval->val conversion. 
+### Note also that we can't use ASLO or others here, as process() will alter VAL 
+### using ASLO even if LINR="NO CONVERSION" (see aiRecord.c, special()).
 
 record(ai, "BPM$(clsName):x") {
 	field(DTYP, "BPM AnalogIn")
@@ -11,10 +12,7 @@ record(ai, "BPM$(clsName):x") {
 	field(PHAS, "$(phase)")
 	field(EGU, "m")
 	field(LINR, "NO CONVERSION")
-	field(SMOO, "0")
-	field(ROFF, "0")
-	field(AOFF, "0")
-	field(ASLO, "$(x-voltsPerMilli)")
+	field(ESLO, "$(x-voltsPerMilli)")
 }
 
 record(ai, "BPM$(clsName):y") {
@@ -25,10 +23,7 @@ record(ai, "BPM$(clsName):y") {
 	field(PHAS, "$(phase)")
 	field(EGU, "m")
 	field(LINR, "NO CONVERSION")
-	field(SMOO, "0")
-	field(ROFF, "0")
-	field(AOFF, "0")
-	field(ASLO, "$(y-voltsPerMilli)")
+	field(ESLO, "$(y-voltsPerMilli)")
 }
 
 record(ao, "BPM$(clsName):x:reference") {

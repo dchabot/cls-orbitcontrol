@@ -10,6 +10,9 @@
 
 #include <stdint.h>
 #include <Vmic2536Module.h>
+#include <string>
+using std::string;
+
 
 /*#define DAC_AMP_CONV_FACTOR 42234.31*/
 #define DAC_AMP_CONV_FACTOR 1
@@ -27,11 +30,11 @@
 #define UPDATE 0x80000000
 //#define DROP_UPDATE 0x7FFFFFFF
 
-const int NumOcm=48;
+const uint32_t NumOcm=48;
 
 class Ocm {
 public:
-	Ocm(const char* pvPrefix, Vmic2536Module* module, uint8_t chan);
+	Ocm(const string& str,Vmic2536Module* module,uint8_t chan);
 	virtual ~Ocm();
 	bool isInCorrection() const;
 	void includeInCorrection();
@@ -39,7 +42,7 @@ public:
 	void setSetpoint(int32_t sp);
 	void activateSetpoint();
 	int32_t getSetpoint() const;
-	const char* getId() const;
+	string getId() const;
 	uint8_t getDelay() const;
 	void setDelay(uint8_t usec);
 
@@ -50,7 +53,7 @@ private:
 
 	Vmic2536Module* mod;
 	uint8_t channel;
-	const char* id;
+	const string id;
 	bool inCorrection;
 	int32_t setpoint;
 	int32_t feedback;
@@ -73,7 +76,7 @@ inline int32_t Ocm::getSetpoint() const {
 	return setpoint;
 }
 
-inline const char* Ocm::getId() const {
+inline string Ocm::getId() const {
 	return id;
 }
 

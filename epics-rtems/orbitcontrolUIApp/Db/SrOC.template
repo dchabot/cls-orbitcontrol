@@ -1,6 +1,8 @@
 record(longout, "$(clsName):dac") {
 	field(DESC, "PwrSupply $(channel) setpoint")
-	field(DTYP, "PwrSupply Setpoint")
+	field(DTYP, "OCM LongOut")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
 	field(OUT, "@$(crateId) $(vmeBaseAddr) $(channel)")
 	field(SCAN, "Passive")
 	field(HOPR, "7602176")
@@ -20,3 +22,11 @@ record(longin, "$(clsName):dac:fbk") {
 	field(INP, "$(clsName):dac NPP")
 }
 
+record(bo, "$(clsName):isInCorrection") {
+	field(DTYP, "OCM BinaryOut")
+	field(OMSL, "supervisory")
+	field(DOL, "$(isInCorrection)")
+	field(OUT, "@FOO")
+	field(ZNAM, "False")
+	field(ONAM, "True")
+}

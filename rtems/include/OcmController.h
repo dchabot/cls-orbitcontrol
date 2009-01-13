@@ -16,12 +16,12 @@ public:
 	OcmController(){};
 	virtual ~OcmController();
 	virtual void setOcmSetpoint(Ocm* ch, int32_t val)=0;
-	virtual int32_t getOcmSetpoint(Ocm *ch)=0;
-	virtual void updateAllOcmSetpoints()=0;
-	virtual void registerOcm(Ocm* ch)=0;
+	virtual Ocm* registerOcm(const string& str,uint32_t crateId,uint32_t vmeAddr,uint8_t ch)=0;
 	virtual void unregisterOcm(Ocm* ch)=0;
-	virtual void setVerticalResponseMatrix(double v[NumOcm][NumOcm])=0;
-	virtual void setHorizontalResponseMatrix(double h[NumOcm][NumOcm])=0;
+	virtual Ocm* getOcmById(const string& id)=0;
+	virtual void setVerticalResponseMatrix(double v[NumOcm*NumOcm])=0;
+	virtual void setHorizontalResponseMatrix(double h[NumOcm*NumOcm])=0;
+	virtual void setDispersionVector(double d[NumOcm])=0;
 
 	void setMaxHorizontalStep(int32_t step);
 	int32_t getMaxHorizontalStep() const;
@@ -39,6 +39,7 @@ protected:
 	int32_t maxVFrac;
 	double hmat[NumOcm][NumOcm];
 	double vmat[NumOcm][NumOcm];
+	double dmat[NumOcm];
 };
 
 inline int32_t OcmController::getMaxHorizontalStep() const { return maxHStep; }

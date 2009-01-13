@@ -1,0 +1,23 @@
+record(waveform, "OCM:x:responseVector") {
+	field(DTYP, "OCM Waveform")
+	field(INP, "0")
+	field(SCAN, "Passive")
+	field(FTVL, "DOUBLE")
+	field(NELM, "$(numElem)")
+}
+
+record(waveform, "OCM:y:responseVector") {
+	field(DTYP, "OCM Waveform")
+	field(INP, "0")
+	field(SCAN, "Passive")
+	field(FTVL, "DOUBLE")
+	field(NELM, "$(numElem)")
+}
+
+record(waveform, "OCM:x:dispersionVector") {
+	field(DTYP, "OCM Waveform")
+	field(INP, "0")
+	field(SCAN, "Passive")
+	field(FTVL, "DOUBLE")
+	field(NELM, "48")
+}

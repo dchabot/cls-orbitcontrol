@@ -1,7 +1,7 @@
 /*
- * devSupBPMBinaryOut.cc
+ * devSupOCMBinaryOut.cc
  *
- *  Created on: Jan 8, 2009
+ *  Created on: Jan 13, 2009
  *      Author: chabotd
  */
 
@@ -38,7 +38,7 @@ struct {
     DEVSUPFUN   init_record;
     DEVSUPFUN   get_ioint_info;
     DEVSUPFUN   write_bo;
-} devSupBPMBinaryOut={
+} devSupOCMBinaryOut={
     5,
     NULL,
     NULL,
@@ -47,54 +47,41 @@ struct {
     write_bo,
 };
 
-epicsExportAddress(dset,devSupBPMBinaryOut);
+epicsExportAddress(dset,devSupOCMBinaryOut);
 
-/**
- * This routine will instantiate the object representing this BPM and
- * register it with a BpmController. The BPM object
- * is then also utilized in various other Device Support routines.
- *
- * @param bor ptr to binary out record
- * @return
- */
 static long init_record(void* bor) {
 	boRecord *pbo = (boRecord*)bor;
-	OrbitController *oc = OrbitController::getInstance();
+	OcmController *ocmCtlr = OrbitController::getInstance();
 
 	if (pbo->out.type != INST_IO) {
 		syslog(LOG_INFO, "%s: OUT field type should be INST_IO\n", pbo->name);
 		return(S_db_badField);
 	}
-
-	string name(pbo->name);
-	size_t pos = name.find(":isInCorrection");
-	Bpm *bpm = new Bpm(name.substr(0,pos));
+	string id(pbo->name);
+	size_t pos = id.find_first_of(":");
+	Ocm *ocm = ocmCtlr->getOcmById(id.substr(0,pos));
+	if(ocm == NULL) {
+		return -1;
+	}
 	/* From Record Reference Manual:
 	 * ---------------------------------
 	 * If DOL is constant than VAL is initialized to 1 or 0, dependent upon (non)zero DOL value.
 	 */
-	bpm->setEnabled((bool)pbo->val);
-	syslog(LOG_INFO, "%s: isEnabled=%s\n",bpm->getId().c_str(),(bpm->isEnabled()?"true":"false"));
-	oc->registerBpm(bpm);
-
+	if(pbo->val != 0) { ocm->includeInCorrection(); }
+	else { ocm->omitFromCorrection(); }
+	pbo->dpvt = (void*)ocm;
 	return 0;
 }
 
-/**
- * Simply update this BPM object's "enabled" property.
- *
- * @param bor
- * @return
- */
 static long write_bo(void* bor) {
 	boRecord *pbo = (boRecord*)bor;
-	Bpm *bpm = (Bpm*)pbo->dpvt;
-
-	bpm->setEnabled((bool)pbo->val);
+	Ocm *ocm = (Ocm*)pbo->dpvt;
+	if(pbo->rval != 0) { ocm->includeInCorrection(); }
+	else { ocm->omitFromCorrection(); }
 	return 0;
 }
+
 
 #ifdef __cplusplus
 }
 #endif
-

@@ -200,7 +200,7 @@ typedef struct
 #ifndef __cplusplus
 int InitICS110BL(VmeModule *module, double reqSampleRate, double *trueSampleRate, int clockingSelect, int AcquireSelect, /*uint8_t irqVector,*/ int numChannels);
 int programFoxRate(VmeModule *module, int foxWordPtr);
-int ICS110BProgramAdcSpi(VmeModule *module, int arg);
+int ICS110BProgramAdcSpi(VmeModule *module, int ocThreadArg);
 int ICS110BCalibrateAdc(VmeModule *module, int sampleRatio, double *pSampleRate);
 int ICS110BSampleRateSet(VmeModule *module, double reqRate, double *actRate, int sampleRatio);
 int ICS110BDemodReset(VmeModule *module);

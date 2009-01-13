@@ -19,16 +19,14 @@ DBD += orbitcontrolUI.dbd
 # orbitcontrolUI_registerRecordDeviceDriver.cpp derives from orbitcontrolUI.dbd
 orbitcontrolUI_SRCS += orbitcontrolUI_registerRecordDeviceDriver.cpp
 
-
-orbitcontrolUI_SRCS += EpicsBpmController.cc
 # custom device support:
 orbitcontrolUI_SRCS += devSupBPMBinaryOut.cc
 orbitcontrolUI_SRCS += devSupBPMAnalogOut.cc
 orbitcontrolUI_SRCS += devSupBPMAnalogIn.cc
+orbitcontrolUI_SRCS += devSupBPMSamplesSetpoint.cc
 orbitcontrolUI_SRCS += devSupOCMSetpoint.cc
-orbitcontrolUI_SRCS += devSupBPMSubArray.cc
-#orbitcontrolUI_SRCS += devSupOCMWaveform.cc
-#orbitcontrolUI_SRCS += devSupBPMSamplesSetpoint.cc
+orbitcontrolUI_SRCS += devSupOCMWaveform.cc
+orbitcontrolUI_SRCS += devSupOCMBinaryOut.cc
 
 # Build the main IOC entry point on workstation OSs.
 orbitcontrolUI_SRCS_DEFAULT += orbitcontrolUIMain.cpp

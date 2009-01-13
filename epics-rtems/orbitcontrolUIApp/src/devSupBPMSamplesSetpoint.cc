@@ -64,10 +64,10 @@ init_record(void* lor) {
 static long
 write_longout(void* lor) {
 	struct longoutRecord* lorp = (longoutRecord*)lor;
-	//extern uint32_t SamplesPerAvg;
+	BpmController *bpmCtlr = OrbitController::getInstance();
 
 	if((lorp->val < lorp->hopr) && (lorp->val > lorp->lopr)) {
-		//SamplesPerAvg = lorp->val;
+		bpmCtlr->setSamplesPerAvg(lorp->val);
 	}
 	else {
 		syslog(LOG_INFO," val %d outside acceptable range!!\n",lorp->val);
