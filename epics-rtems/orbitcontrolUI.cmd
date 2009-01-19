@@ -12,13 +12,14 @@ dbLoadDatabase("dbd/orbitcontrolUI.dbd")
 orbitcontrolUI_registerRecordDeviceDriver(pdbbase)
 
 ## Load record instances ####################################
-dbLoadRecords("db/Bpms.db","event=13,phase=1")
-dbLoadRecords("db/BpmSamplesPerAvg.db")
+dbLoadRecords("db/OrbitController.db","modeChangeEvent=10")
+#dbLoadRecords("db/Bpms.db","bpmChangeEvent=13")
+#dbLoadRecords("db/BpmSamplesPerAvg.db")
 
-dbLoadRecords("db/SrOC2404-05.db")
-dbLoadRecords("db/SrOC2406-01.db")
-dbLoadRecords("db/SrOC2406-03.db")
-dbLoadRecords("db/SrOC2408-01.db")
-dbLoadRecords("db/SrChicane2408-01.db")
+#dbLoadRecords("db/SrOC2404-05.db","isInCorrection=1")
+#dbLoadRecords("db/SrOC2406-01.db","isInCorrection=1")
+#dbLoadRecords("db/SrOC2406-03.db","isInCorrection=1")
+#dbLoadRecords("db/SrOC2408-01.db","isInCorrection=1")
+#dbLoadRecords("db/SrChicane2408-01.db","isInCorrection=1")
 
 iocInit()

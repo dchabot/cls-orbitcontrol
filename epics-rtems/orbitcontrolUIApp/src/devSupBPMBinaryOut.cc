@@ -59,7 +59,7 @@ epicsExportAddress(dset,devSupBPMBinaryOut);
  */
 static long init_record(void* bor) {
 	boRecord *pbo = (boRecord*)bor;
-	OrbitController *oc = OrbitController::getInstance();
+	BpmController *bpmctlr = OrbitController::getInstance();
 
 	if (pbo->out.type != INST_IO) {
 		syslog(LOG_INFO, "%s: OUT field type should be INST_IO\n", pbo->name);
@@ -68,15 +68,23 @@ static long init_record(void* bor) {
 
 	string name(pbo->name);
 	size_t pos = name.find(":isInCorrection");
-	Bpm *bpm = new Bpm(name.substr(0,pos));
+	string id = name.substr(0,pos);
+	Bpm *bpm = bpmctlr->getBpmById(id);
+
+	if(bpm == 0) {
+		syslog(LOG_INFO, "%s: creating BPM %s\n",pbo->name,id.c_str());
+		bpm = new Bpm(id);
+		bpmctlr->registerBpm(bpm);
+		if(bpm==0) {
+			syslog(LOG_INFO, "%s -- failed to create/register BPM!!\n",pbo->name);
+			return -1;
+		}
+	}
 	/* From Record Reference Manual:
 	 * ---------------------------------
 	 * If DOL is constant than VAL is initialized to 1 or 0, dependent upon (non)zero DOL value.
 	 */
 	bpm->setEnabled((bool)pbo->val);
-	syslog(LOG_INFO, "%s: isEnabled=%s\n",bpm->getId().c_str(),(bpm->isEnabled()?"true":"false"));
-	oc->registerBpm(bpm);
-
 	return 0;
 }
 

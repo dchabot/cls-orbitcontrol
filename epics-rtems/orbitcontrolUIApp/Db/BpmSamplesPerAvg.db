@@ -6,7 +6,7 @@
 record(longout, "BPM:samplesPerAvg") {
 	field(DESC, "Set BPM samples/avg")
 	field(DTYP, "BPM LongOut")
-	field(OMSL, "Supervisory")
+	field(OMSL, "supervisory")
 	field(DOL, "5000")
 	field(OUT, "@BPMSamplesPerAverage")
 	field(EGU, "samples/avg")

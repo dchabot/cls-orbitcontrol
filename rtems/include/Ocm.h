@@ -36,15 +36,14 @@ class Ocm {
 public:
 	Ocm(const string& str,Vmic2536Module* module,uint8_t chan);
 	virtual ~Ocm();
-	bool isInCorrection() const;
-	void includeInCorrection();
-	void omitFromCorrection();
+	bool isEnabled() const { return enabled; }
+	void setEnabled(bool b) { enabled=b; }
 	void setSetpoint(int32_t sp);
 	void activateSetpoint();
-	int32_t getSetpoint() const;
-	string getId() const;
-	uint8_t getDelay() const;
-	void setDelay(uint8_t usec);
+	int32_t getSetpoint() const { return setpoint; }
+	string getId() const { return id; }
+	uint8_t getDelay() const { return delay; }
+	void setDelay(uint8_t usec) { delay=usec; }
 
 private:
 	Ocm();
@@ -54,37 +53,10 @@ private:
 	Vmic2536Module* mod;
 	uint8_t channel;
 	const string id;
-	bool inCorrection;
+	bool enabled;
 	int32_t setpoint;
 	int32_t feedback;
 	uint8_t delay; //opto-isolator on/off delay
 };
 
-inline bool Ocm::isInCorrection() const {
-	return inCorrection;
-}
-
-inline void Ocm::includeInCorrection() {
-	inCorrection = true;
-}
-
-inline void Ocm::omitFromCorrection() {
-	inCorrection = false;
-}
-
-inline int32_t Ocm::getSetpoint() const {
-	return setpoint;
-}
-
-inline string Ocm::getId() const {
-	return id;
-}
-
-inline uint8_t Ocm::getDelay() const {
-	return delay;
-}
-
-inline void Ocm::setDelay(uint8_t usec) {
-	delay=usec;
-}
 #endif /* OCM_H_ */

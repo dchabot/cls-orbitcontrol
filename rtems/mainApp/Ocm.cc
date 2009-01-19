@@ -8,12 +8,10 @@
 #include <Ocm.h>
 #include <utils.h>
 
-Ocm::Ocm(const string& pvId,
-			Vmic2536Module* module,
-			uint8_t chan) :
+Ocm::Ocm(const string& str,Vmic2536Module* module,uint8_t chan) :
 	//ctor-initializer list
 	mod(module),channel(chan),
-	id(pvId),inCorrection(true),
+	id(str),enabled(true),
 	setpoint(0),feedback(0),delay(30)//i.e. 30 usecs
 { }
 

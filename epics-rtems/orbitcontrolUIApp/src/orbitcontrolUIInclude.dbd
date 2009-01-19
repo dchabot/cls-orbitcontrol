@@ -1,6 +1,8 @@
 include "base.dbd"
 #include definitions for any other support applications needed
 # custom device support
+device(mbbi, INST_IO, devSupOrbitControllerMbbi, "OrbitController Mbbio")
+device(mbbo, INST_IO, devSupOrbitControllerMbbo, "OrbitController Mbbio")
 device(bo, INST_IO, devSupBPMBinaryOut, "BPM BinaryOut")
 device(ao, INST_IO, devSupBPMAnalogOut, "BPM AnalogOut")
 device(ai, INST_IO, devSupBPMAnalogIn, "BPM AnalogIn")
@@ -8,3 +10,4 @@ device(longout, INST_IO, devSupBPMSamplesSetpoint, "BPM LongOut")
 device(longout, INST_IO, devSupOCMSetpoint, "OCM LongOut")
 device(waveform, CONSTANT, devSupOCMWaveform, "OCM Waveform")
 device(bo, INST_IO, devSupOCMBinaryOut, "OCM BinaryOut")
+device(ao, INST_IO, devSupOCMAnalogOut, "OCM AnalogOut")

@@ -19,6 +19,7 @@ public:
 	virtual Ocm* registerOcm(const string& str,uint32_t crateId,uint32_t vmeAddr,uint8_t ch)=0;
 	virtual void unregisterOcm(Ocm* ch)=0;
 	virtual Ocm* getOcmById(const string& id)=0;
+	virtual void showAllOcms()=0;
 	virtual void setVerticalResponseMatrix(double v[NumOcm*NumOcm])=0;
 	virtual void setHorizontalResponseMatrix(double h[NumOcm*NumOcm])=0;
 	virtual void setDispersionVector(double d[NumOcm])=0;

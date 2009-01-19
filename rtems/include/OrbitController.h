@@ -17,6 +17,7 @@
 #include <AdcIsr.h>
 #include <AdcData.h>
 #include <Ocm.h>
+#include <PowerSupplyBulk.h>
 #include <vector>
 #include <map>
 #include <rtems.h>
@@ -34,8 +35,8 @@ const uint32_t NumAdcModules = 4;
 const uint32_t NumAdcReaders = 4;
 const uint32_t NumVmeCrates = 4;
 //FIXME -- this should be implemented as a class, 'cause c++ enums suck ass :-(
-enum OrbitControllerMode {ASSISTED,AUTONOMOUS};
-
+enum OrbitControllerMode {INITIALIZING,STANDBY,ASSISTED,AUTONOMOUS};
+typedef void (*OrbitControllerModeChangeCallback)(void*);
 
 
 /**
@@ -61,11 +62,13 @@ public:
 	double getAdcFrameRateFeedback() const { return adcFrameRateFeedback; }
 	OrbitControllerMode getMode() const { return mode; }
 	void setMode(OrbitControllerMode mode) { this->mode = mode; }
+	void setModeChangeCallback(OrbitControllerModeChangeCallback cb, void* cbArg);
 
 	//virtual methods inherited from abstract base-class OcmController:
 	Ocm* registerOcm(const string& str,uint32_t crateId,uint32_t vmeAddr,uint8_t ch);
 	void unregisterOcm(Ocm* ch);
 	Ocm* getOcmById(const string& id);
+	void showAllOcms();
 	void setOcmSetpoint(Ocm* ch, int32_t val);
 	void setVerticalResponseMatrix(double v[NumOcm*NumOcm]);
 	void setHorizontalResponseMatrix(double h[NumOcm*NumOcm]);
@@ -74,12 +77,11 @@ public:
 	//virtual methods inherited from abstract base-class BpmController
 	void registerBpm(Bpm* bpm);
 	void unregisterBpm(Bpm* bpm);
-	Bpm* getBpm(const string& id);
+	Bpm* getBpmById(const string& id);
 	void setBpmValueChangeCallback(BpmValueChangeCallback cb, void* cbArg);
 	uint32_t getSamplesPerAvg() const { return samplesPerAvg; }
 	void setSamplesPerAvg(uint32_t num) { samplesPerAvg = num; }
 	void showAllBpms();
-	void enqueAdcData(AdcData** rdSegments);
 
 private:
 	OrbitController();
@@ -91,14 +93,18 @@ private:
 	void stopAdcAcquisition();
 	void resetAdcFifos();
 	void enableAdcInterrupts();
+	void disableAdcInterrupts();
 	void rendezvousWithIsr();
 	void rendezvousWithAdcReaders();
 	void activateAdcReaders();
+	void enqueueAdcData(AdcData** rdSegments);
 
 	static rtems_task ocThreadStart(rtems_task_argument arg);
 	rtems_task ocThreadBody(rtems_task_argument arg);
 
 	static OrbitController* instance;
+	OrbitControllerModeChangeCallback mcCallback;
+	void* mcCallbackArg;
 	rtems_id ocTID;
 	rtems_name ocThreadName;
 	rtems_task_argument ocThreadArg;
@@ -119,6 +125,7 @@ private:
 	vector<Vmic2536Module*> dioArray;
 	vector<AdcIsr*> isrArray;
 	vector<AdcReader*> rdrArray;
+	vector<PowerSupplyBulk*> psbArray;
 	AdcData* rdSegments[NumAdcModules];
 
 	bool initialized;

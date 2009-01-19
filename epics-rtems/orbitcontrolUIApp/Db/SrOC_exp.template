@@ -1,6 +1,8 @@
-record(longout, "$(clsName):dac_x") {
+record(longout, "$(clsName)-exp:dac") {
 	field(DESC, "PwrSupply $(channel) setpoint")
-	field(DTYP, "PwrSupply Setpoint")
+	field(DTYP, "OCM LongOut")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
 	field(OUT, "@$(crateId) $(vmeBaseAddr) $(channel)")
 	field(SCAN, "Passive")
 	field(HOPR, "7602176")
@@ -10,13 +12,21 @@ record(longout, "$(clsName):dac_x") {
 	field(LOLO, "-7602176")
 	field(LOPR, "-7602176")
 	field(EGU, "DAC")
-	field(FLNK, "$(clsName):dac_x:fbk")
+#	field(FLNK, "$(clsName)-exp:dac:fbk")
 }
 
-record(longin, "$(clsName):dac_x:fbk") {
-	field(DESC, "PwrSupply $(channel) setpoint fbk")
-	field(DTYP, "Soft Channel")
-	field(SCAN, "Passive")
-	field(INP, "$(clsName):dac_x NPP")
-}
+#record(longin, "$(clsName)-exp:dac:fbk") {
+#	field(DESC, "PwrSupply $(channel) setpoint fbk")
+#	field(DTYP, "Soft Channel")
+#	field(SCAN, "Passive")
+#	field(INP, "$(clsName)-exp:dac NPP")
+#}
 
+record(bo, "$(clsName)-exp:isInCorrection") {
+	field(DTYP, "OCM BinaryOut")
+	field(OMSL, "supervisory")
+	field(DOL, "$(isInCorrection)")
+	field(OUT, "@$(crateId) $(vmeBaseAddr) $(channel)")
+	field(ZNAM, "False")
+	field(ONAM, "True")
+}

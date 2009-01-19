@@ -1,0 +1,34 @@
+### NOTE: "Initializing" mode is not available through the UI
+record(mbbo, "OrbitController:mode") {
+	field(DTYP, "OrbitController Mbbio")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@mode")
+	field(ONVL, "1")
+	field(TWVL, "2")
+	field(THVL, "3")
+	field(ONST, "Standby")
+	field(TWST, "Assisted")
+	field(THST, "Autonomous")
+}
+
+record(mbbi, "OrbitController:mode:fbk") {
+	field(DTYP, "OrbitController Mbbio")
+	field(PINI, "1")
+	field(SCAN, "Event")
+	field(EVNT, "$(modeChangeEvent)")
+	field(INP, "@mode")
+	field(ZRVL, "0")
+	field(ONVL, "1")
+	field(TWVL, "2")
+	field(THVL, "3")
+	field(ZRST, "Initializing")
+	field(ONST, "Standby")
+	field(TWST, "Assisted")
+	field(THST, "Autonomous")
+}
+
+### FIXME!!!
+#record(ai, "OrbitController:sampleRate:fbk") {
+#	field(DTYP, "OrbitController AnalogIn")
+#}

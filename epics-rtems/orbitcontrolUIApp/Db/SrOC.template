@@ -12,21 +12,21 @@ record(longout, "$(clsName):dac") {
 	field(LOLO, "-7602176")
 	field(LOPR, "-7602176")
 	field(EGU, "DAC")
-	field(FLNK, "$(clsName):dac:fbk")
+#	field(FLNK, "$(clsName):dac:fbk")
 }
 
-record(longin, "$(clsName):dac:fbk") {
-	field(DESC, "PwrSupply $(channel) setpoint fbk")
-	field(DTYP, "Soft Channel")
-	field(SCAN, "Passive")
-	field(INP, "$(clsName):dac NPP")
-}
+#record(longin, "$(clsName):dac:fbk") {
+#	field(DESC, "PwrSupply $(channel) setpoint fbk")
+#	field(DTYP, "Soft Channel")
+#	field(SCAN, "Passive")
+#	field(INP, "$(clsName):dac NPP")
+#}
 
 record(bo, "$(clsName):isInCorrection") {
 	field(DTYP, "OCM BinaryOut")
 	field(OMSL, "supervisory")
 	field(DOL, "$(isInCorrection)")
-	field(OUT, "@FOO")
+	field(OUT, "@$(crateId) $(vmeBaseAddr) $(channel)")
 	field(ZNAM, "False")
 	field(ONAM, "True")
 }

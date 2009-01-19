@@ -4,7 +4,7 @@
 ### Note also that we can't use ASLO or others here, as process() will alter VAL 
 ### using ASLO even if LINR="NO CONVERSION" (see aiRecord.c, special()).
 
-record(ai, "BPM$(clsName):x") {
+record(ai, "BPM$(clsName)-exp:x") {
 	field(DTYP, "BPM AnalogIn")
 	field(INP, "@xval")
 	field(SCAN, "Event")
@@ -15,7 +15,7 @@ record(ai, "BPM$(clsName):x") {
 	field(ESLO, "$(x-voltsPerMilli)")
 }
 
-record(ai, "BPM$(clsName):y") {
+record(ai, "BPM$(clsName)-exp:y") {
 	field(DTYP, "BPM AnalogIn")
 	field(INP, "@yval")
 	field(SCAN, "Event")
@@ -26,31 +26,31 @@ record(ai, "BPM$(clsName):y") {
 	field(ESLO, "$(y-voltsPerMilli)")
 }
 
-record(ao, "BPM$(clsName):x:reference") {
+record(ao, "BPM$(clsName)-exp:x:reference") {
 	field(DTYP, "BPM AnalogOut")
 	field(OUT, "@xreference")
 	field(EGU, "m")
 }
 
-record(ao, "BPM$(clsName):y:reference") {
+record(ao, "BPM$(clsName)-exp:y:reference") {
 	field(DTYP, "BPM AnalogOut")
 	field(OUT, "@yreference")
 	field(EGU, "m")
 }
 
-record(ao, "BPM$(clsName):x:offset") {
+record(ao, "BPM$(clsName)-exp:x:offset") {
 	field(DTYP, "BPM AnalogOut")
 	field(OUT, "@xoffset")
 	field(EGU, "m")
 }
 
-record(ao, "BPM$(clsName):y:offset") {
+record(ao, "BPM$(clsName)-exp:y:offset") {
 	field(DTYP, "BPM AnalogOut")
 	field(OUT, "@yoffset")
 	field(EGU, "m")
 }
 
-record(bo, "BPM$(clsName):isInCorrection") {
+record(bo, "BPM$(clsName)-exp:isInCorrection") {
 	field(DTYP, "BPM BinaryOut")
 	field(OMSL, "supervisory")
 	field(DOL, "$(isInCorrection)")

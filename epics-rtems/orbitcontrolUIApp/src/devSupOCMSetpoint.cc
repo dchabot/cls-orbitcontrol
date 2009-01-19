@@ -51,6 +51,8 @@ epicsExportAddress(dset,devSupOCMSetpoint);
 static long
 init_record(void* lor) {
 	longoutRecord* lorp = (longoutRecord*)lor;
+	OcmController *ocmCtlr = OrbitController::getInstance();
+
 	/*chk INP type:*/
 	if (lorp->out.type != INST_IO) {
 		syslog(LOG_INFO, "%s: OUT field type should be INST_IO\n", lorp->name);
@@ -60,19 +62,21 @@ init_record(void* lor) {
 	/* strip off the ":dac" from the record name; this will form the OCM's id */
 	string name(lorp->name);
 	size_t pos = name.find_first_of(":dac");
-	name = name.substr(0,pos);
-	char cbuf[128] = {0};
-	strncpy(cbuf,lorp->out.value.instio.string,sizeof(cbuf)/sizeof(cbuf[0]));
-	/* <rant> WTF doesn't c++ have a string tokenizer method ?!?!? </rant> */
-	/* parse out the params */
-	uint32_t crateId = strtoul(strtok(cbuf," "),NULL,10);
-	uint32_t vmeBaseAddr = strtoul(strtok(NULL," "),NULL,16);
-	uint8_t channel = (epicsUInt8)strtoul(strtok(NULL," "),NULL,10);
-	OcmController *ocmCtlr = OrbitController::getInstance();
-	Ocm *ocm = ocmCtlr->registerOcm(name,crateId,vmeBaseAddr,channel);
+	string id = name.substr(0,pos);
+	Ocm *ocm = ocmCtlr->getOcmById(id);
 	if(ocm == NULL) {
-		syslog(LOG_INFO, "devSupOCMSetpoint: %s -- couldn't register OCM!!\n",lorp->name);
-		return -1;
+		/* <rant> WTF doesn't c++ have a string tokenizer method ?!?!? </rant> */
+		char cbuf[128] = {0};
+		strncpy(cbuf,lorp->out.value.instio.string,sizeof(cbuf)/sizeof(cbuf[0]));
+		/* parse out the params */
+		uint32_t crateId = strtoul(strtok(cbuf," "),NULL,10);
+		uint32_t vmeBaseAddr = strtoul(strtok(NULL," "),NULL,16);
+		uint8_t channel = (epicsUInt8)strtoul(strtok(NULL," "),NULL,10);
+		Ocm *ocm = ocmCtlr->registerOcm(id,crateId,vmeBaseAddr,channel);
+		if(ocm==NULL) {
+			syslog(LOG_INFO, "%s: failure creating OCM %s!!!\n",lorp->name,id.c_str());
+			return -1;
+		}
 	}
 	lorp->dpvt = (void*)ocm;
 	return 0;
@@ -81,13 +85,11 @@ init_record(void* lor) {
 static long
 write_longout(void* lor) {
 	longoutRecord* lorp = (longoutRecord*)lor;
-	Ocm *ocm = (Ocm*)lorp->dpvt;
 	OcmController *ocmCtlr = OrbitController::getInstance();
 
 	syslog(LOG_INFO, "Setting single channel, %s to %d\n",lorp->name,lorp->val);
-
-	ocmCtlr->setOcmSetpoint(ocm, lorp->val);
-	return 0;//SetSingleSetpoint(pvt->ctlr, lorp->val);
+	ocmCtlr->setOcmSetpoint((Ocm*)lorp->dpvt, lorp->val);
+	return 0;
 }
 
 #ifdef __cplusplus

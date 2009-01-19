@@ -51,13 +51,16 @@ epicsExportAddress(dset,devSupBPMSamplesSetpoint);
 static long
 init_record(void* lor) {
 	struct longoutRecord* lorp = (longoutRecord*)lor;
+	BpmController *bpmCtlr = OrbitController::getInstance();
+
 	/*chk INP type:*/
 	if (lorp->out.type != INST_IO) {
 		syslog(LOG_INFO,"%s: OUT field type should be INST_IO\n", lorp->name);
 		return (S_db_badField);
 	}
-	syslog(LOG_INFO,"%s->out=%s\n",lorp->name,lorp->out.value.instio.string);
-
+	syslog(LOG_INFO,"%s: initializing samples/avg to %u\n",lorp->name,lorp->val);
+	//if DOL constant, VAL is initialized to VAL=DOL
+	bpmCtlr->setSamplesPerAvg(lorp->val);
 	return 0;
 }
 

@@ -40,13 +40,15 @@ struct {
     DEVSUPFUN   init_record;
     DEVSUPFUN   get_ioint_info;
     DEVSUPFUN   read_ai;
+    DEVSUPFUN	special_linconv;
 } devSupBPMAnalogIn={
-    5,
+    6,
     NULL,
     NULL,
     init_record,
     NULL,
     read_ai,
+    NULL
 };
 
 epicsExportAddress(dset,devSupBPMAnalogIn);
@@ -69,8 +71,15 @@ static aiType getRecType(string& type) {
 	}
 }
 
+//callback (Observer pattern) must be registered ONCE with BpmController
+static void onBpmValueChange(void* arg) {
+	int ev = (int)arg;
+	post_event(ev);
+}
+
 static long init_record(void* air) {
 	aiRecord *aip = (aiRecord*)air;
+	static int once = 1;
 
 	if(aip->inp.type != INST_IO) {
 		syslog(LOG_INFO, "%s: INP field type should be INST_IO\n", aip->name);
@@ -78,21 +87,25 @@ static long init_record(void* air) {
 	}
 
 	BpmController* bpmctlr = OrbitController::getInstance();
-	string id(aip->name);
-	size_t pos = id.find_first_of(":");
-	Bpm *bpm = bpmctlr->getBpm(id.substr(0,pos));
+	string name(aip->name);
+	size_t pos = name.find_first_of(":");
+	string id = name.substr(0,pos);
+	Bpm *bpm = bpmctlr->getBpmById(id);
 
 	if(bpm == 0) {
-		syslog(LOG_INFO, "%s: can't find BPM object with id=%s\n!!!",
-						aip->name,id.substr(0,pos).c_str());
-		return -1;
+		syslog(LOG_INFO, "%s -- creating BPM %s\n",aip->name,id.c_str());
+		bpm = new Bpm(id);
+		bpmctlr->registerBpm(bpm);
+		if(bpm==0) {
+			syslog(LOG_INFO, "%s -- failed to create/register BPM!!\n",aip->name);
+			return -1;
+		}
 	}
 
 	string type(aip->inp.value.instio.string);
-	syslog(LOG_INFO, "%s: INP=%s\n",bpm->getId().c_str(),type.c_str());
 	try {
 		aiData *aid = new aiData(bpm,getRecType(type));
-		//FIXME -- what happens if aip->aslo is changed via caput ??
+		//FIXME -- what happens if aip->eslo is changed via caput ??
 		// Nothing: that's what!! Could refactor UI-controlled Bpm class-attributes
 		// into *pointers*. That way we could hook record fields into each object instance...
 		if(aid->type==xval) { bpm->setXVoltsPerMilli(aip->eslo); }
@@ -104,7 +117,11 @@ static long init_record(void* air) {
 		syslog(LOG_INFO, "%s",err.what());
 		return -1;
 	}
-
+	//register ONCE ONLY for BPM value-change events:
+	if(once) {
+		once=0;
+		bpmctlr->setBpmValueChangeCallback(onBpmValueChange,(void*)aip->evnt);
+	}
 	return 0;
 }
 

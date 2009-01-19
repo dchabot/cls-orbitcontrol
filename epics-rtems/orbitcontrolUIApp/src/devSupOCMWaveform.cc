@@ -68,7 +68,7 @@ static long init_record(void* wfr) {
 	 * for buffer before we get here (pg 301)
 	 */
 	if(wfrp->bptr == NULL) {
-		/*allocate mem for record buffer using NELM and FTVL.*/
+		/*FIXME -- this condition is recoverable.*/
 		syslog(LOG_INFO,"BPTR is NULL !!\n");
 		return -1;
 	}
@@ -91,18 +91,18 @@ static long init_record(void* wfr) {
  */
 static long read_wf(void* wfr) {
 	waveformRecord* wfrp = (waveformRecord*)wfr;
-	OrbitController *oc = OrbitController::getInstance();
+	OcmController *ocmCtlr = OrbitController::getInstance();
 	uint32_t type = (uint32_t)wfrp->dpvt;
 
 	switch(type) {
 	case xResp:
-		oc->setHorizontalResponseMatrix((double*)wfrp->bptr);
+		ocmCtlr->setHorizontalResponseMatrix((double*)wfrp->bptr);
 		break;
 	case yResp:
-		oc->setVerticalResponseMatrix((double*)wfrp->bptr);
+		ocmCtlr->setVerticalResponseMatrix((double*)wfrp->bptr);
 		break;
 	case xDisp:
-		oc->setDispersionVector((double*)wfrp->bptr);
+		ocmCtlr->setDispersionVector((double*)wfrp->bptr);
 		break;
 	default:
 		syslog(LOG_INFO,"devSupOCMWaveform: read_wf() default case, AAARRRGGG!!!\n");

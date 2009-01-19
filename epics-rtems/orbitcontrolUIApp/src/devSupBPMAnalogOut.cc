@@ -40,13 +40,15 @@ struct {
     DEVSUPFUN   init_record;
     DEVSUPFUN   get_ioint_info;
     DEVSUPFUN   write_ao;
+    DEVSUPFUN	special_linconv;
 } devSupBPMAnalogOut={
-    5,
+    6,
     NULL,
     NULL,
     init_record,
     NULL,
     write_ao,
+    NULL
 };
 
 epicsExportAddress(dset,devSupBPMAnalogOut);
@@ -81,18 +83,22 @@ static long init_record(void* aor) {
 	}
 
 	BpmController* bpmctlr = OrbitController::getInstance();
-	string id(aop->name);
-	size_t pos = id.find_first_of(":");
-	Bpm *bpm = bpmctlr->getBpm(id.substr(0,pos));
+	string name(aop->name);
+	size_t pos = name.find_first_of(":");
+	string id = name.substr(0,pos);
+	Bpm *bpm = bpmctlr->getBpmById(id);
 
 	if(bpm == 0) {
-		syslog(LOG_INFO, "%s: can't find BPM object with id=%s\n!!!",
-						aop->name,id.substr(0,pos).c_str());
-		return -1;
+		syslog(LOG_INFO, "%s -- creating BPM %s\n",aop->name,id.c_str());
+		bpm = new Bpm(id);
+		bpmctlr->registerBpm(bpm);
+		if(bpm==0) {
+			syslog(LOG_INFO, "%s -- failed to create/register BPM!!\n",aop->name);
+			return -1;
+		}
 	}
 
 	string type(aop->out.value.instio.string);
-	syslog(LOG_INFO, "%s: OUT=%s\n",bpm->getId().c_str(),type.c_str());
 	try {
 		aoData *aod = new aoData(bpm,getRecType(type));
 		//hook our aoData object into this record instance

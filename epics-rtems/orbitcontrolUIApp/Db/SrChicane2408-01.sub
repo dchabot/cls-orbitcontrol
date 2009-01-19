@@ -3,15 +3,10 @@
 #   
 #
 
-file SrOC.template
-{
-#                    
-    pattern
-    {  clsName     	crateId  vmeBaseAddr	channel    }
+pattern
+    {  clsName     	crateId  vmeBaseAddr	channel    isInCorrection}
 
-    {  BID1408-02		3	0x00700010		5		}
-    {  BID1411-02		3	0x00700010		6		}
-    {  BID1410-03		3   0x00700010   	7		}
-    
-}    
+    {  BID1408-02		3	0x00700010		5			1	}
+    {  BID1411-02		3	0x00700010		6			1	}
+    {  BID1410-03		3   0x00700010   	7			1	}
 

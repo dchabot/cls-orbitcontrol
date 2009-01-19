@@ -15,7 +15,10 @@ void FindTscTicksPerSecond(uint32_t numSamples);
 typedef void (*FatalErrorCallback)(void);
 
 void FatalErrorHandler(FatalErrorCallback cb);
+
+#ifndef __cplusplus
 int TestDirective(rtems_status_code rc, const char* msg);
+#endif
 
 #ifdef __cplusplus
 }

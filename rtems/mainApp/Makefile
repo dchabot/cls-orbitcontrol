@@ -17,7 +17,8 @@ C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
 # C++ source names, if any, go here -- minus the .cc
 CC_PIECES=VmeCrate VmeModule Ics110blModule Vmic2536Module
 CC_PIECES+=OrbitController OrbitControlException
-CC_PIECES+=StartApp AdcReader AdcIsr Ocm
+CC_PIECES+=AdcReader AdcIsr
+CC_PIECES+=Ocm PowerSupplyBulk StartApp
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
@@ -28,7 +29,7 @@ H_PIECES+=${INCLUDE_DIR}/OrbitControlException ${INCLUDE_DIR}/OcmController
 H_PIECES+=${INCLUDE_DIR}/VmeCrate ${INCLUDE_DIR}/VmeModule
 H_PIECES+=${INCLUDE_DIR}/Ics110blModule ${INCLUDE_DIR}/Vmic2536Module
 H_PIECES+=${INCLUDE_DIR}/AdcReader ${INCLUDE_DIR}/AdcData ${INCLUDE_DIR}/AdcIsr
-H_PIECES+=${INCLUDE_DIR}/Ocm
+H_PIECES+=${INCLUDE_DIR}/PowerSupplyBulk ${INCLUDE_DIR}/Ocm
 H_FILES=$(H_PIECES:%=%.h)
 
 # Assembly source names, if any, go here -- minus the .S

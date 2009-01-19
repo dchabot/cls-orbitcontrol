@@ -8,24 +8,25 @@
 #ifndef POWERSUPPLYBULK_H_
 #define POWERSUPPLYBULK_H_
 
-#include <Ocm.h>
+#include <stdint.h>
+#include <Vmic2536Module.h>
+#include <utils.h>
 
 class PowerSupplyBulk {
 public:
-	PowerSupplyBulk(Ocm* ch);
-	virtual ~PowerSupplyBulk();
-	/**
-	 * activateSetpoint() will toggle the UPDATE bit of a power-supply bulk,
-	 * causing all (current?) setpoints to take effect.
-	 */
-	void activateSetpoint() const;
+	PowerSupplyBulk(Vmic2536Module* m, uint32_t microsec):mod(m),delay(microsec) {}
+	virtual ~PowerSupplyBulk() {}
+	void updateSetpoints()const;
+	uint32_t getDelay()const { return delay; }
+	void setDelay(uint32_t microsec) {  delay=microsec; }
 
 private:
 	PowerSupplyBulk();
 	PowerSupplyBulk(const PowerSupplyBulk&);
 	const PowerSupplyBulk& operator=(const PowerSupplyBulk&);
 
-	Ocm* psch;
+	Vmic2536Module* mod;
+	uint32_t delay;
 };
 
 #endif /* POWERSUPPLYBULK_H_ */
