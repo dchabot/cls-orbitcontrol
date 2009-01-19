@@ -42,7 +42,7 @@ OrbitController* OrbitController::instance = 0;
 OrbitController::OrbitController() :
 	//ctor-initializer list
 	mcCallback(0), mcCallbackArg(0),
-	ocTID(0),ocThreadName(0),ocThreadArg(0),
+	mutexId(0),ocTID(0),ocThreadName(0),ocThreadArg(0),
 	ocThreadPriority(OrbitControllerPriority),
 	rtemsTicksPerSecond(0),adcFramesPerTick(0),
 	adcFrameRateSetpoint(0),adcFrameRateFeedback(0),
@@ -72,6 +72,7 @@ void OrbitController::destroyInstance() {
 	syslog(LOG_INFO, "Destroying OrbitController instance!!\n");
 	stopAdcAcquisition();
 	resetAdcFifos();
+	if(mutexId) { rtems_semaphore_delete(mutexId); }
 	if(ocTID) { rtems_task_delete(ocTID); }
 	if(spQueueId) { rtems_message_queue_delete(spQueueId); }
 	if(isrBarrierId) { rtems_barrier_delete(isrBarrierId); }
@@ -103,6 +104,11 @@ void OrbitController::destroyInstance() {
 void OrbitController::initialize(const double adcSampleRate) {
 	rtems_status_code rc;
 	syslog(LOG_INFO, "OrbitController: initializing...\n");
+	rc = rtems_semaphore_create(rtems_build_name('O','R','B','m'), \
+					1 /*initial count*/, RTEMS_BINARY_SEMAPHORE | \
+					RTEMS_INHERIT_PRIORITY | RTEMS_PRIORITY, \
+					RTEMS_NO_PRIORITY, &mutexId);
+	TestDirective(rc, "OrbitController: mutex create failure");
 	//create thread and barriers for Rendezvous Pattern
 	ocThreadName = rtems_build_name('O','R','B','C');
 	rc = rtems_task_create(ocThreadName,
@@ -341,6 +347,15 @@ void OrbitController::setBpmValueChangeCallback(BpmValueChangeCallback cb, void*
 }
 
 /*********************** private methods *****************************************/
+void OrbitController::lock() {
+	rtems_status_code rc = rtems_semaphore_obtain(mutexId,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
+	TestDirective(rc, "OrbitController: mutex lock failure");
+}
+
+void OrbitController::unlock() {
+	rtems_status_code rc = rtems_semaphore_release(mutexId);
+	TestDirective(rc, "OrbitController: mutex unlock failure");
+}
 
 rtems_task OrbitController::ocThreadStart(rtems_task_argument arg) {
 	OrbitController *oc = (OrbitController*)arg;

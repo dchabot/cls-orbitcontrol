@@ -89,6 +89,8 @@ private:
 	const OrbitController& operator=(const OrbitController&);
 	~OrbitController();
 
+	void lock();
+	void unlock();
 	void startAdcAcquisition();
 	void stopAdcAcquisition();
 	void resetAdcFifos();
@@ -105,6 +107,7 @@ private:
 	static OrbitController* instance;
 	OrbitControllerModeChangeCallback mcCallback;
 	void* mcCallbackArg;
+	rtems_id mutexId;
 	rtems_id ocTID;
 	rtems_name ocThreadName;
 	rtems_task_argument ocThreadArg;
