@@ -52,7 +52,7 @@ OrbitController::OrbitController() :
 	samplesPerAvg(5000),
 	bpmMsgSize(sizeof(AdcData*)*NumAdcModules),bpmMaxMsgs(10),
 	bpmTID(0),bpmThreadName(0),
-	bpmThreadArg(0),bpmThreadPriority(OrbitControllerPriority+1),
+	bpmThreadArg(0),bpmThreadPriority(OrbitControllerPriority+2),
 	bpmQueueId(0),bpmQueueName(0),
 	bpmCB(0),bpmCBArg(0)
 { }
@@ -316,6 +316,8 @@ void OrbitController::showAllBpms() {
 	}
 }
 
+void OrbitController::setBpmValueChangeCallback(BpmValueChangeCallback cb, void* cbArg){}
+
 void OrbitController::enqueAdcData(AdcData** data) {
 	rtems_status_code rc = rtems_message_queue_send(bpmQueueId,(void*)data,bpmMsgSize);
 	TestDirective(rc, "BpmController: msq_q_send failure");
@@ -413,7 +415,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	//start on the "edge" of a clock-tick:
 	rtems_task_wake_after(2);
 	startAdcAcquisition();
-	for(int j=0; j<100; j++) {
+	for(int j=0; j<1000000; j++) {
 		//Wait for notification of ADC "fifo-half-full" event...
 		rendezvousWithIsr();
 		stopAdcAcquisition();

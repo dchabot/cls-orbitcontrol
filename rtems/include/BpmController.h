@@ -16,7 +16,7 @@ typedef void (*BpmValueChangeCallback)(void*);
 
 class BpmController {
 public:
-	virtual ~BpmController();
+	virtual ~BpmController(){}
 	virtual void registerBpm(Bpm* bpm)=0;
 	virtual void unregisterBpm(Bpm* bpm)=0;
 	virtual Bpm* getBpm(const string& id)=0;

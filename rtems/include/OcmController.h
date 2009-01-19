@@ -13,8 +13,8 @@
 
 class OcmController {
 public:
-	OcmController(){};
-	virtual ~OcmController();
+	OcmController(){}
+	virtual ~OcmController(){}
 	virtual void setOcmSetpoint(Ocm* ch, int32_t val)=0;
 	virtual Ocm* registerOcm(const string& str,uint32_t crateId,uint32_t vmeAddr,uint8_t ch)=0;
 	virtual void unregisterOcm(Ocm* ch)=0;

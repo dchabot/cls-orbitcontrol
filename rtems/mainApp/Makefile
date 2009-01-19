@@ -17,7 +17,7 @@ C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
 # C++ source names, if any, go here -- minus the .cc
 CC_PIECES=VmeCrate VmeModule Ics110blModule Vmic2536Module
 CC_PIECES+=OrbitController OrbitControlException
-CC_PIECES+=StartApp AdcReader AdcIsr
+CC_PIECES+=StartApp AdcReader AdcIsr Ocm
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 

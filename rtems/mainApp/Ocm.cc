@@ -8,7 +8,7 @@
 #include <Ocm.h>
 #include <utils.h>
 
-Ocm::Ocm(const char* pvId,
+Ocm::Ocm(const string& pvId,
 			Vmic2536Module* module,
 			uint8_t chan) :
 	//ctor-initializer list
