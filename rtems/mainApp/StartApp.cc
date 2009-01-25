@@ -34,9 +34,9 @@ extern "C" void startApp(char* epicsApp) {
 			//parse and start the EPICS app, orbitcontrolUI:
 			cexpsh(epicsApp);
 		}
-		rtems_task_wake_after(2000);
+		/*rtems_task_wake_after(2000);
 		oc->showAllBpms();
-		oc->showAllOcms();
+		oc->showAllOcms();*/
 		rtems_event_set evOut = 0;
 		rtems_event_receive(1,RTEMS_EVENT_ANY,RTEMS_NO_TIMEOUT,&evOut);
 		syslog(LOG_INFO, "startApp(): Caught event !!\n");

@@ -34,10 +34,17 @@ const rtems_task_priority OrbitControllerPriority=50;
 const uint32_t NumAdcModules = 4;
 const uint32_t NumAdcReaders = 4;
 const uint32_t NumVmeCrates = 4;
+
 //FIXME -- this should be implemented as a class, 'cause c++ enums suck ass :-(
 enum OrbitControllerMode {INITIALIZING,STANDBY,ASSISTED,AUTONOMOUS};
 typedef void (*OrbitControllerModeChangeCallback)(void*);
 
+//#define OC_DEBUG
+#ifdef OC_DEBUG
+	const uint32_t barrierTimeout=RTEMS_NO_TIMEOUT;
+#else
+	const uint32_t barrierTimeout=5000; //rtems "ticks"
+#endif
 
 /**
  * A Singleton class for managing the storage-ring orbit control system. Based on
@@ -99,10 +106,12 @@ private:
 	void rendezvousWithIsr();
 	void rendezvousWithAdcReaders();
 	void activateAdcReaders();
-	void enqueueAdcData(AdcData** rdSegments);
+	void enqueueAdcData();
 
 	static rtems_task ocThreadStart(rtems_task_argument arg);
 	rtems_task ocThreadBody(rtems_task_argument arg);
+	static rtems_task bpmThreadStart(rtems_task_argument arg);
+	rtems_task bpmThreadBody(rtems_task_argument arg);
 
 	static OrbitController* instance;
 	OrbitControllerModeChangeCallback mcCallback;
@@ -147,8 +156,6 @@ private:
 	};
 
 	//BpmController attributes
-	static rtems_task bpmThreadStart(rtems_task_argument arg);
-	rtems_task bpmThreadBody(rtems_task_argument arg);
 	uint32_t samplesPerAvg;
 	map<string,Bpm*> bpmMap;
 	const uint32_t bpmMsgSize;

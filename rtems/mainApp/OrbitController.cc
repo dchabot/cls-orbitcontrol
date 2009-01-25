@@ -51,24 +51,14 @@ OrbitController::OrbitController() :
 	initialized(false),mode(ASSISTED),
 	spQueueId(0),spQueueName(0),
 	samplesPerAvg(5000),
-	bpmMsgSize(sizeof(AdcData*)*NumAdcModules),bpmMaxMsgs(10),
+	bpmMsgSize(sizeof(rdSegments)),bpmMaxMsgs(10),
 	bpmTID(0),bpmThreadName(0),
-	bpmThreadArg(0),bpmThreadPriority(OrbitControllerPriority+2),
+	bpmThreadArg(0),bpmThreadPriority(OrbitControllerPriority+3),
 	bpmQueueId(0),bpmQueueName(0),
 	bpmCB(0),bpmCBArg(0)
 { }
 
-OrbitController::~OrbitController() { }
-
-OrbitController* OrbitController::getInstance() {
-	//FIXME -- not thread-safe!!
-	if(instance==0) {
-		instance = new OrbitController();
-	}
-	return instance;
-}
-
-void OrbitController::destroyInstance() {
+OrbitController::~OrbitController() {
 	syslog(LOG_INFO, "Destroying OrbitController instance!!\n");
 	stopAdcAcquisition();
 	resetAdcFifos();
@@ -100,6 +90,16 @@ void OrbitController::destroyInstance() {
 	crateArray.clear();
 	instance = 0;
 }
+
+OrbitController* OrbitController::getInstance() {
+	//FIXME -- not thread-safe!!
+	if(instance==0) {
+		instance = new OrbitController();
+	}
+	return instance;
+}
+
+void OrbitController::destroyInstance() { delete instance; }
 
 void OrbitController::initialize(const double adcSampleRate) {
 	rtems_status_code rc;
@@ -151,6 +151,7 @@ void OrbitController::initialize(const double adcSampleRate) {
 									bpmMsgSize/*max msg size (bytes)*/,
 									RTEMS_LOCAL|RTEMS_FIFO,
 									&bpmQueueId);
+
 	rtems_clock_get(RTEMS_CLOCK_GET_TICKS_PER_SECOND, &rtemsTicksPerSecond);
 	//initialize hardware: VME crates, ADC, and DIO modules
 	for(uint32_t i=0; i<NumVmeCrates; i++) {
@@ -364,7 +365,7 @@ rtems_task OrbitController::ocThreadStart(rtems_task_argument arg) {
 
 rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	syslog(LOG_INFO, "OrbitController: entering main processing loop\n");
-	//start on the "edge" of a clock-tick:
+	//state entry: start on the "edge" of a clock-tick:
 	rtems_task_wake_after(2);
 	startAdcAcquisition();
 	for(int j=0; j<1000000; j++) {
@@ -377,16 +378,16 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 		resetAdcFifos();
 		startAdcAcquisition();
 		enableAdcInterrupts();
-		//FIXME -- temporary debugging!!
-		for(uint32_t i=0; i<NumAdcModules; i++) {
-			delete rdSegments[i];
-		}
+		//ship ADC data off for processing && distribution:
+		enqueueAdcData();
 	}
+	//state exit: silence the ADC's
 	stopAdcAcquisition();
 	resetAdcFifos();
 	//FIXME -- temporary!!!
-	rtems_event_send((rtems_id)arg,1);
-	rtems_task_delete(ocTID);
+	rtems_task_wake_after(1000);
+	TestDirective(rtems_event_send((rtems_id)arg,1),"OrbitController: problem sending event to UI thread");
+	TestDirective(rtems_task_delete(ocTID),"OrbitController: problem deleting ocThread");
 }
 
 void OrbitController::startAdcAcquisition() {
@@ -429,13 +430,13 @@ void OrbitController::disableAdcInterrupts() {
 
 void OrbitController::rendezvousWithIsr() {
 	/* Wait for notification of ADC "fifo-half-full" event... */
-	rtems_status_code rc = rtems_barrier_wait(isrBarrierId,5000);/*FIXME--debugging timeouts*/
+	rtems_status_code rc = rtems_barrier_wait(isrBarrierId,barrierTimeout);/*FIXME--debugging timeouts*/
 	TestDirective(rc, "OrbitController: ISR barrier_wait() failure");
 }
 
 void OrbitController::rendezvousWithAdcReaders() {
 	/* block until the ReaderThreads are at their sync-point... */
-	rtems_status_code rc = rtems_barrier_wait(rdrBarrierId, 5000);/*FIXME--debugging timeouts*/
+	rtems_status_code rc = rtems_barrier_wait(rdrBarrierId, barrierTimeout);/*FIXME--debugging timeouts*/
 	TestDirective(rc,"OrbitController: RDR barrier_wait() failure");
 }
 
@@ -448,8 +449,8 @@ void OrbitController::activateAdcReaders() {
 	}
 }
 
-void OrbitController::enqueueAdcData(AdcData** data) {
-	rtems_status_code rc = rtems_message_queue_send(bpmQueueId,(void*)data,bpmMsgSize);
+void OrbitController::enqueueAdcData() {
+	rtems_status_code rc = rtems_message_queue_send(bpmQueueId,rdSegments,sizeof(rdSegments));
 	TestDirective(rc, "BpmController: msq_q_send failure");
 }
 
@@ -462,30 +463,32 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 	uint32_t nthFrame,nthAdc,nthChannel;
 	uint32_t localSamplesPerAvg = samplesPerAvg;
 	uint32_t numSamplesSummed=0;
+	AdcData *ds[NumAdcModules];
 	static double sums[NumBpmChannels];
 	static double sorted[NumBpmChannels];
 
 	syslog(LOG_INFO, "BpmController: entering main loop...\n");
 	for(;;) {
 		uint32_t bytes;
-		rtems_status_code rc = rtems_message_queue_receive(bpmQueueId,(void*)rdSegments,
-															&bytes,RTEMS_LOCAL|RTEMS_WAIT,
-															RTEMS_NO_TIMEOUT);
+		rtems_status_code rc = rtems_message_queue_receive(bpmQueueId,ds,&bytes,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
 		TestDirective(rc,"BpmController: msg_q_rcv failure");
-		if(bytes%bpmMsgSize) {
+		if(bytes != bpmMsgSize) {
 			syslog(LOG_INFO, "BpmController: received %u bytes in msg: was expecting %u\n",
 								bytes,bpmMsgSize);
 			//FIXME -- handle this error!!!
 		}
-		/* XXX -- assumes each rdSegment has an equal # of frames... */
-		for(nthFrame=0; nthFrame<rdSegments[nthFrame]->getFrames(); nthFrame++) { /* for each ADC frame in rdSegment[].buf... */
-			int nthFrameOffset = nthFrame*rdSegments[nthFrame]->getChannelsPerFrame();
+		/* XXX -- assumes each ADC Data Segment has an equal # of frames and channels per frame */
+        uint32_t nFrames = ds[0]->getFrames();
+        uint32_t frameOffset = ds[0]->getChannelsPerFrame();
+		for(nthFrame=0; nthFrame<nFrames; nthFrame++) { /* for each ADC frame... */
+			int nthFrameOffset = nthFrame*frameOffset;
 
 			for(nthAdc=0; nthAdc<NumAdcModules; nthAdc++) { /* for each ADC... */
-				int nthAdcOffset = nthAdc*rdSegments[nthAdc]->getChannelsPerFrame();
+				int nthAdcOffset = nthAdc*frameOffset;
+				int32_t *buf = ds[nthAdc]->getBuffer();
 
-				for(nthChannel=0; nthChannel<rdSegments[nthAdc]->getChannelsPerFrame(); nthChannel++) { /* for each channel of this frame... */
-					sums[nthAdcOffset+nthChannel] += (double)(rdSegments[nthAdc]->getBuffer()[nthFrameOffset+nthChannel]);
+				for(nthChannel=0; nthChannel<frameOffset; nthChannel++) { /* for each channel of this frame... */
+					sums[nthAdcOffset+nthChannel] += (double)buf[nthFrameOffset+nthChannel];
 					//sumsSqrd[nthAdcOffset+nthChannel] += pow(sums[nthAdcOffset+nthChannel],2);
 				}
 
@@ -493,7 +496,7 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 			numSamplesSummed++;
 
 			if(numSamplesSummed==localSamplesPerAvg) {
-				sortBPMData(sorted,sums,rdSegments[0]->getChannelsPerFrame());
+				sortBPMData(sorted,sums,ds[0]->getChannelsPerFrame());
 				/* scale & update each BPM object, then execute client's BpmValueChangeCallback */
 				map<string,Bpm*>::iterator it;
 				int i;
@@ -520,9 +523,13 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 				}
 			}
 		}
-		/* release allocated memory */
+#ifdef OC_DEBUG
+		static int cnt=1;
+		syslog(LOG_INFO, "BpmController: finished processing block %i with %u frames\n",cnt++,numSamplesSummed);
+#endif
+		/* release memory allocated in OrbitController::activateAdcReaders() */
 		for(uint32_t i=0; i<NumAdcModules; i++) {
-			delete rdSegments[i];
+			delete ds[i];
 		}
 
 	}//end for(;;) -- go wait for more ADC data
@@ -581,6 +588,7 @@ void OrbitController::sortBPMData(double *sortedArray,
 
 /**
  * FIXME -- refactor so we're no duplicating functionality!!!
+ * At least the two, inner loops can be extracted...
  *
  * @param sums ptr to array of doubles; storage for running sums
  * @param ds input array of AdcData ptrs
@@ -591,20 +599,24 @@ uint32_t OrbitController::sumAdcSamples(double* sums, AdcData** data) {
 	uint32_t nthFrame,nthAdc,nthChannel;
 	uint32_t numSamplesSummed=0;
 
-	/* XXX -- assumes each rdSegment has an equal # of frames... */
-	for(nthFrame=0; nthFrame<data[nthFrame]->getFrames(); nthFrame++) { /* for each ADC frame in rdSegment[].buf... */
-		int nthFrameOffset = nthFrame*data[nthFrame]->getChannelsPerFrame();
+	/* XXX -- assumes each ADC Data Segment has an equal # of frames and channels per frame */
+	uint32_t nFrames = data[0]->getFrames();
+	uint32_t frameOffset = data[0]->getChannelsPerFrame();
+	for(nthFrame=0; nthFrame<nFrames; nthFrame++) { /* for each ADC frame... */
+		int nthFrameOffset = nthFrame*frameOffset;
 
 		for(nthAdc=0; nthAdc<NumAdcModules; nthAdc++) { /* for each ADC... */
-			int nthAdcOffset = nthAdc*data[nthAdc]->getChannelsPerFrame();
+			int nthAdcOffset = nthAdc*frameOffset;
+			int32_t *buf = data[nthAdc]->getBuffer();
 
-			for(nthChannel=0; nthChannel<data[nthAdc]->getChannelsPerFrame(); nthChannel++) { /* for each channel of this frame... */
-				sums[nthAdcOffset+nthChannel] += (double)(data[nthAdc]->getBuffer()[nthFrameOffset+nthChannel]);
+			for(nthChannel=0; nthChannel<frameOffset; nthChannel++) { /* for each channel of this frame... */
+				sums[nthAdcOffset+nthChannel] += (double)buf[nthFrameOffset+nthChannel];
 				//sumsSqrd[nthAdcOffset+nthChannel] += pow(sums[nthAdcOffset+nthChannel],2);
 			}
 
 		}
-		numSamplesSummed++;
+
+	numSamplesSummed++;
 	}
 	return numSamplesSummed;
 }

@@ -13,18 +13,13 @@
 #include <AdcData.h>
 
 
-typedef struct {
-	uint32_t numFrames;
-	int32_t *buf;
-}RawDataSegment;
-
 class AdcReader {
 public:
 	AdcReader(Ics110blModule* adc, rtems_id bid);
 	virtual ~AdcReader();
 	void start(rtems_task_argument);
 	void read(AdcData* data);
-	AdcData* getAdcData() const;
+	AdcData* getAdcData() const { return data;	}
 
 private:
 	AdcReader();
@@ -47,8 +42,4 @@ private:
 	AdcData *data;
 };
 
-
-inline AdcData* AdcReader::getAdcData() const {
-	return data;
-}
 #endif /* ADCREADER_H_ */

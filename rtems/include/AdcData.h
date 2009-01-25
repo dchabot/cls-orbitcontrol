@@ -25,10 +25,10 @@ public:
 		buf = new int32_t[bufSize];
 	}
 	~AdcData() { delete []buf; }
-	int32_t* getBuffer() const;
-	uint32_t getFrames() const;
-	uint32_t getChannelsPerFrame() const;
-	uint32_t getBufferSize() const;
+	int32_t* getBuffer() const { return buf; }
+	uint32_t getFrames() const { return numFrames; }
+	uint32_t getChannelsPerFrame() const { return channelsPerFrame; }
+	uint32_t getBufferSize() const { return bufSize; }
 
 private:
 	AdcData();
@@ -39,30 +39,4 @@ private:
 	int32_t *buf;
 };
 
-/**
- * @return the number of ADC frames this segment is sized for
- */
-inline uint32_t AdcData::getFrames() const {
-	return numFrames;
-}
-
-/**
- *
- * @return the number of channels per sampling frame
- */
-inline uint32_t AdcData::getChannelsPerFrame() const {
-	return channelsPerFrame;
-}
-/**
- * @return buffer size in number of channels contain (4 bytes/channel)
- */
-inline uint32_t AdcData::getBufferSize() const {
-	return bufSize;
-}
-/**
- * @return a pointer to the buffer
- */
-inline int32_t* AdcData::getBuffer() const {
-	return buf;
-}
 #endif /* ADCDATASEGMENT_H_ */

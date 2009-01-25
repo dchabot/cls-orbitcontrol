@@ -10,6 +10,7 @@
 #include <sis1100_api.h>
 #include <syslog.h>
 
+//FIXME -- remove dependence on OrbitControlException. Use std::runtime_error instead.
 
 Vmic2536Module::Vmic2536Module(VmeCrate* c, uint32_t vmeAddr) :
 	//constructor-initializer list

@@ -15,6 +15,8 @@
 
 using std::string;
 
+//FIXME -- remove dependence on OrbitControlException. Use std::runtime_error instead.
+
 Ics110blModule::Ics110blModule(VmeCrate* c, uint32_t vmeAddr) :
 	//constructor-initializer list
 	VmeModule(c,vmeAddr)
@@ -484,7 +486,7 @@ void Ics110blModule::setChannelsPerFrame(uint8_t ch) {
 	uint16_t data = (uint16_t)ch;
 
 	if((data%2 != 0) || (data > 32) || (data < 2)) {
-		string err("2 < numChannels < 32 and divisible by 2\n");
+		string err("2 <= numChannels <= 32 and divisible by 2\n");
 		syslog(LOG_INFO, "%s",err.c_str());
 		throw OrbitControlException(err.c_str());
 	}
