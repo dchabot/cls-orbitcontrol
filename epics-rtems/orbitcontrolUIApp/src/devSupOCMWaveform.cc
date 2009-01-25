@@ -95,18 +95,18 @@ static long read_wf(void* wfr) {
 	uint32_t type = (uint32_t)wfrp->dpvt;
 
 	switch(type) {
-	case xResp:
-		ocmCtlr->setHorizontalResponseMatrix((double*)wfrp->bptr);
-		break;
-	case yResp:
-		ocmCtlr->setVerticalResponseMatrix((double*)wfrp->bptr);
-		break;
-	case xDisp:
-		ocmCtlr->setDispersionVector((double*)wfrp->bptr);
-		break;
-	default:
-		syslog(LOG_INFO,"devSupOCMWaveform: read_wf() default case, AAARRRGGG!!!\n");
-		return -1;
+		case xResp:
+			ocmCtlr->setHorizontalResponseMatrix((double*)wfrp->bptr);
+			break;
+		case yResp:
+			ocmCtlr->setVerticalResponseMatrix((double*)wfrp->bptr);
+			break;
+		case xDisp:
+			ocmCtlr->setDispersionVector((double*)wfrp->bptr);
+			break;
+		default:
+			syslog(LOG_INFO,"devSupOCMWaveform: read_wf() default case, AAARRRGGG!!!\n");
+			return -1;
 	}
 
 	wfrp->nord = wfrp->nelm;

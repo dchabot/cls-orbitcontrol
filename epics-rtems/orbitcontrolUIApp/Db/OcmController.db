@@ -1,0 +1,59 @@
+record(waveform, "OCM:x:responseVector") {
+	field(DTYP, "OCM Waveform")
+	field(INP, "0")
+	field(SCAN, "Passive")
+	field(FTVL, "DOUBLE")
+	field(NELM, "$(numElem)")
+}
+
+record(waveform, "OCM:y:responseVector") {
+	field(DTYP, "OCM Waveform")
+	field(INP, "0")
+	field(SCAN, "Passive")
+	field(FTVL, "DOUBLE")
+	field(NELM, "$(numElem)")
+}
+
+record(waveform, "OCM:x:dispersionVector") {
+	field(DTYP, "OCM Waveform")
+	field(INP, "0")
+	field(SCAN, "Passive")
+	field(FTVL, "DOUBLE")
+	field(NELM, "48")
+}
+
+record(longout, "OCM:x:maxStep") {
+	field(DESC, "OCM max gain")
+	field(DTYP, "OCM LongOut")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@xStep")
+	field(SCAN, "Passive")
+}
+
+record(longout, "OCM:y:maxStep") {
+	field(DESC, "OCM max gain")
+	field(DTYP, "OCM LongOut")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@yStep")
+	field(SCAN, "Passive")
+}
+
+record(ao, "OCM:x:corrFraction") {
+	field(DESC, "OCM setpoint gain")
+	field(DTYP, "OCM AnalogOut")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@xFraction")
+	field(SCAN, "Passive")
+}
+
+record(ao, "OCM:y:corrFraction") {
+	field(DESC, "OCM setpoint gain")
+	field(DTYP, "OCM AnalogOut")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@yFraction")
+	field(SCAN, "Passive")
+}

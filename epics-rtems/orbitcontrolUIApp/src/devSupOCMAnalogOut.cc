@@ -6,7 +6,6 @@
  */
 
 #include <aoRecord.h>
-#include <longoutRecord.h>
 #include <dbCommon.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -54,10 +53,46 @@ struct {
 
 epicsExportAddress(dset,devSupOCMAnalogOut);
 
+enum ocmAOType {xFrac,yFrac};
+
+struct OcmFraction {
+	OcmFraction(ocmAOType t):type(t){}
+	ocmAOType type;
+};
+
 static long init_record(void* aor) {
+	aoRecord *aop = (aoRecord*)aor;
+	/*chk OUT type:*/
+	if (aop->out.type != INST_IO) {
+		syslog(LOG_INFO, "%s: OUT field type should be INST_IO\n", aop->name);
+		return (S_db_badField);
+	}
+	string type(aop->out.value.instio.string);
+	if(type.compare("xFraction")==0) { aop->dpvt = (void*)new OcmFraction(xFrac); }
+	else if(type.compare("yFraction")==0) { aop->dpvt = (void*)new OcmFraction(yFrac); }
+	else {
+		type.append(": unknown OUT type!!! WTF ?!?!?!?");
+		throw runtime_error(type.c_str());
+	}
+	syslog(LOG_INFO, "%s is ocmAOType=%s\n",aop->name,type.c_str());
 	return 0;
 }
 static long write_ao(void* aor) {
+	aoRecord *aop = (aoRecord*)aor;
+	OcmController *ocmCtlr = OrbitController::getInstance();
+	OcmFraction *of = (OcmFraction*)aop->dpvt;
+
+	switch(of->type) {
+		case(xFrac):
+			ocmCtlr->setMaxHorizontalFraction(aop->val);
+			break;
+		case(yFrac):
+			ocmCtlr->setMaxVerticalFraction(aop->val);
+			break;
+		default:
+			syslog(LOG_INFO, "%s: unknown ocmAOType=%i !!\n",aop->name,of->type);
+			return -1;
+	}
 	return 0;
 }
 
