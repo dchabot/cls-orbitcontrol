@@ -24,14 +24,14 @@ public:
 	virtual void setHorizontalResponseMatrix(double h[NumOcm*NumOcm])=0;
 	virtual void setDispersionVector(double d[NumOcm])=0;
 
-	void setMaxHorizontalStep(int32_t step);
-	int32_t getMaxHorizontalStep() const;
-	void setMaxVerticalStep(int32_t step);
-	int32_t getMaxVerticalStep() const ;
-	void setMaxHorizontalFraction(double f);
-	double getMaxHorizontalFraction() const;
-	void setMaxVerticalFraction(double f);
-	double getMaxVerticalFraction() const;
+	void setMaxHorizontalStep(int32_t step) { maxHStep = step; }
+	int32_t getMaxHorizontalStep() const { return maxHStep; }
+	void setMaxVerticalStep(int32_t step) { maxVStep = step; }
+	int32_t getMaxVerticalStep() const { return maxVStep; }
+	void setMaxHorizontalFraction(double f) { maxHFrac = f; }
+	double getMaxHorizontalFraction() const { return maxHFrac; }
+	void setMaxVerticalFraction(double f) { maxVFrac = f; }
+	double getMaxVerticalFraction() const { return maxVFrac; }
 
 protected:
 	int32_t maxHStep;
@@ -42,15 +42,5 @@ protected:
 	double vmat[NumOcm][NumOcm];
 	double dmat[NumOcm];
 };
-
-inline int32_t OcmController::getMaxHorizontalStep() const { return maxHStep; }
-inline int32_t OcmController::getMaxVerticalStep() const { return maxVStep; }
-inline double OcmController::getMaxHorizontalFraction() const { return maxHFrac; }
-inline double OcmController::getMaxVerticalFraction() const { return maxVFrac; }
-
-inline void OcmController::setMaxHorizontalStep(int32_t step) { maxHStep = step; }
-inline void OcmController::setMaxVerticalStep(int32_t step) { maxVStep = step; }
-inline void OcmController::setMaxHorizontalFraction(double f) { maxHFrac = f; }
-inline void OcmController::setMaxVerticalFraction(double f) { maxVFrac = f; }
 
 #endif /* OCMCONTROLLER_H_ */

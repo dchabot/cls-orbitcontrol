@@ -1,5 +1,5 @@
 record(longout, "$(clsName)-exp:dac") {
-	field(DESC, "PwrSupply $(channel) setpoint")
+	field(DESC, "OCM ch$(channel) setpoint")
 	field(DTYP, "OCM LongOut")
 	field(OMSL, "supervisory")
 	field(DOL, "0")
@@ -16,7 +16,7 @@ record(longout, "$(clsName)-exp:dac") {
 }
 
 #record(longin, "$(clsName)-exp:dac:fbk") {
-#	field(DESC, "PwrSupply $(channel) setpoint fbk")
+#	field(DESC, "OCM ch$(channel) setpoint fbk")
 #	field(DTYP, "Soft Channel")
 #	field(SCAN, "Passive")
 #	field(INP, "$(clsName)-exp:dac NPP")

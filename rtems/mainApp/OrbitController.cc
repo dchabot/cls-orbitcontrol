@@ -181,6 +181,7 @@ void OrbitController::initialize(const double adcSampleRate) {
 	}
 	rendezvousWithAdcReaders();
 	initialized = true;
+	mode=STANDBY;
 	syslog(LOG_INFO, "OrbitController: initialized and synchronized with AdcReaders...\n");
 }
 
@@ -197,6 +198,23 @@ void OrbitController::start(rtems_task_argument ocThreadArg,
 	this->bpmThreadArg = bpmThreadArg;
 	rc = rtems_task_start(bpmTID,bpmThreadStart,(rtems_task_argument)this);
 	TestDirective(rc, "Failed to start BpmController thread");
+}
+
+OrbitControllerMode OrbitController::getMode() {
+	OrbitControllerMode m;
+	lock();
+	m=mode;
+	unlock();
+	return m;
+}
+
+void OrbitController::setMode(OrbitControllerMode mode) {
+	lock();
+	this->mode = mode;
+	unlock();
+	if(mcCallback) {
+		this->mcCallback(mcCallbackArg);
+	}
 }
 
 void OrbitController::setModeChangeCallback(OrbitControllerModeChangeCallback cb, void* cbArg) {
@@ -278,26 +296,32 @@ void OrbitController::setOcmSetpoint(Ocm* ocm, int32_t val) {
 //FIXME -- need mutex protection around matrix manipulations!!!!!!!
 void OrbitController::setVerticalResponseMatrix(double v[NumOcm*NumOcm]) {
 	uint32_t i,j;
+	lock();
 	for(i=0; i<NumOcm; i++) {
 		for(j=0; j<NumOcm; j++) {
 			vmat[i][j] = v[i*NumOcm+j];
 		}
 	}
+	unlock();
 }
 
 void OrbitController::setHorizontalResponseMatrix(double h[NumOcm*NumOcm]) {
 	uint32_t i,j;
+	lock();
 	for(i=0; i<NumOcm; i++) {
 		for(j=0; j<NumOcm; j++) {
 			hmat[i][j] = h[i*NumOcm+j];
 		}
 	}
+	unlock();
 }
 
 void OrbitController::setDispersionVector(double d[NumOcm]) {
+	lock();
 	for(uint32_t i=0; i<NumOcm; i++) {
 		dmat[i] = d[i];
 	}
+	unlock();
 }
 
 /*********************** BpmController public interface ********************/
@@ -364,6 +388,10 @@ rtems_task OrbitController::ocThreadStart(rtems_task_argument arg) {
 }
 
 rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
+	static double sums[TOTAL_BPMS*2];
+	static double sorted[TOTAL_BPMS*2];
+	OrbitControllerMode lmode;
+
 	syslog(LOG_INFO, "OrbitController: entering main processing loop\n");
 	//state entry: start on the "edge" of a clock-tick:
 	rtems_task_wake_after(2);
