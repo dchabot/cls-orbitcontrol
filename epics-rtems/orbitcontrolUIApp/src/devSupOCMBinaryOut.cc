@@ -68,7 +68,7 @@ static long init_record(void* bor) {
 		uint32_t crateId = strtoul(strtok(cbuf," "),NULL,10);
 		uint32_t vmeBaseAddr = strtoul(strtok(NULL," "),NULL,16);
 		uint8_t channel = (epicsUInt8)strtoul(strtok(NULL," "),NULL,10);
-		Ocm *ocm = ocmCtlr->registerOcm(id,crateId,vmeBaseAddr,channel);
+		ocm = ocmCtlr->registerOcm(id,crateId,vmeBaseAddr,channel);
 		if(ocm==NULL) {
 			syslog(LOG_INFO, "%s: failure creating OCM %s!!!\n",pbo->name,id.c_str());
 			return -1;

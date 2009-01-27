@@ -217,6 +217,8 @@ void OrbitController::setMode(OrbitControllerMode mode) {
 	}
 }
 
+//FIXME -- refactor the BPM and OCM callback mechanisms using standard
+// Observer && Command patterns (i.e. vectors of observers and their cmds,publish,etc)
 void OrbitController::setModeChangeCallback(OrbitControllerModeChangeCallback cb, void* cbArg) {
 	mcCallback = cb;
 	mcCallbackArg = cbArg;
@@ -232,17 +234,20 @@ Ocm* OrbitController::registerOcm(const string& str,
 		if(crateId==dioArray[i]->getCrate()->getId()
 				&& vmeAddr==dioArray[i]->getVmeBaseAddr()) {
 			ocm = new Ocm(str,dioArray[i],ch);
+			break;
 		}
 	}
 	if(ocm != NULL) {
-		//stuff this OCM in our Map:
+		//stuff this OCM into our ocmMap:
 		pair<map<string,Ocm*>::iterator,bool> ret;
 		ret = ocmMap.insert(pair<string,Ocm*>(ocm->getId(),ocm));
-		if(ret.second == false) {
-			syslog(LOG_INFO, "Failed to insert %s in ocmMap; it already exists!\n",
-								ocm->getId().c_str());
+		if(ret.second != false) {
+			syslog(LOG_INFO, "OcmController: added %s to ocmMap.\n",ocm->getId().c_str());
 		}
-		syslog(LOG_INFO, "OcmController: added %s to ocmMap.\n",ocm->getId().c_str());
+		else {
+			syslog(LOG_INFO, "Failed to insert %s in ocmMap; it already exists!\n",
+									ocm->getId().c_str());
+		}
 	}
 	else {
 		syslog(LOG_INFO, "OcmController: couldn't match DIO module with Ocm id=%s addr=%#x!!\n",
@@ -267,14 +272,8 @@ void OrbitController::unregisterOcm(Ocm* ocm) {
 Ocm* OrbitController::getOcmById(const string& id) {
 	map<string,Ocm*>::iterator it;
 	it = ocmMap.find(id);
-	if(it != ocmMap.end()) {
-		return it->second;
-	}
-	else {
-		syslog(LOG_INFO, "OcmController: Failed to find %s in ocmMap!!\n",
-				id.c_str());
-		return NULL;
-	}
+	if(it != ocmMap.end()) { return it->second; }
+	else { return NULL; }
 }
 
 void OrbitController::showAllOcms() {
@@ -293,7 +292,7 @@ void OrbitController::setOcmSetpoint(Ocm* ocm, int32_t val) {
 	TestDirective(rc,"OcmController: msg_q_send failure");
 }
 
-//FIXME -- need mutex protection around matrix manipulations!!!!!!!
+//XXX -- vmat & hmat are populated in Row-Major order (i.e - "ith row, jth column")
 void OrbitController::setVerticalResponseMatrix(double v[NumOcm*NumOcm]) {
 	uint32_t i,j;
 	lock();
@@ -348,13 +347,8 @@ void OrbitController::unregisterBpm(Bpm *bpm) {
 Bpm* OrbitController::getBpmById(const string& id) {
 	map<string,Bpm*>::iterator it;
 	it = bpmMap.find(id);
-	if(it != bpmMap.end()) {
-		return it->second;
-	}
-	else {
-		return NULL;
-	}
-
+	if(it != bpmMap.end()) { return it->second; }
+	else { return NULL; }
 }
 
 void OrbitController::showAllBpms() {
@@ -390,24 +384,104 @@ rtems_task OrbitController::ocThreadStart(rtems_task_argument arg) {
 rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	static double sums[TOTAL_BPMS*2];
 	static double sorted[TOTAL_BPMS*2];
-	OrbitControllerMode lmode;
 
 	syslog(LOG_INFO, "OrbitController: entering main processing loop\n");
-	//state entry: start on the "edge" of a clock-tick:
-	rtems_task_wake_after(2);
-	startAdcAcquisition();
-	for(int j=0; j<1000000; j++) {
-		//Wait for notification of ADC "fifo-half-full" event...
-		rendezvousWithIsr();
-		stopAdcAcquisition();
-		activateAdcReaders();
-		//Wait (block) 'til AdcReaders have completed their block-reads:
-		rendezvousWithAdcReaders();
-		resetAdcFifos();
-		startAdcAcquisition();
-		enableAdcInterrupts();
-		//ship ADC data off for processing && distribution:
-		enqueueAdcData();
+	for(;;) {
+		switch(mode) {
+		case STANDBY:
+			stopAdcAcquisition();
+			resetAdcFifos();
+			while(mode==STANDBY) {
+				syslog(LOG_INFO, "OrbitController: mode=STANDBY\n");
+				rtems_task_wake_after(2000);
+			}
+			syslog(LOG_INFO, "OrbitController: leaving STANDBY. New mode=%i\n",mode);
+			break;
+		case ASSISTED:
+		case AUTONOMOUS:
+			//start on the "edge" of a clock-tick:
+			rtems_task_wake_after(2);
+			startAdcAcquisition();
+			while(mode!=STANDBY) {
+				//Wait for notification of ADC "fifo-half-full" event...
+				rendezvousWithIsr();
+				stopAdcAcquisition();
+				activateAdcReaders();
+				//Wait (block) 'til AdcReaders have completed their block-reads: ~3 ms duration
+				rendezvousWithAdcReaders();
+				resetAdcFifos();
+				startAdcAcquisition();
+				enableAdcInterrupts();
+				/* At this point, we have approx 50 ms to "do our thing" (at 10 kHz ADC framerate)
+				 * before ADC FIFOs reach their 1/2-full point and trigger another interrupt.
+				 */
+				if(mode==ASSISTED) {
+					/* If we have new OCM setpoints to deliver, do it now
+					 * We'll wait up to 20 ms for ALL the setpoints to enqueue
+					 */
+					int maxIter=20;
+					uint32_t numMsgs=0;
+					do {
+						rtems_status_code rc = rtems_message_queue_get_number_pending(spQueueId,&numMsgs);
+						TestDirective(rc, "OrbitController: OCM msg_q_get_number_pending failure");
+						if(numMsgs < NumOcm) { rtems_task_wake_after(1); }
+						else { break; }
+					} while(--maxIter);
+					//deliver all the OCM setpoints we have.
+					if(numMsgs > 0) {
+						for(uint32_t i=numMsgs; i; i--) {
+							SetpointMsg *msg;
+							size_t msgsz;
+							rtems_status_code rc = rtems_message_queue_receive(spQueueId,msg,&msgsz,RTEMS_NO_WAIT,RTEMS_NO_TIMEOUT);
+							TestDirective(rc,"OcmController: msq_q_rcv failure");
+							msg->ocm->setSetpoint(msg->sp);
+						}
+						for(uint32_t i=0; i<psbArray.size(); i++) {
+							psbArray[i]->updateSetpoints();
+						}
+#ifdef OC_DEBUG
+						syslog(LOG_INFO, "OrbitController: updated %i OCM setpoints\n",numMsgs);
+#endif
+					}
+				}
+				else if(mode==AUTONOMOUS) {
+					/* Calc and deliver new OCM setpoints:
+					 * NOTE: testing shows calc takes ~1ms
+					 * while OCM setpoint delivery req's ~5ms
+					 * for 48 OCMs (scales linearly with # OCM)
+					 */
+					uint32_t numSamples = sumAdcSamples(sums,rdSegments);
+					sortBPMData(sorted,sums,rdSegments[0]->getChannelsPerFrame());
+					double sf = getBpmScaleFactor(numSamples);
+					map<string,Bpm*>::iterator bpmit;
+					int i;
+					for(i=0,bpmit=bpmMap.begin(); i<TOTAL_BPMS; i++, bpmit++) {
+						sorted[i] *= sf/bpmit->second->getXVoltsPerMilli();
+						sorted[i+1] *= sf/bpmit->second->getYVoltsPerMilli();
+					}
+					//FIXME -- refactor calcs to private method
+					lock();
+					//calc dispersion effect
+					//calc horizontal OCM setpoints
+					//calc vertical OCM setpoints
+					unlock();
+					//scale OCM setpoints (max step && pct application)
+					//distribute new OCM setpoints
+					//foreach Ocm:ocm->setSetpoint(val);
+					for(uint32_t i=0; i<psbArray.size(); i++) {
+						psbArray[i]->updateSetpoints();
+					}
+				}
+				//hand raw ADC data off to processing thread
+				enqueueAdcData();
+			}//end while(mode != STANDBY) { }
+		default:
+			stopAdcAcquisition();
+			resetAdcFifos();
+			syslog(LOG_INFO, "OrbitController: undefined mode encountered!! Entering STANDBY mode...\n");
+			mode=STANDBY;
+			break;
+		}
 	}
 	//state exit: silence the ADC's
 	stopAdcAcquisition();
@@ -542,6 +616,10 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 				/* zero the array of running-sums,reset counter, update num pts in avg */
 				memset(sums, 0, sizeof(double)*NumBpmChannels);
 				//memset(sumsSqrd, 0, sizeof(double)*NumBpmChannels);
+#ifdef OC_DEBUG
+				static int cnt=1;
+				syslog(LOG_INFO, "BpmController: finished processing block %i with %u frames\n",cnt++,numSamplesSummed);
+#endif
 				numSamplesSummed=0;
 				/* XXX - SamplesPerAvg can be set via orbitcontrolUI app */
 				if(localSamplesPerAvg != samplesPerAvg) {
@@ -551,10 +629,6 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 				}
 			}
 		}
-#ifdef OC_DEBUG
-		static int cnt=1;
-		syslog(LOG_INFO, "BpmController: finished processing block %i with %u frames\n",cnt++,numSamplesSummed);
-#endif
 		/* release memory allocated in OrbitController::activateAdcReaders() */
 		for(uint32_t i=0; i<NumAdcModules; i++) {
 			delete ds[i];

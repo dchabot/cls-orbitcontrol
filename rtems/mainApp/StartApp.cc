@@ -25,18 +25,27 @@ extern "C" void setStandbyMode() {
 	oc->setMode(STANDBY);
 }
 
+extern "C" void showAllBpms() {
+	OrbitController *oc = OrbitController::getInstance();
+	oc->showAllBpms();
+}
+
+extern "C" void showAllOcms() {
+	OrbitController *oc = OrbitController::getInstance();
+	oc->showAllOcms();
+}
+
 /* avoid c++ name-mangling, make this callable from "c"... (i.e. CEXP cmdline) */
 extern "C" void startApp(char* epicsApp) {
 	OrbitController* oc = OrbitController::getInstance();
 	try {
-		oc->start(rtems_task_self(),0);
+		oc->initialize();
 		if(epicsApp != 0) {
 			//parse and start the EPICS app, orbitcontrolUI:
 			cexpsh(epicsApp);
 		}
-		/*rtems_task_wake_after(2000);
-		oc->showAllBpms();
-		oc->showAllOcms();*/
+		oc->start(rtems_task_self(),0);
+
 		rtems_event_set evOut = 0;
 		rtems_event_receive(1,RTEMS_EVENT_ANY,RTEMS_NO_TIMEOUT,&evOut);
 		syslog(LOG_INFO, "startApp(): Caught event !!\n");

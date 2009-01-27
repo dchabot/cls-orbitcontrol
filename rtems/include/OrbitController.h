@@ -39,7 +39,7 @@ const uint32_t NumVmeCrates = 4;
 enum OrbitControllerMode {INITIALIZING,STANDBY,ASSISTED,AUTONOMOUS};
 typedef void (*OrbitControllerModeChangeCallback)(void*);
 
-//#define OC_DEBUG
+#define OC_DEBUG
 #ifdef OC_DEBUG
 	const uint32_t barrierTimeout=RTEMS_NO_TIMEOUT;
 #else
@@ -67,8 +67,8 @@ public:
 	void destroyInstance();
 	double getAdcFrameRateSetpoint() const { return adcFrameRateSetpoint; }
 	double getAdcFrameRateFeedback() const { return adcFrameRateFeedback; }
-	OrbitControllerMode getMode() const { return mode; }
-	void setMode(OrbitControllerMode mode) { this->mode = mode; }
+	OrbitControllerMode getMode();
+	void setMode(OrbitControllerMode mode);
 	void setModeChangeCallback(OrbitControllerModeChangeCallback cb, void* cbArg);
 
 	//virtual methods inherited from abstract base-class OcmController:

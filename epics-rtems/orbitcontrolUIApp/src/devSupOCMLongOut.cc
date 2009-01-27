@@ -69,27 +69,9 @@ init_record(void* lor) {
 	}
 
 	//check OCM LongOut loType:
-	int needOcm = isalpha((int)lorp->out.value.instio.string[0]);
-	if(!needOcm) {
-		//this is an xStep or yStep loType. Interface with OcmController only.
-		syslog(LOG_INFO, "%s.OUT=%s\n",lorp->name,lorp->out.value.instio.string);
-		string type(lorp->out.value.instio.string);
-		OcmLongoutData *old = NULL;
-		if(type.compare("xStep")==0) {
-			 old = new OcmLongoutData();
-			 old->type = xStep;
-		}
-		else if(type.compare("yStep")==0) {
-			old = new OcmLongoutData();
-			old->type = yStep;
-		}
-		else {
-			type.append(": unknown OUT type!!! WTF ?!?!?!?");
-			throw runtime_error(type.c_str());
-		}
-		lorp->dpvt = (void*)old;
-	}
-	else { //this is a "setpoint"-type record
+	int needOcm = !isalpha((int)lorp->out.value.instio.string[0]);
+	if(needOcm) {
+		//this is a "setpoint"-type record
 		/* strip off the ":dac" from the record name; this will form the OCM's id */
 		string name(lorp->name);
 		size_t pos = name.find_first_of(":dac");
@@ -112,6 +94,25 @@ init_record(void* lor) {
 		OcmLongoutData *old = new OcmLongoutData();
 		old->type = setpoint;
 		old->ocm = ocm;
+		lorp->dpvt = (void*)old;
+	}
+	else {
+		//this is an xStep or yStep loType. Interface with OcmController only.
+		syslog(LOG_INFO, "%s.OUT=%s\n",lorp->name,lorp->out.value.instio.string);
+		string type(lorp->out.value.instio.string);
+		OcmLongoutData *old = NULL;
+		if(type.compare("xStep")==0) {
+			 old = new OcmLongoutData();
+			 old->type = xStep;
+		}
+		else if(type.compare("yStep")==0) {
+			old = new OcmLongoutData();
+			old->type = yStep;
+		}
+		else {
+			type.append(": unknown OUT type!!! WTF ?!?!?!?");
+			throw runtime_error(type.c_str());
+		}
 		lorp->dpvt = (void*)old;
 	}
 	return 0;
@@ -140,7 +141,7 @@ write_longout(void* lor) {
 			syslog(LOG_INFO,"%s: unknown loType=%i !!\n",lorp->name,old->type);
 			return -1;
 	}
-
+	lorp->udf=0;
 	return 0;
 }
 

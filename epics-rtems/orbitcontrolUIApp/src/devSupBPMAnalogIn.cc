@@ -125,6 +125,7 @@ static long init_record(void* air) {
 	return 0;
 }
 
+// if we return 0 here, aiRecord.c will call convert() which will set val=0 if LINR=NO CONVERSION
 static long read_ai(void* air) {
 	aiRecord *aip = (aiRecord*)air;
 	aiData *aid = (aiData*)aip->dpvt;
@@ -137,8 +138,8 @@ static long read_ai(void* air) {
 		aip->val = aid->bpm->getY();
 		aid->bpm->setYVoltsPerMilli(aip->eslo);
 	}
-
-	return 0;
+	aip->udf=0;
+	return 1;
 }
 
 #ifdef __cplusplus
