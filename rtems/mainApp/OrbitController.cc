@@ -294,33 +294,33 @@ void OrbitController::setOcmSetpoint(Ocm* ocm, int32_t val) {
 
 //XXX -- vmat & hmat are populated in Row-Major order (i.e - "ith row, jth column")
 void OrbitController::setVerticalResponseMatrix(double v[NumVOcm*NumBpm]) {
-	/*uint32_t i,j;
+	uint32_t row,col;
 	lock();
-	for(i=0; i<NumOcm; i++) {
-		for(j=0; j<NumOcm; j++) {
-			vmat[i][j] = v[i*NumOcm+j];
+	for(col=0; col<NumBpm; col++) {
+		for(row=0; row<NumVOcm; row++) {
+			vmat[row][col] = v[col*NumOcm+row];
 		}
 	}
-	unlock();*/
+	unlock();
 }
 
 void OrbitController::setHorizontalResponseMatrix(double h[NumHOcm*NumBpm]) {
-	/*uint32_t i,j;
+	uint32_t row,col;
 	lock();
-	for(i=0; i<NumOcm; i++) {
-		for(j=0; j<NumOcm; j++) {
-			hmat[i][j] = h[i*NumOcm+j];
+	for(col=0; col<NumBpm; col++) {
+		for(row=0; row<NumHOcm; row++) {
+			hmat[row][col] = h[col*NumOcm+row];
 		}
 	}
-	unlock();*/
+	unlock();
 }
 
 void OrbitController::setDispersionVector(double d[NumBpm]) {
-	/*lock();
-	for(uint32_t i=0; i<NumOcm; i++) {
-		dmat[i] = d[i];
+	lock();
+	for(uint32_t col=0; col<NumBpm; col++) {
+		dmat[col] = d[col];
 	}
-	unlock();*/
+	unlock();
 }
 
 /*********************** BpmController public interface ********************/
@@ -388,22 +388,23 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 
 	syslog(LOG_INFO, "OrbitController: entering main processing loop\n");
 	for(;;) {
-		switch(mode) {
+		OrbitControllerMode lmode = getMode();
+		switch(lmode) {
 		case STANDBY:
 			stopAdcAcquisition();
 			resetAdcFifos();
-			while(mode==STANDBY) {
+			while((lmode=getMode())==STANDBY) {
 				syslog(LOG_INFO, "OrbitController: mode=STANDBY\n");
 				rtems_task_wake_after(2000);
 			}
-			syslog(LOG_INFO, "OrbitController: leaving STANDBY. New mode=%i\n",mode);
+			syslog(LOG_INFO, "OrbitController: leaving STANDBY. New mode=%i\n",lmode);
 			break;
 		case ASSISTED:
 		case AUTONOMOUS:
 			//start on the "edge" of a clock-tick:
 			rtems_task_wake_after(2);
 			startAdcAcquisition();
-			while(mode!=STANDBY) {
+			while((lmode=getMode())!=STANDBY) {
 				//Wait for notification of ADC "fifo-half-full" event...
 				rendezvousWithIsr();
 				stopAdcAcquisition();
@@ -416,7 +417,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 				/* At this point, we have approx 50 ms to "do our thing" (at 10 kHz ADC framerate)
 				 * before ADC FIFOs reach their 1/2-full point and trigger another interrupt.
 				 */
-				if(mode==ASSISTED) {
+				if(lmode==ASSISTED) {
 					/* If we have new OCM setpoints to deliver, do it now
 					 * We'll wait up to 20 ms for ALL the setpoints to enqueue
 					 */
@@ -445,7 +446,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 #endif
 					}
 				}
-				else if(mode==AUTONOMOUS) {
+				else if(lmode==AUTONOMOUS) {
 					/* Calc and deliver new OCM setpoints:
 					 * NOTE: testing shows calc takes ~1ms
 					 * while OCM setpoint delivery req's ~5ms
@@ -454,33 +455,53 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 					uint32_t numSamples = sumAdcSamples(sums,rdSegments);
 					sortBPMData(sorted,sums,rdSegments[0]->getChannelsPerFrame());
 					double sf = getBpmScaleFactor(numSamples);
-					map<string,Bpm*>::iterator bpmit;
+					map<string,Bpm*>::iterator it;
 					int i;
-					for(i=0,bpmit=bpmMap.begin(); i<TOTAL_BPMS; i++, bpmit++) {
-						sorted[i] *= sf/bpmit->second->getXVoltsPerMilli();
-						sorted[i+1] *= sf/bpmit->second->getYVoltsPerMilli();
+					for(i=0,it=bpmMap.begin(); i<TOTAL_BPMS; i++, it++) {
+						sorted[i] *= sf/it->second->getXVoltsPerMilli();
+						sorted[i+1] *= sf/it->second->getYVoltsPerMilli();
 					}
 					//FIXME -- refactor calcs to private method
+					//TODO: calc dispersion effect
+					//Calc horizontal OCM setpoints:
+					//First, generate a vector<Bpm*> of all BPMs participating in the correction
+					vector<Bpm*> bpms(NumBpm);
+					for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
+						if(it->second->isEnabled()) { bpms.push_back(it->second); }
+					}
 					lock();
-					//calc dispersion effect
-					//calc horizontal OCM setpoints
+					double h[NumHOcm];
+					memset(h,0,sizeof(h));
+					for(uint32_t i=0; i<NumHOcm; i++) {
+						for(uint32_t j=0; j<NumBpm; j++) {
+							h[i] += hmat[i][j]*sorted[bpms[j]->getAdcOffset()];
+						}
+					}
 					//calc vertical OCM setpoints
+					double v[NumVOcm];
+					memset(v,0,sizeof(v));
+					for(uint32_t i=0; i<NumVOcm; i++) {
+						for(uint32_t j=0; j<NumBpm; j++) {
+							v[i] += vmat[i][j]*sorted[bpms[j]->getAdcOffset()+1];
+						}
+					}
 					unlock();
-					//scale OCM setpoints (max step && pct application)
+					//scale OCM setpoints (max step && %-age to apply)
 					//distribute new OCM setpoints
 					//foreach Ocm:ocm->setSetpoint(val);
 					for(uint32_t i=0; i<psbArray.size(); i++) {
 						psbArray[i]->updateSetpoints();
 					}
-				}
+				} //vector<Bpm*> bpms destroyed here
 				//hand raw ADC data off to processing thread
 				enqueueAdcData();
 			}//end while(mode != STANDBY) { }
+			break;
 		default:
 			stopAdcAcquisition();
 			resetAdcFifos();
-			syslog(LOG_INFO, "OrbitController: undefined mode=%i encountered!! Entering STANDBY mode...\n",mode);
-			mode=STANDBY;
+			syslog(LOG_INFO, "OrbitController: undefined mode=%i encountered!! Entering STANDBY mode...\n",getMode());
+			setMode(STANDBY);
 			break;
 		}
 	}
