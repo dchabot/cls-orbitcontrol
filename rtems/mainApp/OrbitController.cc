@@ -293,34 +293,34 @@ void OrbitController::setOcmSetpoint(Ocm* ocm, int32_t val) {
 }
 
 //XXX -- vmat & hmat are populated in Row-Major order (i.e - "ith row, jth column")
-void OrbitController::setVerticalResponseMatrix(double v[NumOcm*NumOcm]) {
-	uint32_t i,j;
+void OrbitController::setVerticalResponseMatrix(double v[NumVOcm*NumBpm]) {
+	/*uint32_t i,j;
 	lock();
 	for(i=0; i<NumOcm; i++) {
 		for(j=0; j<NumOcm; j++) {
 			vmat[i][j] = v[i*NumOcm+j];
 		}
 	}
-	unlock();
+	unlock();*/
 }
 
-void OrbitController::setHorizontalResponseMatrix(double h[NumOcm*NumOcm]) {
-	uint32_t i,j;
+void OrbitController::setHorizontalResponseMatrix(double h[NumHOcm*NumBpm]) {
+	/*uint32_t i,j;
 	lock();
 	for(i=0; i<NumOcm; i++) {
 		for(j=0; j<NumOcm; j++) {
 			hmat[i][j] = h[i*NumOcm+j];
 		}
 	}
-	unlock();
+	unlock();*/
 }
 
-void OrbitController::setDispersionVector(double d[NumOcm]) {
-	lock();
+void OrbitController::setDispersionVector(double d[NumBpm]) {
+	/*lock();
 	for(uint32_t i=0; i<NumOcm; i++) {
 		dmat[i] = d[i];
 	}
-	unlock();
+	unlock();*/
 }
 
 /*********************** BpmController public interface ********************/
@@ -354,9 +354,10 @@ Bpm* OrbitController::getBpmById(const string& id) {
 void OrbitController::showAllBpms() {
 	map<string,Bpm*>::iterator it;
 	for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
-		syslog(LOG_INFO, "%s: x=%.9g\ty=%.9g\n",it->second->getId().c_str(),
+		syslog(LOG_INFO, "%s: x=%.3e\ty=%.3e\tisEnabled=%s\n",it->second->getId().c_str(),
 												it->second->getX(),
-												it->second->getY());
+												it->second->getY(),
+												it->second->isEnabled()?"yes":"no");
 	}
 }
 
@@ -478,7 +479,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 		default:
 			stopAdcAcquisition();
 			resetAdcFifos();
-			syslog(LOG_INFO, "OrbitController: undefined mode encountered!! Entering STANDBY mode...\n");
+			syslog(LOG_INFO, "OrbitController: undefined mode=%i encountered!! Entering STANDBY mode...\n",mode);
 			mode=STANDBY;
 			break;
 		}
@@ -685,6 +686,15 @@ void OrbitController::sortBPMData(double *sortedArray,
 	for(j=0; j<adc4ChMap_LENGTH; i++,j++) {
 		sortedArray[i] = rawArray[nthAdc+adc4ChMap[j]];
 		sortedArray[i+1] = rawArray[nthAdc+adc4ChMap[j]+1];
+	}
+	//do this once only, but be SURE that all BPMs have been added to bpmMap at this point!
+	static int once = 1;
+	if(once) {
+		once=0;
+		map<string,Bpm*>::iterator it;
+		for(i=0,it=bpmMap.begin(); it!=bpmMap.end(); it++,i++) {
+			it->second->setAdcOffset(i);
+		}
 	}
 }
 

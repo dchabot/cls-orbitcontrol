@@ -31,6 +31,8 @@ using std::string;
 //#define DROP_UPDATE 0x7FFFFFFF
 
 const uint32_t NumOcm=48;
+const uint32_t NumHOcm=NumOcm/2;
+const uint32_t NumVOcm=NumOcm/2;
 
 class Ocm {
 public:

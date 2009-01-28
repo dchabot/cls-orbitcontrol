@@ -10,6 +10,8 @@
 
 #include <stdint.h>
 #include <Ocm.h>
+#include <Bpm.h>
+
 
 class OcmController {
 public:
@@ -20,27 +22,17 @@ public:
 	virtual void unregisterOcm(Ocm* ch)=0;
 	virtual Ocm* getOcmById(const string& id)=0;
 	virtual void showAllOcms()=0;
-	virtual void setVerticalResponseMatrix(double v[NumOcm*NumOcm])=0;
-	virtual void setHorizontalResponseMatrix(double h[NumOcm*NumOcm])=0;
-	virtual void setDispersionVector(double d[NumOcm])=0;
-
-	void setMaxHorizontalStep(int32_t step) { maxHStep = step; }
-	int32_t getMaxHorizontalStep() const { return maxHStep; }
-	void setMaxVerticalStep(int32_t step) { maxVStep = step; }
-	int32_t getMaxVerticalStep() const { return maxVStep; }
-	void setMaxHorizontalFraction(double f) { maxHFrac = f; }
-	double getMaxHorizontalFraction() const { return maxHFrac; }
-	void setMaxVerticalFraction(double f) { maxVFrac = f; }
-	double getMaxVerticalFraction() const { return maxVFrac; }
-
-protected:
-	int32_t maxHStep;
-	int32_t maxVStep;
-	int32_t maxHFrac;
-	int32_t maxVFrac;
-	double hmat[NumOcm][NumOcm];
-	double vmat[NumOcm][NumOcm];
-	double dmat[NumOcm];
+	virtual void setVerticalResponseMatrix(double v[NumVOcm*NumBpm])=0;
+	virtual void setHorizontalResponseMatrix(double h[NumHOcm*NumBpm])=0;
+	virtual void setDispersionVector(double d[NumBpm])=0;
+	virtual void setMaxHorizontalStep(int32_t step)=0;
+	virtual int32_t getMaxHorizontalStep()const=0;
+	virtual void setMaxVerticalStep(int32_t step)=0;
+	virtual int32_t getMaxVerticalStep()const=0;
+	virtual void setMaxHorizontalFraction(double f)=0;
+	virtual double getMaxHorizontalFraction()const=0;
+	virtual void setMaxVerticalFraction(double f)=0;
+	virtual double getMaxVerticalFraction()const=0;
 };
 
 #endif /* OCMCONTROLLER_H_ */

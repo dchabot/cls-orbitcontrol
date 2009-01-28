@@ -45,10 +45,14 @@ epicsExportAddress(dset,devSupOCMWaveform);
 
 enum wfType {xResp,yResp,xDisp};
 
+struct ocmWF {
+	wfType type;
+};
+
 static wfType getRecType(string type) {
 	if(type.compare("x:responseVector")==0) { return xResp; }
 	else if(type.compare("y:responseVector")==0) { return yResp; }
-	else if(type.compare("x:dispersionVector")==0) { return xDisp; }
+	else if(type.compare("dispersionVector")==0) { return xDisp; }
 	else {
 		type.append(": unknown record type!!! WTF ?!?!?!?");
 		throw runtime_error(type.c_str());
@@ -76,7 +80,9 @@ static long init_record(void* wfr) {
 	try {
 		string name(wfrp->name);
 		size_t pos = name.find_first_of(":");
-		wfrp->dpvt = (void*)getRecType(name.substr(pos,name.npos));
+		ocmWF *pvt = new ocmWF();
+		pvt->type = getRecType(name.substr(pos+1,name.length()));
+		wfrp->dpvt = (void*)pvt;
 	}
 	catch(runtime_error& err) {
 		syslog(LOG_INFO, "%s",err.what());
@@ -92,9 +98,9 @@ static long init_record(void* wfr) {
 static long read_wf(void* wfr) {
 	waveformRecord* wfrp = (waveformRecord*)wfr;
 	OcmController *ocmCtlr = OrbitController::getInstance();
-	uint32_t type = (uint32_t)wfrp->dpvt;
+	ocmWF *pvt = (ocmWF*)wfrp->dpvt;
 
-	switch(type) {
+	switch(pvt->type) {
 		case xResp:
 			ocmCtlr->setHorizontalResponseMatrix((double*)wfrp->bptr);
 			break;

@@ -21,5 +21,7 @@ dbLoadRecords("db/Ocm2406-01.db","isInCorrection=1")
 dbLoadRecords("db/Ocm2406-03.db","isInCorrection=1")
 dbLoadRecords("db/Ocm2408-01.db","isInCorrection=1")
 #dbLoadRecords("db/OcmChicane2408-01.db","isInCorrection=1")
+### NOTE: responseX|YSize is numOcm*numBpm (presently,24*48)
+dbLoadRecords("db/OcmController.db","responseXSize=1152,responseYSize=1152,numBpm=48")
 
 iocInit()

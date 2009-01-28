@@ -1,9 +1,10 @@
+### NOTE: responseX|YSize is numOcm*numBpm (presently,24*48)
 record(waveform, "OCM:x:responseVector") {
 	field(DTYP, "OCM Waveform")
 	field(INP, "0")
 	field(SCAN, "Passive")
 	field(FTVL, "DOUBLE")
-	field(NELM, "$(numElem)")
+	field(NELM, "$(responseXSize)")
 }
 
 record(waveform, "OCM:y:responseVector") {
@@ -11,17 +12,18 @@ record(waveform, "OCM:y:responseVector") {
 	field(INP, "0")
 	field(SCAN, "Passive")
 	field(FTVL, "DOUBLE")
-	field(NELM, "$(numElem)")
+	field(NELM, "$(responseYSize)")
 }
 
-record(waveform, "OCM:x:dispersionVector") {
+record(waveform, "OCM:dispersionVector") {
 	field(DTYP, "OCM Waveform")
 	field(INP, "0")
 	field(SCAN, "Passive")
 	field(FTVL, "DOUBLE")
-	field(NELM, "48")
+	field(NELM, "$(numBpm)")
 }
 
+###NOTE: need to get limits for maxStep && corrFraction records!!!
 record(longout, "OCM:x:maxStep") {
 	field(DESC, "OCM max gain")
 	field(DTYP, "OCM LongOut")

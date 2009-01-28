@@ -77,9 +77,17 @@ public:
 	Ocm* getOcmById(const string& id);
 	void showAllOcms();
 	void setOcmSetpoint(Ocm* ch, int32_t val);
-	void setVerticalResponseMatrix(double v[NumOcm*NumOcm]);
-	void setHorizontalResponseMatrix(double h[NumOcm*NumOcm]);
-	void setDispersionVector(double d[NumOcm]);
+	void setVerticalResponseMatrix(double v[NumVOcm*NumBpm]);
+	void setHorizontalResponseMatrix(double h[NumHOcm*NumBpm]);
+	void setDispersionVector(double d[NumBpm]);
+	void setMaxHorizontalStep(int32_t step) { maxHStep = step; }
+	int32_t getMaxHorizontalStep() const { return maxHStep; }
+	void setMaxVerticalStep(int32_t step) { maxVStep = step; }
+	int32_t getMaxVerticalStep() const { return maxVStep; }
+	void setMaxHorizontalFraction(double f) { maxHFrac = f; }
+	double getMaxHorizontalFraction() const { return maxHFrac; }
+	void setMaxVerticalFraction(double f) { maxVFrac = f; }
+	double getMaxVerticalFraction() const { return maxVFrac; }
 
 	//virtual methods inherited from abstract base-class BpmController
 	void registerBpm(Bpm* bpm);
@@ -154,6 +162,13 @@ private:
 		Ocm* ocm;
 		int32_t sp;
 	};
+	int32_t maxHStep;
+	int32_t maxVStep;
+	int32_t maxHFrac;
+	int32_t maxVFrac;
+	double hmat[NumHOcm][NumBpm];
+	double vmat[NumVOcm][NumBpm];
+	double dmat[NumBpm];
 
 	//BpmController attributes
 	uint32_t samplesPerAvg;
