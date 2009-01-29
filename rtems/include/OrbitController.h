@@ -169,6 +169,9 @@ private:
 	double hmat[NumHOcm][NumBpm];
 	double vmat[NumVOcm][NumBpm];
 	double dmat[NumBpm];
+	bool hResponseInitialized;
+	bool vResponseInitialized;
+	bool dispInitialized;
 
 	//BpmController attributes
 	uint32_t samplesPerAvg;

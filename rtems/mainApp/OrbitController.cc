@@ -50,7 +50,8 @@ OrbitController::OrbitController() :
 	rdrBarrierId(0),rdrBarrierName(0),
 	initialized(false),mode(ASSISTED),
 	spQueueId(0),spQueueName(0),
-	samplesPerAvg(5000),
+	hResponseInitialized(false),vResponseInitialized(false),
+	dispInitialized(false),samplesPerAvg(5000),
 	bpmMsgSize(sizeof(rdSegments)),bpmMaxMsgs(10),
 	bpmTID(0),bpmThreadName(0),
 	bpmThreadArg(0),bpmThreadPriority(OrbitControllerPriority+3),
@@ -301,6 +302,7 @@ void OrbitController::setVerticalResponseMatrix(double v[NumVOcm*NumBpm]) {
 			vmat[row][col] = v[col*NumOcm+row];
 		}
 	}
+	vResponseInitialized=true;
 	unlock();
 }
 
@@ -312,6 +314,7 @@ void OrbitController::setHorizontalResponseMatrix(double h[NumHOcm*NumBpm]) {
 			hmat[row][col] = h[col*NumOcm+row];
 		}
 	}
+	hResponseInitialized=true;
 	unlock();
 }
 
@@ -320,6 +323,7 @@ void OrbitController::setDispersionVector(double d[NumBpm]) {
 	for(uint32_t col=0; col<NumBpm; col++) {
 		dmat[col] = d[col];
 	}
+	dispInitialized=true;
 	unlock();
 }
 
@@ -431,7 +435,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 					} while(--maxIter);
 					//deliver all the OCM setpoints we have.
 					if(numMsgs > 0) {
-						for(uint32_t i=numMsgs; i; i--) {
+						for(uint32_t i=0; i<numMsgs; i++) {
 							SetpointMsg *msg;
 							size_t msgsz;
 							rtems_status_code rc = rtems_message_queue_receive(spQueueId,msg,&msgsz,RTEMS_NO_WAIT,RTEMS_NO_TIMEOUT);
@@ -447,52 +451,55 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 					}
 				}
 				else if(lmode==AUTONOMOUS) {
-					/* Calc and deliver new OCM setpoints:
-					 * NOTE: testing shows calc takes ~1ms
-					 * while OCM setpoint delivery req's ~5ms
-					 * for 48 OCMs (scales linearly with # OCM)
-					 */
-					uint32_t numSamples = sumAdcSamples(sums,rdSegments);
-					sortBPMData(sorted,sums,rdSegments[0]->getChannelsPerFrame());
-					double sf = getBpmScaleFactor(numSamples);
-					map<string,Bpm*>::iterator it;
-					int i;
-					for(i=0,it=bpmMap.begin(); i<TOTAL_BPMS; i++, it++) {
-						sorted[i] *= sf/it->second->getXVoltsPerMilli();
-						sorted[i+1] *= sf/it->second->getYVoltsPerMilli();
-					}
-					//FIXME -- refactor calcs to private method
-					//TODO: calc dispersion effect
-					//Calc horizontal OCM setpoints:
-					//First, generate a vector<Bpm*> of all BPMs participating in the correction
-					vector<Bpm*> bpms(NumBpm);
-					for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
-						if(it->second->isEnabled()) { bpms.push_back(it->second); }
-					}
-					lock();
-					double h[NumHOcm];
-					memset(h,0,sizeof(h));
-					for(uint32_t i=0; i<NumHOcm; i++) {
-						for(uint32_t j=0; j<NumBpm; j++) {
-							h[i] += hmat[i][j]*sorted[bpms[j]->getAdcOffset()];
+					//TODO -- we're eventually going to want to incorporate Dispersion effects here
+					if(hResponseInitialized && vResponseInitialized/* && dispInitialized*/) {
+						/* Calc and deliver new OCM setpoints:
+						 * NOTE: testing shows calc takes ~1ms
+						 * while OCM setpoint delivery req's ~5ms
+						 * for 48 OCMs (scales linearly with # OCM)
+						 */
+						uint32_t numSamples = sumAdcSamples(sums,rdSegments);
+						sortBPMData(sorted,sums,rdSegments[0]->getChannelsPerFrame());
+						double sf = getBpmScaleFactor(numSamples);
+						map<string,Bpm*>::iterator it;
+						int i;
+						for(i=0,it=bpmMap.begin(); i<TOTAL_BPMS; i++, it++) {
+							sorted[i] *= sf/it->second->getXVoltsPerMilli();
+							sorted[i+1] *= sf/it->second->getYVoltsPerMilli();
 						}
-					}
-					//calc vertical OCM setpoints
-					double v[NumVOcm];
-					memset(v,0,sizeof(v));
-					for(uint32_t i=0; i<NumVOcm; i++) {
-						for(uint32_t j=0; j<NumBpm; j++) {
-							v[i] += vmat[i][j]*sorted[bpms[j]->getAdcOffset()+1];
+						//FIXME -- refactor calcs to private method
+						//TODO: calc dispersion effect
+						//Calc horizontal OCM setpoints:
+						//First, generate a vector<Bpm*> of all BPMs participating in the correction
+						vector<Bpm*> bpms(NumBpm);
+						for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
+							if(it->second->isEnabled()) { bpms.push_back(it->second); }
 						}
+						lock();
+						double *h = new double[NumHOcm];
+						for(uint32_t i=0; i<NumHOcm; i++) {
+							for(uint32_t j=0; j<NumBpm; j++) {
+								h[i] += hmat[i][j]*sorted[bpms[j]->getAdcOffset()];
+							}
+						}
+						//calc vertical OCM setpoints
+						double *v = new double[NumVOcm];
+						for(uint32_t i=0; i<NumVOcm; i++) {
+							for(uint32_t j=0; j<NumBpm; j++) {
+								v[i] += vmat[i][j]*sorted[bpms[j]->getAdcOffset()+1];
+							}
+						}
+						unlock();
+						//scale OCM setpoints (max step && %-age to apply)
+						//distribute new OCM setpoints
+						//foreach Ocm:ocm->setSetpoint(val);
+						for(uint32_t i=0; i<psbArray.size(); i++) {
+							psbArray[i]->updateSetpoints();
+						}
+						delete []h;
+						delete []v;
 					}
-					unlock();
-					//scale OCM setpoints (max step && %-age to apply)
-					//distribute new OCM setpoints
-					//foreach Ocm:ocm->setSetpoint(val);
-					for(uint32_t i=0; i<psbArray.size(); i++) {
-						psbArray[i]->updateSetpoints();
-					}
-				} //vector<Bpm*> bpms destroyed here
+				}
 				//hand raw ADC data off to processing thread
 				enqueueAdcData();
 			}//end while(mode != STANDBY) { }

@@ -45,14 +45,11 @@ extern "C" void startApp(char* epicsApp) {
 			cexpsh(epicsApp);
 		}
 		oc->start(rtems_task_self(),0);
-
-		rtems_event_set evOut = 0;
-		rtems_event_receive(1,RTEMS_EVENT_ANY,RTEMS_NO_TIMEOUT,&evOut);
-		syslog(LOG_INFO, "startApp(): Caught event !!\n");
 	}
 	catch(OrbitControlException& ex) {
 		cout << "Caught Exception!!!" << endl;
 		cout << ex.what();
+		oc->destroyInstance();
 	}
 	catch(...) {
 		syslog(LOG_INFO,"Caught an exception!!\n");
@@ -60,6 +57,4 @@ extern "C" void startApp(char* epicsApp) {
 		//re-throw it up the stack; not much we can do here anyway... :-)
 		throw;
 	}
-
-	if(oc) { oc->destroyInstance(); }
 }
