@@ -90,6 +90,8 @@ init_record(void* lor) {
 				syslog(LOG_INFO, "%s: failure creating OCM %s!!!\n",lorp->name,id.c_str());
 				return -1;
 			}
+			uint32_t position = strtoul(strtok(NULL," "),NULL,10);
+			ocm->setPosition(position);
 		}
 		OcmLongoutData *old = new OcmLongoutData();
 		old->type = setpoint;

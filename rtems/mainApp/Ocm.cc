@@ -12,7 +12,9 @@ Ocm::Ocm(const string& str,Vmic2536Module* module,uint8_t chan) :
 	//ctor-initializer list
 	mod(module),channel(chan),
 	id(str),enabled(true),
-	setpoint(0),feedback(0),delay(30)//i.e. 30 usecs
+	setpoint(0),feedback(0),
+	delay(30),//i.e. 30 usecs
+	position(0)
 { }
 
 Ocm::~Ocm() { }

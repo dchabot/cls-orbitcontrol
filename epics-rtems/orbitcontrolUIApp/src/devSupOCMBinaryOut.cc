@@ -73,10 +73,15 @@ static long init_record(void* bor) {
 			syslog(LOG_INFO, "%s: failure creating OCM %s!!!\n",pbo->name,id.c_str());
 			return -1;
 		}
+		uint32_t position = strtoul(strtok(NULL," "),NULL,10);
+		ocm->setPosition(position);
 	}
 	/* From Record Reference Manual:
 	 * ---------------------------------
 	 * If DOL is constant than VAL is initialized to 1 or 0, dependent upon (non)zero DOL value.
+	 *
+	 * NOTE: we're using an Ocm object's enabled:bool member to indicate its participation
+	 * 			in the orbit-correction algorithm: nothing more, nothing less.
 	 */
 	if(pbo->val != 0) { ocm->setEnabled(true); }
 	else { ocm->setEnabled(false); }

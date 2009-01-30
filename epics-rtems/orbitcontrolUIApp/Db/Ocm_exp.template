@@ -3,7 +3,7 @@ record(longout, "$(clsName)-exp:dac") {
 	field(DTYP, "OCM LongOut")
 	field(OMSL, "supervisory")
 	field(DOL, "0")
-	field(OUT, "@$(crateId) $(vmeBaseAddr) $(channel)")
+	field(OUT, "@$(crateId) $(vmeBaseAddr) $(channel) $(ringOrder)")
 	field(SCAN, "Passive")
 	field(HOPR, "7602176")
 	field(HIHI, "7602176")
@@ -26,7 +26,7 @@ record(bo, "$(clsName)-exp:isInCorrection") {
 	field(DTYP, "OCM BinaryOut")
 	field(OMSL, "supervisory")
 	field(DOL, "$(isInCorrection)")
-	field(OUT, "@$(crateId) $(vmeBaseAddr) $(channel)")
+	field(OUT, "@$(crateId) $(vmeBaseAddr) $(channel) $(ringOrder)")
 	field(ZNAM, "False")
 	field(ONAM, "True")
 }

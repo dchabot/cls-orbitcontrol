@@ -46,6 +46,8 @@ public:
 	string getId() const { return id; }
 	uint8_t getDelay() const { return delay; }
 	void setDelay(uint8_t usec) { delay=usec; }
+	uint32_t getPosition() const { return position; }
+	void setPosition(uint32_t p) { position=p; }
 
 private:
 	Ocm();
@@ -59,6 +61,7 @@ private:
 	int32_t setpoint;
 	int32_t feedback;
 	uint8_t delay; //opto-isolator on/off delay
+	uint32_t position;
 };
 
 #endif /* OCM_H_ */

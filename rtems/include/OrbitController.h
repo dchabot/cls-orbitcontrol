@@ -152,10 +152,11 @@ private:
 	OrbitControllerMode mode;
 
 	//OcmController attributes
-	map<string,Ocm*> ocmMap;
+	map<uint32_t,Ocm*> vOcmMap;//vertical OCM
+	map<uint32_t,Ocm*> hOcmMap;//horizontal OCM
 	rtems_id spQueueId;
 	rtems_name spQueueName;
-	//private struct for enqueueing OCM setpoint updates (single)
+	//private struct for enqueueing OCM setpoint changes (single)
 	struct SetpointMsg {
 		SetpointMsg(Ocm* ocm, int32_t setpoint):ocm(ocm),sp(setpoint){}
 		~SetpointMsg(){}

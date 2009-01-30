@@ -225,6 +225,19 @@ void OrbitController::setModeChangeCallback(OrbitControllerModeChangeCallback cb
 	mcCallbackArg = cbArg;
 }
 /********************** OcmController public interface *********************/
+static int isHorizontalOcm(const string& id) {
+    if(id.find("OCH") != string::npos) { return 1; }
+    else if(id.find("OCV") != string::npos) { return 0; }
+    else if(id.find("SOA") != string::npos) {
+        size_t pos = id.find_first_of(":");
+        if(id.compare(pos+1,1,"X")==0) { return 1; }
+        else if(id.compare(pos+1,1,"Y")==0) { return 0; }
+    }
+    //screwed up id: bail out
+    syslog(LOG_INFO, "Can't identify type with id=%s\n",id.c_str());
+    return -1;
+}
+
 Ocm* OrbitController::registerOcm(const string& str,
 									uint32_t crateId,
 									uint32_t vmeAddr,
@@ -239,8 +252,8 @@ Ocm* OrbitController::registerOcm(const string& str,
 		}
 	}
 	if(ocm != NULL) {
-		//stuff this OCM into our ocmMap:
-		pair<map<string,Ocm*>::iterator,bool> ret;
+		//stuff this OCM into hOcmMap or vOcmMap:
+		pair<map<uint32_t,Ocm*>::iterator,bool> ret;
 		ret = ocmMap.insert(pair<string,Ocm*>(ocm->getId(),ocm));
 		if(ret.second != false) {
 			syslog(LOG_INFO, "OcmController: added %s to ocmMap.\n",ocm->getId().c_str());
@@ -398,8 +411,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			stopAdcAcquisition();
 			resetAdcFifos();
 			while((lmode=getMode())==STANDBY) {
-				syslog(LOG_INFO, "OrbitController: mode=STANDBY\n");
-				rtems_task_wake_after(2000);
+				rtems_task_wake_after(rtemsTicksPerSecond/2);
 			}
 			syslog(LOG_INFO, "OrbitController: leaving STANDBY. New mode=%i\n",lmode);
 			break;
