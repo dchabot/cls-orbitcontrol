@@ -74,24 +74,20 @@ init_record(void* lor) {
 		//this is a "setpoint"-type record
 		/* strip off the ":dac" from the record name; this will form the OCM's id */
 		string name(lorp->name);
-		size_t pos = name.find_first_of(":dac");
+		size_t pos = name.find(":dac");
 		string id = name.substr(0,pos);
-		Ocm *ocm = ocmCtlr->getOcmById(id);
-		if(ocm == NULL) {
-			/* <rant> WTF doesn't c++ have a string tokenizer method ?!?!? </rant> */
-			char cbuf[128] = {0};
-			strncpy(cbuf,lorp->out.value.instio.string,sizeof(cbuf)/sizeof(cbuf[0]));
-			/* parse out the params */
-			uint32_t crateId = strtoul(strtok(cbuf," "),NULL,10);
-			uint32_t vmeBaseAddr = strtoul(strtok(NULL," "),NULL,16);
-			uint8_t channel = (epicsUInt8)strtoul(strtok(NULL," "),NULL,10);
-			Ocm *ocm = ocmCtlr->registerOcm(id,crateId,vmeBaseAddr,channel);
-			if(ocm==NULL) {
-				syslog(LOG_INFO, "%s: failure creating OCM %s!!!\n",lorp->name,id.c_str());
-				return -1;
-			}
-			uint32_t position = strtoul(strtok(NULL," "),NULL,10);
-			ocm->setPosition(position);
+		/* <rant> WTF doesn't c++ have a string tokenizer method ?!?!? </rant> */
+		char cbuf[128] = {0};
+		strncpy(cbuf,lorp->out.value.instio.string,sizeof(cbuf)/sizeof(cbuf[0]));
+		/* parse out the params */
+		uint32_t crateId = strtoul(strtok(cbuf," "),NULL,10);
+		uint32_t vmeBaseAddr = strtoul(strtok(NULL," "),NULL,16);
+		uint8_t channel = (epicsUInt8)strtoul(strtok(NULL," "),NULL,10);
+		uint32_t position = strtoul(strtok(NULL," "),NULL,10);
+		Ocm *ocm = ocmCtlr->registerOcm(id,crateId,vmeBaseAddr,channel, position);
+		if(ocm==NULL) {
+			syslog(LOG_INFO, "%s: failure creating OCM %s!!!\n",lorp->name,id.c_str());
+			return -1;
 		}
 		OcmLongoutData *old = new OcmLongoutData();
 		old->type = setpoint;

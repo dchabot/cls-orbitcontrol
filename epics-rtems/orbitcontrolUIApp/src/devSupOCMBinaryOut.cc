@@ -58,23 +58,19 @@ static long init_record(void* bor) {
 		return(S_db_badField);
 	}
 	string name(pbo->name);
-	size_t pos = name.find_first_of(":");
+	size_t pos = name.find(":isInCorrection");
 	string id = name.substr(0,pos);
-	Ocm *ocm = ocmCtlr->getOcmById(id);
-	if(ocm == NULL) {
-		char cbuf[128] = {0};
-		strncpy(cbuf,pbo->out.value.instio.string,sizeof(cbuf)/sizeof(cbuf[0]));
-		/* parse out the params */
-		uint32_t crateId = strtoul(strtok(cbuf," "),NULL,10);
-		uint32_t vmeBaseAddr = strtoul(strtok(NULL," "),NULL,16);
-		uint8_t channel = (epicsUInt8)strtoul(strtok(NULL," "),NULL,10);
-		ocm = ocmCtlr->registerOcm(id,crateId,vmeBaseAddr,channel);
-		if(ocm==NULL) {
-			syslog(LOG_INFO, "%s: failure creating OCM %s!!!\n",pbo->name,id.c_str());
-			return -1;
-		}
-		uint32_t position = strtoul(strtok(NULL," "),NULL,10);
-		ocm->setPosition(position);
+	char cbuf[128] = {0};
+	strncpy(cbuf,pbo->out.value.instio.string,sizeof(cbuf)/sizeof(cbuf[0]));
+	/* parse out the params */
+	uint32_t crateId = strtoul(strtok(cbuf," "),NULL,10);
+	uint32_t vmeBaseAddr = strtoul(strtok(NULL," "),NULL,16);
+	uint8_t channel = (epicsUInt8)strtoul(strtok(NULL," "),NULL,10);
+	uint32_t position = strtoul(strtok(NULL," "),NULL,10);
+	Ocm *ocm = ocmCtlr->registerOcm(id,crateId,vmeBaseAddr,channel,position);
+	if(ocm==NULL) {
+		syslog(LOG_INFO, "%s: failure creating OCM %s!!!\n",pbo->name,id.c_str());
+		return -1;
 	}
 	/* From Record Reference Manual:
 	 * ---------------------------------

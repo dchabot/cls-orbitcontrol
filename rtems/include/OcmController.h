@@ -18,7 +18,8 @@ public:
 	OcmController(){}
 	virtual ~OcmController(){}
 	virtual void setOcmSetpoint(Ocm* ch, int32_t val)=0;
-	virtual Ocm* registerOcm(const string& str,uint32_t crateId,uint32_t vmeAddr,uint8_t ch)=0;
+	virtual Ocm* registerOcm(const string& str,uint32_t crateId,
+								uint32_t vmeAddr,uint8_t ch,uint32_t pos)=0;
 	virtual void unregisterOcm(Ocm* ch)=0;
 	virtual Ocm* getOcmById(const string& id)=0;
 	virtual void showAllOcms()=0;

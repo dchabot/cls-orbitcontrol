@@ -56,7 +56,7 @@ typedef void (*OrbitControllerModeChangeCallback)(void*);
  * If initialize() is NOT called prior to start(), the ICS-110BL ADCz will be configured
  * with a default sample-rate (aka frame-rate) of 10 kHz.
  *
- * XXX -- don't forget to call destroyInstance() to release all resources !!!
+ * NOTE: don't forget to call destroyInstance() to release all resources !!!
  *
  */
 class OrbitController : public OcmController,public BpmController {
@@ -72,7 +72,8 @@ public:
 	void setModeChangeCallback(OrbitControllerModeChangeCallback cb, void* cbArg);
 
 	//virtual methods inherited from abstract base-class OcmController:
-	Ocm* registerOcm(const string& str,uint32_t crateId,uint32_t vmeAddr,uint8_t ch);
+	Ocm* registerOcm(const string& str,uint32_t crateId,
+						uint32_t vmeAddr,uint8_t ch,uint32_t pos);
 	void unregisterOcm(Ocm* ch);
 	Ocm* getOcmById(const string& id);
 	void showAllOcms();

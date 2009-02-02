@@ -74,9 +74,11 @@ OrbitController::~OrbitController() {
 	map<string,Bpm*>::iterator bpmit;
 	for(bpmit=bpmMap.begin(); bpmit!=bpmMap.end(); bpmit++) { delete bpmit->second; }
 	bpmMap.clear();
-	map<string,Ocm*>::iterator ocmit;
-	for(ocmit=ocmMap.begin(); ocmit!=ocmMap.end(); ocmit++) { delete ocmit->second; }
-	ocmMap.clear();
+	map<uint32_t,Ocm*>::iterator ocmit;
+	for(ocmit=hOcmMap.begin(); ocmit!=hOcmMap.end(); ocmit++) { delete ocmit->second; }
+	hOcmMap.clear();
+	for(ocmit=vOcmMap.begin(); ocmit!=vOcmMap.end(); ocmit++) { delete ocmit->second; }
+	vOcmMap.clear();
 	for(uint32_t i=0; i<isrArray.size(); i++) { delete isrArray[i]; }
 	isrArray.clear();
 	for(uint32_t i=0; i<rdrArray.size(); i++) { delete rdrArray[i]; }
@@ -225,23 +227,45 @@ void OrbitController::setModeChangeCallback(OrbitControllerModeChangeCallback cb
 	mcCallbackArg = cbArg;
 }
 /********************** OcmController public interface *********************/
-static int isHorizontalOcm(const string& id) {
-    if(id.find("OCH") != string::npos) { return 1; }
-    else if(id.find("OCV") != string::npos) { return 0; }
+/**
+ *
+ * @param id
+ * @return 1 if horizontal, 0 if vertical, -1 if id is ill-formed (error).
+ */
+static ocmType getOcmType(const string& id) {
+    if(id.find("OCH") != string::npos) { return HORIZONTAL; }
+    else if(id.find("OCV") != string::npos) { return VERTICAL; }
     else if(id.find("SOA") != string::npos) {
         size_t pos = id.find_first_of(":");
-        if(id.compare(pos+1,1,"X")==0) { return 1; }
-        else if(id.compare(pos+1,1,"Y")==0) { return 0; }
+        if(id.compare(pos+1,1,"X")==0) { return HORIZONTAL; }
+        else if(id.compare(pos+1,1,"Y")==0) { return VERTICAL; }
     }
     //screwed up id: bail out
     syslog(LOG_INFO, "Can't identify type with id=%s\n",id.c_str());
-    return -1;
+    return UNKNOWN;
+}
+
+static void mapInsertOcm(map<uint32_t,Ocm*>& m, Ocm* ocm) {
+	pair<map<uint32_t,Ocm*>::iterator,bool> ret;
+	ret = m.insert(pair<uint32_t,Ocm*>(ocm->getPosition(),ocm));
+	if(ret.second != false) {
+		string id = ocm->getId();
+		syslog(LOG_INFO, "OcmController: added %s to %s OCM map.\n",
+							id.c_str(),
+							getOcmType(id)==HORIZONTAL?"horizontal":"vertical");
+	}
+	/*else {
+		syslog(LOG_INFO, "Failed to insert %s in hOcmMap; it already exists!\n",
+								ocm->getId().c_str());
+		delete ocm;
+	}*/
 }
 
 Ocm* OrbitController::registerOcm(const string& str,
 									uint32_t crateId,
 									uint32_t vmeAddr,
-									uint8_t ch) {
+									uint8_t ch,
+									uint32_t pos) {
 	Ocm *ocm = NULL;
 	//find the matching DIO module controlling this OCM:
 	for(uint32_t i=0; i<dioArray.size(); i++) {
@@ -252,16 +276,12 @@ Ocm* OrbitController::registerOcm(const string& str,
 		}
 	}
 	if(ocm != NULL) {
+		ocm->setPosition(pos);
 		//stuff this OCM into hOcmMap or vOcmMap:
-		pair<map<uint32_t,Ocm*>::iterator,bool> ret;
-		ret = ocmMap.insert(pair<string,Ocm*>(ocm->getId(),ocm));
-		if(ret.second != false) {
-			syslog(LOG_INFO, "OcmController: added %s to ocmMap.\n",ocm->getId().c_str());
-		}
-		else {
-			syslog(LOG_INFO, "Failed to insert %s in ocmMap; it already exists!\n",
-									ocm->getId().c_str());
-		}
+		ocmType ocmtype = getOcmType(ocm->getId());
+		if(ocmtype==HORIZONTAL) { mapInsertOcm(hOcmMap,ocm); }
+		else if(ocmtype==VERTICAL) { mapInsertOcm(vOcmMap, ocm); }
+		else { ocm = NULL; }
 	}
 	else {
 		syslog(LOG_INFO, "OcmController: couldn't match DIO module with Ocm id=%s addr=%#x!!\n",
@@ -271,32 +291,60 @@ Ocm* OrbitController::registerOcm(const string& str,
 }
 
 void OrbitController::unregisterOcm(Ocm* ocm) {
-	map<string,Ocm*>::iterator it;
-	it = ocmMap.find(ocm->getId());
-	if(it != ocmMap.end()) {
-		ocmMap.erase(it);
-		delete ocm;
+	map<uint32_t,Ocm*>::iterator it;
+	ocmType ocmtype = getOcmType(ocm->getId());
+	if(ocmtype==HORIZONTAL) {
+		it = hOcmMap.find(ocm->getPosition());
+		if(it != hOcmMap.end()) {
+			hOcmMap.erase(it);
+			delete ocm;
+		}
+	}
+	else if(ocmtype==VERTICAL) {
+		it = vOcmMap.find(ocm->getPosition());
+		if(it != vOcmMap.end()) {
+			vOcmMap.erase(it);
+			delete ocm;
+		}
 	}
 	else {
-		syslog(LOG_INFO, "Failed to remove %s in ocmMap; it doesn't exist!\n",
+		syslog(LOG_INFO, "Failed to remove %s from OCM maps; it doesn't exist!\n",
 				ocm->getId().c_str());
 	}
 }
 
 Ocm* OrbitController::getOcmById(const string& id) {
-	map<string,Ocm*>::iterator it;
-	it = ocmMap.find(id);
-	if(it != ocmMap.end()) { return it->second; }
-	else { return NULL; }
+	map<uint32_t,Ocm*>::iterator it;
+	ocmType ocmtype = getOcmType(id);
+	if(ocmtype==HORIZONTAL) {
+		for(it=hOcmMap.begin(); it!=hOcmMap.end(); it++) {
+			if(id.compare(it->second->getId())==0) { return it->second; }
+		}
+	}
+	else if(ocmtype==VERTICAL) {
+		for(it=vOcmMap.begin(); it!=vOcmMap.end(); it++) {
+			if(id.compare(it->second->getId())==0) { return it->second; }
+		}
+	}
+	return NULL;
 }
 
 void OrbitController::showAllOcms() {
-	map<string,Ocm*>::iterator it;
-	for(it=ocmMap.begin(); it!=ocmMap.end(); it++) {
-		syslog(LOG_INFO, "%s: setpoint=%i\tinCorrection=%s\n",
+	map<uint32_t,Ocm*>::iterator it;
+	for(it=hOcmMap.begin(); it!=hOcmMap.end(); it++) {
+		syslog(LOG_INFO, "%s: position=%i\tsetpoint=%i\tinCorrection=%s\n",
 				it->second->getId().c_str(),
+				it->second->getPosition(),
 				it->second->getSetpoint(),
 				it->second->isEnabled()?"true":"false");
+	}
+	syslog(LOG_INFO, "\n\n\n");
+	for(it=vOcmMap.begin(); it!=vOcmMap.end(); it++) {
+		syslog(LOG_INFO, "%s: position=%i\tsetpoint=%i\tinCorrection=%s\n",
+						it->second->getId().c_str(),
+						it->second->getPosition(),
+						it->second->getSetpoint(),
+						it->second->isEnabled()?"true":"false");
 	}
 }
 
@@ -312,11 +360,18 @@ void OrbitController::setVerticalResponseMatrix(double v[NumVOcm*NumBpm]) {
 	lock();
 	for(col=0; col<NumBpm; col++) {
 		for(row=0; row<NumVOcm; row++) {
-			vmat[row][col] = v[col*NumOcm+row];
+			vmat[row][col] = v[col*NumVOcm+row];
 		}
 	}
 	vResponseInitialized=true;
 	unlock();
+#if 0
+	for(col=0; col<2; col++) {
+		for(row=0; row<NumVOcm; row++) {
+			syslog(LOG_INFO, "vmat[%i][%i]=%.3e\n",row,col,vmat[row][col]);
+		}
+	}
+#endif
 }
 
 void OrbitController::setHorizontalResponseMatrix(double h[NumHOcm*NumBpm]) {
@@ -324,11 +379,18 @@ void OrbitController::setHorizontalResponseMatrix(double h[NumHOcm*NumBpm]) {
 	lock();
 	for(col=0; col<NumBpm; col++) {
 		for(row=0; row<NumHOcm; row++) {
-			hmat[row][col] = h[col*NumOcm+row];
+			hmat[row][col] = h[col*NumHOcm+row];
 		}
 	}
 	hResponseInitialized=true;
 	unlock();
+#if 0
+	for(col=0; col<2; col++) {
+		for(row=0; row<NumVOcm; row++) {
+			syslog(LOG_INFO, "hmat[%i][%i]=%.3e\n",row,col,hmat[row][col]);
+		}
+	}
+#endif
 }
 
 void OrbitController::setDispersionVector(double d[NumBpm]) {
@@ -338,6 +400,11 @@ void OrbitController::setDispersionVector(double d[NumBpm]) {
 	}
 	dispInitialized=true;
 	unlock();
+#if 0
+	for(uint32_t col=0; col<NumBpm; col++) {
+		syslog(LOG_INFO, "dmat[%i]=%.3e\n",col,dmat[col]);
+	}
+#endif
 }
 
 /*********************** BpmController public interface ********************/
