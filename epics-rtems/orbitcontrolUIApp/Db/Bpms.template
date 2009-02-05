@@ -6,7 +6,7 @@
 
 record(ai, "BPM$(clsName):x") {
 	field(DTYP, "BPM AnalogIn")
-	field(INP, "@xval")
+	field(INP, "@xval $(ringOrder)")
 	field(SCAN, "Event")
 	field(EVNT, "$(bpmChangeEvent)")
 	field(PRIO, "HIGH")
@@ -17,7 +17,7 @@ record(ai, "BPM$(clsName):x") {
 
 record(ai, "BPM$(clsName):y") {
 	field(DTYP, "BPM AnalogIn")
-	field(INP, "@yval")
+	field(INP, "@yval $(ringOrder)")
 	field(SCAN, "Event")
 	field(EVNT, "$(bpmChangeEvent)")
 	field(PRIO, "HIGH")
@@ -28,25 +28,33 @@ record(ai, "BPM$(clsName):y") {
 
 record(ao, "BPM$(clsName):x:reference") {
 	field(DTYP, "BPM AnalogOut")
-	field(OUT, "@xreference")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@xreference $(ringOrder)")
 	field(EGU, "m")
 }
 
 record(ao, "BPM$(clsName):y:reference") {
 	field(DTYP, "BPM AnalogOut")
-	field(OUT, "@yreference")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@yreference $(ringOrder)")
 	field(EGU, "m")
 }
 
 record(ao, "BPM$(clsName):x:offset") {
 	field(DTYP, "BPM AnalogOut")
-	field(OUT, "@xoffset")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@xoffset $(ringOrder)")
 	field(EGU, "m")
 }
 
 record(ao, "BPM$(clsName):y:offset") {
 	field(DTYP, "BPM AnalogOut")
-	field(OUT, "@yoffset")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@yoffset $(ringOrder)")
 	field(EGU, "m")
 }
 
@@ -54,7 +62,7 @@ record(bo, "BPM$(clsName):isInCorrection") {
 	field(DTYP, "BPM BinaryOut")
 	field(OMSL, "supervisory")
 	field(DOL, "$(isInCorrection)")
-	field(OUT, "@FOO")
+	field(OUT, "@FOO $(ringOrder)")
 	field(ZNAM, "False")
 	field(ONAM, "True")
 }

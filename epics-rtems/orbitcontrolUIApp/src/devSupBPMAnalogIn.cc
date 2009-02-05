@@ -20,6 +20,7 @@
 #include <epicsExport.h>
 #include <syslog.h>
 #include <OrbitController.h>
+#include <stdlib.h>
 #include <string>
 #include <stdexcept>
 using std::runtime_error;
@@ -103,6 +104,10 @@ static long init_record(void* air) {
 	}
 
 	string type(aip->inp.value.instio.string);
+	//trim the "ringOrder" param out of "type:string"
+	pos = type.find_first_of(" ");
+	bpm->setPosition(strtoul(type.substr(pos+1,type.length()).c_str(),NULL,10));
+	type = type.substr(0,pos);
 	try {
 		aiData *aid = new aiData(bpm,getRecType(type));
 		//FIXME -- what happens if aip->eslo is changed via caput ??

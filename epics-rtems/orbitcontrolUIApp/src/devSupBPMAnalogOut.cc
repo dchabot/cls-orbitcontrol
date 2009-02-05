@@ -20,6 +20,7 @@
 #include <epicsExport.h>
 #include <syslog.h>
 #include <OrbitController.h>
+#include <stdlib.h>
 #include <string>
 #include <stdexcept>
 using std::runtime_error;
@@ -53,7 +54,7 @@ struct {
 
 epicsExportAddress(dset,devSupBPMAnalogOut);
 
-enum aoType {xRef,yRef,xOffs,yOffs};
+enum aoType {xRef,yRef,xOffs,yOffs,xVal,yVal};
 
 struct aoData {
 	aoData(Bpm* b, aoType t):bpm(b),type(t){};
@@ -67,6 +68,8 @@ static aoType getRecType(string& type) {
 	else if(type.compare("yreference")==0) { return yRef; }
 	else if(type.compare("xoffset")==0) { return xOffs; }
 	else if(type.compare("yoffset")==0) { return yOffs; }
+	else if(type.compare("xval")==0) { return xVal; }
+	else if(type.compare("yval")==0) { return yVal; }
 	else {
 		type.append(": unknown record type!!! WTF ?!?!?!?");
 		throw runtime_error(type.c_str());
@@ -99,6 +102,10 @@ static long init_record(void* aor) {
 	}
 
 	string type(aop->out.value.instio.string);
+	//trim the "ringOrder" param out of "type:string"
+	pos = type.find_first_of(" ");
+	bpm->setPosition(strtoul(type.substr(pos+1,type.length()).c_str(),NULL,10));
+	type = type.substr(0,pos);
 	try {
 		aoData *aod = new aoData(bpm,getRecType(type));
 		//hook our aoData object into this record instance
@@ -127,6 +134,12 @@ static long write_ao(void* aor) {
 			return 0;
 		case(yOffs):
 			aod->bpm->setYOffs(aop->val);
+			return 0;
+		case(xVal):
+			aod->bpm->setX(aop->val);
+			return 0;
+		case(yVal):
+			aod->bpm->setY(aop->val);
 			return 0;
 		default:
 			syslog(LOG_INFO,"devSupBPMAnalogOut: write_ao() default case, AAARRRGGG!!!\n");

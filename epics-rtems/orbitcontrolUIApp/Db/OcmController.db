@@ -26,7 +26,7 @@ record(waveform, "OCM:dispersionVector") {
 ###NOTE: need to get limits for maxStep && corrFraction records!!!
 record(longout, "OCM:x:maxStep") {
 	field(DESC, "OCM max gain")
-	field(DTYP, "OCM LongOut")
+	field(DTYP, "OCM LongIO")
 	field(OMSL, "supervisory")
 	field(DOL, "0")
 	field(OUT, "@xStep")
@@ -35,7 +35,7 @@ record(longout, "OCM:x:maxStep") {
 
 record(longout, "OCM:y:maxStep") {
 	field(DESC, "OCM max gain")
-	field(DTYP, "OCM LongOut")
+	field(DTYP, "OCM LongIO")
 	field(OMSL, "supervisory")
 	field(DOL, "0")
 	field(OUT, "@yStep")

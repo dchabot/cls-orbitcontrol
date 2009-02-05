@@ -4,49 +4,77 @@
 ### Note also that we can't use ASLO or others here, as process() will alter VAL 
 ### using ASLO even if LINR="NO CONVERSION" (see aiRecord.c, special()).
 
-record(ai, "BPM$(clsName)-exp:x") {
-	field(DTYP, "BPM AnalogIn")
-	field(INP, "@xval")
-	field(SCAN, "Event")
-	field(EVNT, "$(bpmChangeEvent)")
-	field(PRIO, "HIGH")
+record(ao, "BPM$(clsName)-exp:x") {
+	field(DTYP, "BPM AnalogOut")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@xval $(ringOrder)")
 	field(EGU, "m")
 	field(LINR, "NO CONVERSION")
 	field(ESLO, "$(x-voltsPerMilli)")
 }
 
-record(ai, "BPM$(clsName)-exp:y") {
-	field(DTYP, "BPM AnalogIn")
-	field(INP, "@yval")
-	field(SCAN, "Event")
-	field(EVNT, "$(bpmChangeEvent)")
-	field(PRIO, "HIGH")
+record(ao, "BPM$(clsName)-exp:y") {
+	field(DTYP, "BPM AnalogOut")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@yval $(ringOrder)")
 	field(EGU, "m")
 	field(LINR, "NO CONVERSION")
 	field(ESLO, "$(y-voltsPerMilli)")
 }
 
+#record(ai, "BPM$(clsName)-exp:x") {
+#	field(DTYP, "BPM AnalogIn")
+#	field(INP, "@xval $(ringOrder)")
+#	field(SCAN, "Event")
+#	field(EVNT, "$(bpmChangeEvent)")
+#	field(PRIO, "HIGH")
+#	field(EGU, "m")
+#	field(LINR, "NO CONVERSION")
+#	field(ESLO, "$(x-voltsPerMilli)")
+#}
+
+#record(ai, "BPM$(clsName)-exp:y") {
+#	field(DTYP, "BPM AnalogIn")
+#	field(INP, "@yval $(ringOrder)")
+#	field(SCAN, "Event")
+#	field(EVNT, "$(bpmChangeEvent)")
+#	field(PRIO, "HIGH")
+#	field(EGU, "m")
+#	field(LINR, "NO CONVERSION")
+#	field(ESLO, "$(y-voltsPerMilli)")
+#}
+
 record(ao, "BPM$(clsName)-exp:x:reference") {
 	field(DTYP, "BPM AnalogOut")
-	field(OUT, "@xreference")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@xreference $(ringOrder)")
 	field(EGU, "m")
 }
 
 record(ao, "BPM$(clsName)-exp:y:reference") {
 	field(DTYP, "BPM AnalogOut")
-	field(OUT, "@yreference")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@yreference $(ringOrder)")
 	field(EGU, "m")
 }
 
 record(ao, "BPM$(clsName)-exp:x:offset") {
 	field(DTYP, "BPM AnalogOut")
-	field(OUT, "@xoffset")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@xoffset $(ringOrder)")
 	field(EGU, "m")
 }
 
 record(ao, "BPM$(clsName)-exp:y:offset") {
 	field(DTYP, "BPM AnalogOut")
-	field(OUT, "@yoffset")
+	field(OMSL, "supervisory")
+	field(DOL, "0")
+	field(OUT, "@yoffset $(ringOrder)")
 	field(EGU, "m")
 }
 
@@ -54,7 +82,7 @@ record(bo, "BPM$(clsName)-exp:isInCorrection") {
 	field(DTYP, "BPM BinaryOut")
 	field(OMSL, "supervisory")
 	field(DOL, "$(isInCorrection)")
-	field(OUT, "@FOO")
+	field(OUT, "@FOO  $(ringOrder)")
 	field(ZNAM, "False")
 	field(ONAM, "True")
 }

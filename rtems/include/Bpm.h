@@ -39,8 +39,8 @@ public:
 	void setYVoltsPerMilli(double val) { yVoltsPerMilli=val; }
 	void setEnabled(bool b) { enabled = b; }
 	bool isEnabled() const { return enabled; }
-	uint32_t getAdcOffset() const { return adcOffset; }
-	void setAdcOffset(uint32_t offs) { adcOffset=offs; }
+	uint32_t getPosition() const { return position; }
+	void setPosition(uint32_t offs) { position=offs; }
 
 private:
 	Bpm();
@@ -55,7 +55,7 @@ private:
 	double xVoltsPerMilli;
 	double yVoltsPerMilli;
 	bool enabled;
-	uint32_t adcOffset;
+	uint32_t position;
 };
 
 #endif /* BPM_H_ */

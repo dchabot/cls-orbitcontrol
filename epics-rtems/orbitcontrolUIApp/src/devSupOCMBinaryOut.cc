@@ -89,8 +89,10 @@ static long init_record(void* bor) {
 static long write_bo(void* bor) {
 	boRecord *pbo = (boRecord*)bor;
 	Ocm *ocm = (Ocm*)pbo->dpvt;
+
 	if(pbo->rval != 0) { ocm->setEnabled(true); }
 	else { ocm->setEnabled(false); }
+
 	return 0;
 }
 

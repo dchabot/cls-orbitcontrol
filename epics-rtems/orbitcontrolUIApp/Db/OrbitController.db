@@ -7,9 +7,11 @@ record(mbbo, "OrbitController:mode") {
 	field(ONVL, "1")
 	field(TWVL, "2")
 	field(THVL, "3")
+	field(FRVL, "4")
 	field(ONST, "Standby")
 	field(TWST, "Assisted")
 	field(THST, "Autonomous")
+	field(FRST, "Testing")
 }
 
 record(mbbi, "OrbitController:mode:fbk") {
@@ -22,10 +24,12 @@ record(mbbi, "OrbitController:mode:fbk") {
 	field(ONVL, "1")
 	field(TWVL, "2")
 	field(THVL, "3")
+	field(FRVL, "4")
 	field(ZRST, "Initializing")
 	field(ONST, "Standby")
 	field(TWST, "Assisted")
 	field(THST, "Autonomous")
+	field(FRST, "Testing")
 }
 
 ### FIXME!!!

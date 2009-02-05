@@ -1,6 +1,6 @@
 record(longout, "$(clsName)-exp:dac") {
 	field(DESC, "OCM ch$(channel) setpoint")
-	field(DTYP, "OCM LongOut")
+	field(DTYP, "OCM LongIO")
 	field(OMSL, "supervisory")
 	field(DOL, "0")
 	field(OUT, "@$(crateId) $(vmeBaseAddr) $(channel) $(ringOrder)")
@@ -15,12 +15,12 @@ record(longout, "$(clsName)-exp:dac") {
 #	field(FLNK, "$(clsName)-exp:dac:fbk")
 }
 
-#record(longin, "$(clsName)-exp:dac:fbk") {
-#	field(DESC, "OCM ch$(channel) setpoint fbk")
-#	field(DTYP, "Soft Channel")
-#	field(SCAN, "Passive")
-#	field(INP, "$(clsName)-exp:dac NPP")
-#}
+record(longin, "$(clsName):dac:fbk") {
+	field(DESC, "OCM ch$(channel) setpoint fbk")
+	field(DTYP, "OCM LongIO")
+	field(SCAN, "Passive")
+	field(INP, "@$(crateId) $(vmeBaseAddr) $(channel) $(ringOrder)")
+}
 
 record(bo, "$(clsName)-exp:isInCorrection") {
 	field(DTYP, "OCM BinaryOut")

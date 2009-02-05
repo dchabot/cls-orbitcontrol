@@ -12,6 +12,8 @@
 #include <syslog.h>
 #include <ics110bl.h>
 #include <vmic2536.h>
+#include <cmath> //fabs(double)
+
 
 struct DioConfig {
 	uint32_t baseAddr;
@@ -74,11 +76,11 @@ OrbitController::~OrbitController() {
 	map<string,Bpm*>::iterator bpmit;
 	for(bpmit=bpmMap.begin(); bpmit!=bpmMap.end(); bpmit++) { delete bpmit->second; }
 	bpmMap.clear();
-	map<uint32_t,Ocm*>::iterator ocmit;
-	for(ocmit=hOcmMap.begin(); ocmit!=hOcmMap.end(); ocmit++) { delete ocmit->second; }
-	hOcmMap.clear();
-	for(ocmit=vOcmMap.begin(); ocmit!=vOcmMap.end(); ocmit++) { delete ocmit->second; }
-	vOcmMap.clear();
+	set<Ocm*>::iterator ocmit;
+	for(ocmit=hOcmSet.begin(); ocmit!=hOcmSet.end(); ocmit++) { delete *ocmit; }
+	hOcmSet.clear();
+	for(ocmit=vOcmSet.begin(); ocmit!=vOcmSet.end(); ocmit++) { delete *ocmit; }
+	vOcmSet.clear();
 	for(uint32_t i=0; i<isrArray.size(); i++) { delete isrArray[i]; }
 	isrArray.clear();
 	for(uint32_t i=0; i<rdrArray.size(); i++) { delete rdrArray[i]; }
@@ -150,7 +152,7 @@ void OrbitController::initialize(const double adcSampleRate) {
 	TestDirective(rc,"BpmController: thread_create failure");
 	bpmQueueName = rtems_build_name('B','P','M','q');
 	rc = rtems_message_queue_create(bpmQueueName,
-									bpmMaxMsgs/*FIXME -- max msgs in queue*/,
+									bpmMaxMsgs/*max msgs in queue*/,
 									bpmMsgSize/*max msg size (bytes)*/,
 									RTEMS_LOCAL|RTEMS_FIFO,
 									&bpmQueueId);
@@ -220,8 +222,10 @@ void OrbitController::setMode(OrbitControllerMode mode) {
 	}
 }
 
-//FIXME -- refactor the BPM and OCM callback mechanisms using standard
-// Observer && Command patterns (i.e. vectors of observers and their cmds,publish,etc)
+/* FIXME
+ * Refactor the BPM and OCM callback mechanisms using standard
+ * Observer && Command patterns (i.e. vectors of observers and their cmds,publish,etc)
+ */
 void OrbitController::setModeChangeCallback(OrbitControllerModeChangeCallback cb, void* cbArg) {
 	mcCallback = cb;
 	mcCallbackArg = cbArg;
@@ -245,65 +249,80 @@ static ocmType getOcmType(const string& id) {
     return UNKNOWN;
 }
 
-static void mapInsertOcm(map<uint32_t,Ocm*>& m, Ocm* ocm) {
-	pair<map<uint32_t,Ocm*>::iterator,bool> ret;
-	ret = m.insert(pair<uint32_t,Ocm*>(ocm->getPosition(),ocm));
+/*static void mapInsertOcm(map<string,Ocm*,OcmCompare>& m, Ocm* ocm) {
+	pair<set<Ocm*>::iterator,bool> ret;
+	ret = m.insert(pair<string,Ocm*>(ocm->getId(),ocm));
 	if(ret.second != false) {
-		string id = ocm->getId();
 		syslog(LOG_INFO, "OcmController: added %s to %s OCM map.\n",
-							id.c_str(),
-							getOcmType(id)==HORIZONTAL?"horizontal":"vertical");
+							ocm->getId().c_str(),
+							getOcmType(ocm->getId())==HORIZONTAL?"horizontal":"vertical");
 	}
-	/*else {
-		syslog(LOG_INFO, "Failed to insert %s in hOcmMap; it already exists!\n",
+	else {
+		syslog(LOG_INFO, "Failed to insert %s in OcmMap; it already exists!\n",
 								ocm->getId().c_str());
 		delete ocm;
-	}*/
-}
+	}
+}*/
 
-Ocm* OrbitController::registerOcm(const string& str,
+Ocm* OrbitController::registerOcm(const string& id,
 									uint32_t crateId,
 									uint32_t vmeAddr,
 									uint8_t ch,
 									uint32_t pos) {
 	Ocm *ocm = NULL;
-	//find the matching DIO module controlling this OCM:
+	//find the matching VME crate/DIO module pair controlling this OCM:
 	for(uint32_t i=0; i<dioArray.size(); i++) {
 		if(crateId==dioArray[i]->getCrate()->getId()
 				&& vmeAddr==dioArray[i]->getVmeBaseAddr()) {
-			ocm = new Ocm(str,dioArray[i],ch);
+			//found a matching crate/module pair
+			ocm = getOcmById(id);
+			if(ocm == NULL) {
+				lock();
+				ocm = new Ocm(id,dioArray[i],ch);
+				ocm->setPosition(pos);
+				//stuff this OCM into hOcmSet or vOcmSet:
+				ocmType ocmtype = getOcmType(id);
+				pair<set<Ocm*>::iterator,bool> ret;
+				if(ocmtype==HORIZONTAL) { ret = hOcmSet.insert(ocm); }
+				else if(ocmtype==VERTICAL) { ret = vOcmSet.insert(ocm); 	}
+				if(ret.second != false) {
+					syslog(LOG_INFO, "OcmController: added %s to %s OCM set.\n",
+										ocm->getId().c_str(),
+										getOcmType(ocm->getId())==HORIZONTAL?"horizontal":"vertical");
+				}
+				else {
+					//the OCM already exists in hOcmSet or vOcmSet.
+					//Destroy new instance and return ptr to std::set member
+					delete ocm;
+					ocm = *(ret.first);
+				}
+				unlock();
+			}
 			break;
 		}
 	}
-	if(ocm != NULL) {
-		ocm->setPosition(pos);
-		//stuff this OCM into hOcmMap or vOcmMap:
-		ocmType ocmtype = getOcmType(ocm->getId());
-		if(ocmtype==HORIZONTAL) { mapInsertOcm(hOcmMap,ocm); }
-		else if(ocmtype==VERTICAL) { mapInsertOcm(vOcmMap, ocm); }
-		else { ocm = NULL; }
-	}
-	else {
+	if(ocm==NULL) {
+		//FIXME -- this should be fatal. It's a resolvable configuration issue.
 		syslog(LOG_INFO, "OcmController: couldn't match DIO module with Ocm id=%s addr=%#x!!\n",
-						  str.c_str(),vmeAddr);
+						  id.c_str(),vmeAddr);
 	}
 	return ocm;
 }
 
 void OrbitController::unregisterOcm(Ocm* ocm) {
-	map<uint32_t,Ocm*>::iterator it;
+	set<Ocm*>::iterator it;
 	ocmType ocmtype = getOcmType(ocm->getId());
 	if(ocmtype==HORIZONTAL) {
-		it = hOcmMap.find(ocm->getPosition());
-		if(it != hOcmMap.end()) {
-			hOcmMap.erase(it);
+		it = hOcmSet.find(ocm);
+		if(it != hOcmSet.end()) {
+			hOcmSet.erase(it);
 			delete ocm;
 		}
 	}
 	else if(ocmtype==VERTICAL) {
-		it = vOcmMap.find(ocm->getPosition());
-		if(it != vOcmMap.end()) {
-			vOcmMap.erase(it);
+		it = vOcmSet.find(ocm);
+		if(it != vOcmSet.end()) {
+			vOcmSet.erase(it);
 			delete ocm;
 		}
 	}
@@ -314,38 +333,45 @@ void OrbitController::unregisterOcm(Ocm* ocm) {
 }
 
 Ocm* OrbitController::getOcmById(const string& id) {
-	map<uint32_t,Ocm*>::iterator it;
+	lock();
+	Ocm *ocm = NULL;
+	set<Ocm*>::iterator it;
 	ocmType ocmtype = getOcmType(id);
 	if(ocmtype==HORIZONTAL) {
-		for(it=hOcmMap.begin(); it!=hOcmMap.end(); it++) {
-			if(id.compare(it->second->getId())==0) { return it->second; }
+		for(it=hOcmSet.begin(); it!=hOcmSet.end(); it++) {
+			if(id.compare((*it)->getId())==0) { ocm=*it; break; }
 		}
 	}
 	else if(ocmtype==VERTICAL) {
-		for(it=vOcmMap.begin(); it!=vOcmMap.end(); it++) {
-			if(id.compare(it->second->getId())==0) { return it->second; }
+		for(it=vOcmSet.begin(); it!=vOcmSet.end(); it++) {
+			if(id.compare((*it)->getId())==0) { ocm=*it; break; }
 		}
 	}
-	return NULL;
+	unlock();
+	return ocm;
 }
 
 void OrbitController::showAllOcms() {
-	map<uint32_t,Ocm*>::iterator it;
-	for(it=hOcmMap.begin(); it!=hOcmMap.end(); it++) {
+	syslog(LOG_INFO, "Total # of OCM instances=%i\tTotal # OCM registered=%i\n",
+						Ocm::getNumInstances(),hOcmSet.size()+vOcmSet.size());
+
+	set<Ocm*>::iterator it;
+	for(it=hOcmSet.begin(); it!=hOcmSet.end(); it++) {
 		syslog(LOG_INFO, "%s: position=%i\tsetpoint=%i\tinCorrection=%s\n",
-				it->second->getId().c_str(),
-				it->second->getPosition(),
-				it->second->getSetpoint(),
-				it->second->isEnabled()?"true":"false");
+				(*it)->getId().c_str(),
+				(*it)->getPosition(),
+				(*it)->getSetpoint(),
+				(*it)->isEnabled()?"true":"false");
 	}
 	syslog(LOG_INFO, "\n\n\n");
-	for(it=vOcmMap.begin(); it!=vOcmMap.end(); it++) {
+	for(it=vOcmSet.begin(); it!=vOcmSet.end(); it++) {
 		syslog(LOG_INFO, "%s: position=%i\tsetpoint=%i\tinCorrection=%s\n",
-						it->second->getId().c_str(),
-						it->second->getPosition(),
-						it->second->getSetpoint(),
-						it->second->isEnabled()?"true":"false");
+						(*it)->getId().c_str(),
+						(*it)->getPosition(),
+						(*it)->getSetpoint(),
+						(*it)->isEnabled()?"true":"false");
 	}
+	syslog(LOG_INFO, "\n\n\n");
 }
 
 void OrbitController::setOcmSetpoint(Ocm* ocm, int32_t val) {
@@ -365,7 +391,7 @@ void OrbitController::setVerticalResponseMatrix(double v[NumVOcm*NumBpm]) {
 	}
 	vResponseInitialized=true;
 	unlock();
-#if 0
+#ifdef OC_DEBUG
 	for(col=0; col<2; col++) {
 		for(row=0; row<NumVOcm; row++) {
 			syslog(LOG_INFO, "vmat[%i][%i]=%.3e\n",row,col,vmat[row][col]);
@@ -384,7 +410,7 @@ void OrbitController::setHorizontalResponseMatrix(double h[NumHOcm*NumBpm]) {
 	}
 	hResponseInitialized=true;
 	unlock();
-#if 0
+#ifdef OC_DEBUG
 	for(col=0; col<2; col++) {
 		for(row=0; row<NumVOcm; row++) {
 			syslog(LOG_INFO, "hmat[%i][%i]=%.3e\n",row,col,hmat[row][col]);
@@ -400,7 +426,7 @@ void OrbitController::setDispersionVector(double d[NumBpm]) {
 	}
 	dispInitialized=true;
 	unlock();
-#if 0
+#ifdef OC_DEBUG
 	for(uint32_t col=0; col<NumBpm; col++) {
 		syslog(LOG_INFO, "dmat[%i]=%.3e\n",col,dmat[col]);
 	}
@@ -438,10 +464,12 @@ Bpm* OrbitController::getBpmById(const string& id) {
 void OrbitController::showAllBpms() {
 	map<string,Bpm*>::iterator it;
 	for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
-		syslog(LOG_INFO, "%s: x=%.3e\ty=%.3e\tisEnabled=%s\n",it->second->getId().c_str(),
-												it->second->getX(),
-												it->second->getY(),
-												it->second->isEnabled()?"yes":"no");
+		syslog(LOG_INFO, "%s: pos=%i x=%.3e y=%.3e enabled=%s\n",
+						it->second->getId().c_str(),
+						it->second->getPosition(),
+						it->second->getX(),
+						it->second->getY(),
+						it->second->isEnabled()?"yes":"no");
 	}
 }
 
@@ -451,6 +479,9 @@ void OrbitController::setBpmValueChangeCallback(BpmValueChangeCallback cb, void*
 }
 
 /*********************** private methods *****************************************/
+//FIXME -- refactor lock()/unlock() to signatures like lock(id:rtems_id)
+// 		   This will permit finer-grained locking by admitting BPM,OCM,
+//		   and OrbitController locks.
 void OrbitController::lock() {
 	rtems_status_code rc = rtems_semaphore_obtain(mutexId,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
 	TestDirective(rc, "OrbitController: mutex lock failure");
@@ -469,12 +500,14 @@ rtems_task OrbitController::ocThreadStart(rtems_task_argument arg) {
 rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	static double sums[TOTAL_BPMS*2];
 	static double sorted[TOTAL_BPMS*2];
+	static int once=0;
 
 	syslog(LOG_INFO, "OrbitController: entering main processing loop\n");
 	for(;;) {
 		OrbitControllerMode lmode = getMode();
 		switch(lmode) {
 		case STANDBY:
+			++once;
 			stopAdcAcquisition();
 			resetAdcFifos();
 			while((lmode=getMode())==STANDBY) {
@@ -482,6 +515,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			}
 			syslog(LOG_INFO, "OrbitController: leaving STANDBY. New mode=%i\n",lmode);
 			break;
+		case TESTING:
 		case ASSISTED:
 		case AUTONOMOUS:
 			//start on the "edge" of a clock-tick:
@@ -515,11 +549,11 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 					//deliver all the OCM setpoints we have.
 					if(numMsgs > 0) {
 						for(uint32_t i=0; i<numMsgs; i++) {
-							SetpointMsg *msg;
+							SetpointMsg msg(NULL,0);
 							size_t msgsz;
-							rtems_status_code rc = rtems_message_queue_receive(spQueueId,msg,&msgsz,RTEMS_NO_WAIT,RTEMS_NO_TIMEOUT);
+							rtems_status_code rc = rtems_message_queue_receive(spQueueId,&msg,&msgsz,RTEMS_NO_WAIT,RTEMS_NO_TIMEOUT);
 							TestDirective(rc,"OcmController: msq_q_rcv failure");
-							msg->ocm->setSetpoint(msg->sp);
+							msg.ocm->setSetpoint(msg.sp);
 						}
 						for(uint32_t i=0; i<psbArray.size(); i++) {
 							psbArray[i]->updateSetpoints();
@@ -529,7 +563,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 #endif
 					}
 				}
-				else if(lmode==AUTONOMOUS) {
+				else if(lmode==AUTONOMOUS || lmode==TESTING) {
 					//TODO -- we're eventually going to want to incorporate Dispersion effects here
 					if(hResponseInitialized && vResponseInitialized/* && dispInitialized*/) {
 						/* Calc and deliver new OCM setpoints:
@@ -537,46 +571,123 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 						 * while OCM setpoint delivery req's ~5ms
 						 * for 48 OCMs (scales linearly with # OCM)
 						 */
-						uint32_t numSamples = sumAdcSamples(sums,rdSegments);
-						sortBPMData(sorted,sums,rdSegments[0]->getChannelsPerFrame());
-						double sf = getBpmScaleFactor(numSamples);
-						map<string,Bpm*>::iterator it;
-						int i;
-						for(i=0,it=bpmMap.begin(); i<TOTAL_BPMS; i++, it++) {
-							sorted[i] *= sf/it->second->getXVoltsPerMilli();
-							sorted[i+1] *= sf/it->second->getYVoltsPerMilli();
+						map<string,Bpm*>::iterator bit;
+						if(lmode == AUTONOMOUS) {
+							uint32_t numSamples = sumAdcSamples(sums,rdSegments);
+							sortBPMData(sorted,sums,rdSegments[0]->getChannelsPerFrame());
+							double sf = getBpmScaleFactor(numSamples);
+							for(bit=bpmMap.begin(); bit!=bpmMap.end(); bit++) {
+								uint32_t pos = bit->second->getPosition();
+								sorted[2*pos] *= sf/bit->second->getXVoltsPerMilli();
+								sorted[2*pos+1] *= sf/bit->second->getYVoltsPerMilli();
+							}
 						}
-						//FIXME -- refactor calcs to private method
+						else {//TESTING mode
+							for(bit=bpmMap.begin(); bit!=bpmMap.end(); bit++) {
+								uint32_t pos = bit->second->getPosition();
+								sorted[2*pos] = bit->second->getX();
+								sorted[2*pos+1] = bit->second->getY();
+							}
+						}
+						//FIXME -- refactor calcs to private methods
 						//TODO: calc dispersion effect
 						//Calc horizontal OCM setpoints:
 						//First, generate a vector<Bpm*> of all BPMs participating in the correction
 						vector<Bpm*> bpms(NumBpm);
-						for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
-							if(it->second->isEnabled()) { bpms.push_back(it->second); }
+						for(bit=bpmMap.begin(); bit!=bpmMap.end(); bit++) {
+							if(bit->second->isEnabled()) {
+								//subtract reference and DC orbit-components
+								uint32_t pos = bit->second->getPosition();
+								sorted[2*pos] -= (bit->second->getXRef() + bit->second->getXOffs());
+								sorted[2*pos+1] -= (bit->second->getYRef() + bit->second->getYOffs());
+								//store it
+								bpms.push_back(bit->second);
+							}
 						}
 						lock();
 						double *h = new double[NumHOcm];
 						for(uint32_t i=0; i<NumHOcm; i++) {
 							for(uint32_t j=0; j<NumBpm; j++) {
-								h[i] += hmat[i][j]*sorted[bpms[j]->getAdcOffset()];
+								h[i] += hmat[i][j]*sorted[2*bpms[j]->getPosition()];
 							}
+							h[i] *= -1.0;
 						}
 						//calc vertical OCM setpoints
 						double *v = new double[NumVOcm];
 						for(uint32_t i=0; i<NumVOcm; i++) {
-							for(uint32_t j=0; j<NumBpm; j++) {
-								v[i] += vmat[i][j]*sorted[bpms[j]->getAdcOffset()+1];
+							for(uint32_t j=0; j<bpms.size(); j++) {
+								v[i] += vmat[i][j]*sorted[2*bpms[j]->getPosition()+1];
+							}
+							v[i] *= -1.0;
+						}
+						//scale OCM setpoints (max step && %-age to apply)
+						double max;
+						for(uint32_t i=0,max=0; i<NumHOcm; i++) {
+							double habs = fabs(h[i]);
+							if(habs > max) { max = habs; }
+						}
+						if(max > maxHStep) {
+							for(uint32_t i=0; i<NumHOcm; i++) {
+								h[i] *= (max/maxHStep);
 							}
 						}
+						for(uint32_t i=0,max=0; i<NumVOcm; i++) {
+							double vabs = fabs(v[i]);
+							if(vabs > max) { max = vabs; }
+						}
+						if(max > maxVStep) {
+							for(uint32_t i=0; i<NumVOcm; i++) {
+								v[i] *= (max/maxVStep);
+							}
+						}
+						for(uint32_t i=0; i<NumHOcm; i++) {
+							h[i] *= maxHFrac;
+						}
+						for(uint32_t i=0; i<NumVOcm; i++) {
+							v[i] *= maxVFrac;
+						}
 						unlock();
-						//scale OCM setpoints (max step && %-age to apply)
 						//distribute new OCM setpoints
-						//foreach Ocm:ocm->setSetpoint(val);
+						set<Ocm*>::iterator hit,vit;
+						hit=hOcmSet.begin();
+						vit=vOcmSet.begin();
+						for(uint32_t i=0; hit!=hOcmSet.end() || vit!=vOcmSet.end(); hit++,vit++,i++) {
+							//foreach Ocm:ocm->setSetpoint(val)
+							if((*hit)->isEnabled()) {
+								(*hit)->setSetpoint((int32_t)h[i]+(*hit)->getSetpoint());
+							}
+							if((*vit)->isEnabled()) {
+								(*vit)->setSetpoint((int32_t)v[i]+(*vit)->getSetpoint());
+							}
+						}
+						//distribute the UPDATE-signal to pwr-supply ctlrs
 						for(uint32_t i=0; i<psbArray.size(); i++) {
 							psbArray[i]->updateSetpoints();
 						}
+						if(lmode == TESTING) {
+							if(once) {
+								--once;
+								hit=hOcmSet.begin();
+								for(uint32_t i=0; hit!=hOcmSet.end(); hit++,i++) {
+									if((*hit)->isEnabled()) {
+										syslog(LOG_INFO, "%s=%i + %.3e\n",(*hit)->getId().c_str(),
+												(*hit)->getSetpoint(),h[i]);
+									}
+								}
+								syslog(LOG_INFO, "\n\n\n");
+								vit=vOcmSet.begin();
+								for(uint32_t i=0; vit!=vOcmSet.end(); vit++,i++) {
+									if((*vit)->isEnabled()) {
+										syslog(LOG_INFO, "%s=%i + %.3e\n",(*vit)->getId().c_str(),
+												(*vit)->getSetpoint(),v[i]);
+									}
+								}
+								syslog(LOG_INFO, "\n\n\n");
+							}
+						}
 						delete []h;
 						delete []v;
+						if(lmode==TESTING) { setMode(STANDBY); break; }
 					}
 				}
 				//hand raw ADC data off to processing thread
@@ -640,13 +751,13 @@ void OrbitController::disableAdcInterrupts() {
 
 void OrbitController::rendezvousWithIsr() {
 	/* Wait for notification of ADC "fifo-half-full" event... */
-	rtems_status_code rc = rtems_barrier_wait(isrBarrierId,barrierTimeout);/*FIXME--debugging timeouts*/
+	rtems_status_code rc = rtems_barrier_wait(isrBarrierId,barrierTimeout);
 	TestDirective(rc, "OrbitController: ISR barrier_wait() failure");
 }
 
 void OrbitController::rendezvousWithAdcReaders() {
 	/* block until the ReaderThreads are at their sync-point... */
-	rtems_status_code rc = rtems_barrier_wait(rdrBarrierId, barrierTimeout);/*FIXME--debugging timeouts*/
+	rtems_status_code rc = rtems_barrier_wait(rdrBarrierId, barrierTimeout);
 	TestDirective(rc,"OrbitController: RDR barrier_wait() failure");
 }
 
@@ -794,19 +905,10 @@ void OrbitController::sortBPMData(double *sortedArray,
 		sortedArray[i] = rawArray[nthAdc+adc4ChMap[j]];
 		sortedArray[i+1] = rawArray[nthAdc+adc4ChMap[j]+1];
 	}
-	//do this once only, but be SURE that all BPMs have been added to bpmMap at this point!
-	static int once = 1;
-	if(once) {
-		once=0;
-		map<string,Bpm*>::iterator it;
-		for(i=0,it=bpmMap.begin(); it!=bpmMap.end(); it++,i++) {
-			it->second->setAdcOffset(i);
-		}
-	}
 }
 
 /**
- * FIXME -- refactor so we're no duplicating functionality!!!
+ * FIXME -- refactor so we're not duplicating functionality!!!
  * At least the two, inner loops can be extracted...
  *
  * @param sums ptr to array of doubles; storage for running sums

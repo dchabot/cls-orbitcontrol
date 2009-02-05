@@ -20,12 +20,14 @@
 #include <PowerSupplyBulk.h>
 #include <vector>
 #include <map>
+#include <set>
 #include <rtems.h>
 #include <stdint.h>
 
 using std::vector;
 using std::string;
 using std::map;
+using std::set;
 using std::iterator;
 using std::pair;
 
@@ -36,7 +38,7 @@ const uint32_t NumAdcReaders = 4;
 const uint32_t NumVmeCrates = 4;
 
 //FIXME -- this should be implemented as a class, 'cause c++ enums suck ass :-(
-enum OrbitControllerMode {INITIALIZING,STANDBY,ASSISTED,AUTONOMOUS};
+enum OrbitControllerMode {INITIALIZING,STANDBY,ASSISTED,AUTONOMOUS,TESTING};
 typedef void (*OrbitControllerModeChangeCallback)(void*);
 
 #define OC_DEBUG
@@ -85,9 +87,9 @@ public:
 	int32_t getMaxHorizontalStep() const { return maxHStep; }
 	void setMaxVerticalStep(int32_t step) { maxVStep = step; }
 	int32_t getMaxVerticalStep() const { return maxVStep; }
-	void setMaxHorizontalFraction(double f) { maxHFrac = f; }
+	void setMaxHorizontalFraction(double f) { lock(); maxHFrac = f; unlock(); }
 	double getMaxHorizontalFraction() const { return maxHFrac; }
-	void setMaxVerticalFraction(double f) { maxVFrac = f; }
+	void setMaxVerticalFraction(double f) { lock(); maxVFrac = f; unlock(); }
 	double getMaxVerticalFraction() const { return maxVFrac; }
 
 	//virtual methods inherited from abstract base-class BpmController
@@ -153,8 +155,14 @@ private:
 	OrbitControllerMode mode;
 
 	//OcmController attributes
-	map<uint32_t,Ocm*> vOcmMap;//vertical OCM
-	map<uint32_t,Ocm*> hOcmMap;//horizontal OCM
+	//private struct for determining order in OCM sets
+	struct OcmCompare {
+		bool operator()(Ocm* lhs, Ocm* rhs) const {
+			return (lhs->getPosition()<rhs->getPosition());
+		}
+	};
+	set<Ocm*,OcmCompare> vOcmSet;//vertical OCM
+	set<Ocm*,OcmCompare> hOcmSet;//horizontal OCM
 	rtems_id spQueueId;
 	rtems_name spQueueName;
 	//private struct for enqueueing OCM setpoint changes (single)
@@ -168,6 +176,10 @@ private:
 	int32_t maxVStep;
 	int32_t maxHFrac;
 	int32_t maxVFrac;
+	/* FIXME -- replace static arrays with vector<vector<double>> && vector<double>
+	 * NOTE  -- also replace const NumOcm/NumBpm,etc with static variables and let
+	 * 			the UI inform *us* of how many OCM/BPM are required...
+	 */
 	double hmat[NumHOcm][NumBpm];
 	double vmat[NumVOcm][NumBpm];
 	double dmat[NumBpm];

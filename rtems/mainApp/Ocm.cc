@@ -8,6 +8,8 @@
 #include <Ocm.h>
 #include <utils.h>
 
+uint32_t Ocm::numInstances=0;
+
 Ocm::Ocm(const string& str,Vmic2536Module* module,uint8_t chan) :
 	//ctor-initializer list
 	mod(module),channel(chan),
@@ -15,9 +17,9 @@ Ocm::Ocm(const string& str,Vmic2536Module* module,uint8_t chan) :
 	setpoint(0),feedback(0),
 	delay(30),//i.e. 30 usecs
 	position(0)
-{ }
+{ ++numInstances;}
 
-Ocm::~Ocm() { }
+Ocm::~Ocm() { --numInstances; }
 
 /** setSetpoint(int sp) will change the value of a channel's setpoint,
  * 	but activateSetpoint() is then req'd to effect the change.

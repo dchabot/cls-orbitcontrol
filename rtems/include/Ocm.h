@@ -30,6 +30,7 @@ using std::string;
 #define UPDATE 0x80000000
 //#define DROP_UPDATE 0x7FFFFFFF
 
+//FIXME -- let the UI determine these #s!!! Ditto for # of BPMs.
 const uint32_t NumOcm=48;
 const uint32_t NumHOcm=NumOcm/2;
 const uint32_t NumVOcm=NumOcm/2;
@@ -50,6 +51,8 @@ public:
 	void setDelay(uint8_t usec) { delay=usec; }
 	uint32_t getPosition() const { return position; }
 	void setPosition(uint32_t p) { position=p; }
+	//FIXME -- temporary!!
+	static uint32_t getNumInstances() { return numInstances; }
 
 private:
 	Ocm();
@@ -64,6 +67,8 @@ private:
 	int32_t feedback;
 	uint8_t delay; //opto-isolator on/off delay
 	uint32_t position;
+	//FIXME -- temporary debug var
+	static uint32_t numInstances;
 };
 
 #endif /* OCM_H_ */
