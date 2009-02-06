@@ -13,7 +13,7 @@
 #include <ics110bl.h>
 #include <vmic2536.h>
 #include <cmath> //fabs(double)
-
+#include <tscDefs.h>
 
 struct DioConfig {
 	uint32_t baseAddr;
@@ -37,7 +37,7 @@ static DioConfig dioconfig[] = {
 
 const uint32_t NumDioModules = sizeof(dioconfig)/sizeof(DioConfig);
 
-
+uint32_t Bpm::numInstances=0;
 /* THE singleton instance of this class */
 OrbitController* OrbitController::instance = 0;
 
@@ -462,6 +462,8 @@ Bpm* OrbitController::getBpmById(const string& id) {
 }
 
 void OrbitController::showAllBpms() {
+	syslog(LOG_INFO, "Total # of BPM instances=%i\tTotal # BPM registered=%i\n",
+							Bpm::getNumInstances(),bpmMap.size());
 	map<string,Bpm*>::iterator it;
 	for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
 		syslog(LOG_INFO, "%s: pos=%i x=%.3e y=%.3e enabled=%s\n",
@@ -501,12 +503,30 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	static double sums[TOTAL_BPMS*2];
 	static double sorted[TOTAL_BPMS*2];
 	static int once=0;
+	uint64_t now,then,tmp,numIters;
+	double sum,sumSqrs,avg,stdDev,maxTime;
+	extern double tscTicksPerSecond;
+
+	now=then=tmp=numIters=0;
+	sum=sumSqrs=avg=stdDev=maxTime=0.0;
 
 	syslog(LOG_INFO, "OrbitController: entering main processing loop\n");
 	for(;;) {
 		OrbitControllerMode lmode = getMode();
 		switch(lmode) {
 		case STANDBY:
+#ifdef OC_DEBUG
+			stdDev = (1.0/(double)(numIters))*sumSqrs - (1.0/(double)(numIters*numIters))*(sum*sum);
+			stdDev = sqrt(stdDev);
+			stdDev /= tscTicksPerSecond;
+			avg = sum/((double)numIters);
+			avg /= tscTicksPerSecond;
+			maxTime /= tscTicksPerSecond;
+
+			syslog(LOG_INFO, "OrbitController - Autonomous Mode:\n\tAvg = %0.9f +/- %0.9f [s], max=%0.9f [s]\n",avg,stdDev,maxTime);
+			/* zero the parameters for the next iteration...*/
+			sum=sumSqrs=avg=stdDev=maxTime=0.0;
+#endif
 			++once;
 			stopAdcAcquisition();
 			resetAdcFifos();
@@ -565,6 +585,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 				}
 				else if(lmode==AUTONOMOUS || lmode==TESTING) {
 					//TODO -- we're eventually going to want to incorporate Dispersion effects here
+					rdtscll(then);
 					if(hResponseInitialized && vResponseInitialized/* && dispInitialized*/) {
 						/* Calc and deliver new OCM setpoints:
 						 * NOTE: testing shows calc takes ~1ms
@@ -591,32 +612,38 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 						}
 						//FIXME -- refactor calcs to private methods
 						//TODO: calc dispersion effect
-						//Calc horizontal OCM setpoints:
-						//First, generate a vector<Bpm*> of all BPMs participating in the correction
-						vector<Bpm*> bpms(NumBpm);
+						//First, calc BPM deltas
 						for(bit=bpmMap.begin(); bit!=bpmMap.end(); bit++) {
 							if(bit->second->isEnabled()) {
 								//subtract reference and DC orbit-components
 								uint32_t pos = bit->second->getPosition();
 								sorted[2*pos] -= (bit->second->getXRef() + bit->second->getXOffs());
 								sorted[2*pos+1] -= (bit->second->getYRef() + bit->second->getYOffs());
-								//store it
-								bpms.push_back(bit->second);
 							}
 						}
 						lock();
 						double *h = new double[NumHOcm];
 						for(uint32_t i=0; i<NumHOcm; i++) {
-							for(uint32_t j=0; j<NumBpm; j++) {
-								h[i] += hmat[i][j]*sorted[2*bpms[j]->getPosition()];
+							bit=bpmMap.begin();
+							for(uint32_t j=0; j<NumBpm; bit++) {
+								if(bit->second->isEnabled()) {
+									uint32_t pos = bit->second->getPosition();
+									h[i] += hmat[i][j]*sorted[2*pos];
+									++j;
+								}
 							}
 							h[i] *= -1.0;
 						}
 						//calc vertical OCM setpoints
 						double *v = new double[NumVOcm];
 						for(uint32_t i=0; i<NumVOcm; i++) {
-							for(uint32_t j=0; j<bpms.size(); j++) {
-								v[i] += vmat[i][j]*sorted[2*bpms[j]->getPosition()+1];
+							bit=bpmMap.begin();
+							for(uint32_t j=0; j<NumBpm; bit++) {
+								if(bit->second->isEnabled()) {
+									uint32_t pos = bit->second->getPosition();
+									v[i] += vmat[i][j]*sorted[2*pos+1];
+									++j;
+								}
 							}
 							v[i] *= -1.0;
 						}
@@ -626,6 +653,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 							double habs = fabs(h[i]);
 							if(habs > max) { max = habs; }
 						}
+						//syslog(LOG_INFO, "h-max=%.3e\n",max);
 						if(max > maxHStep) {
 							for(uint32_t i=0; i<NumHOcm; i++) {
 								h[i] *= (max/maxHStep);
@@ -635,6 +663,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 							double vabs = fabs(v[i]);
 							if(vabs > max) { max = vabs; }
 						}
+						//syslog(LOG_INFO, "v-max=%.3e\n",max);
 						if(max > maxVStep) {
 							for(uint32_t i=0; i<NumVOcm; i++) {
 								v[i] *= (max/maxVStep);
@@ -649,7 +678,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 						unlock();
 						//distribute new OCM setpoints
 						set<Ocm*>::iterator hit,vit;
-						hit=hOcmSet.begin();
+						/*hit=hOcmSet.begin();
 						vit=vOcmSet.begin();
 						for(uint32_t i=0; hit!=hOcmSet.end() || vit!=vOcmSet.end(); hit++,vit++,i++) {
 							//foreach Ocm:ocm->setSetpoint(val)
@@ -663,7 +692,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 						//distribute the UPDATE-signal to pwr-supply ctlrs
 						for(uint32_t i=0; i<psbArray.size(); i++) {
 							psbArray[i]->updateSetpoints();
-						}
+						}*/
 						if(lmode == TESTING) {
 							if(once) {
 								--once;
@@ -687,6 +716,16 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 						}
 						delete []h;
 						delete []v;
+						rdtscll(now);
+#ifdef OC_DEBUG
+						tmp = now-then;
+						sum += (double)tmp;
+						sumSqrs += (double)(tmp*tmp);
+						if((double)tmp>maxTime) {
+							maxTime = (double)tmp;
+						}
+						++numIters;
+#endif
 						if(lmode==TESTING) { setMode(STANDBY); break; }
 					}
 				}

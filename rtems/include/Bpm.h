@@ -18,8 +18,8 @@ const uint32_t NumBpm=48;
 //FIXME -- req'r state for X && Y enabled, as well as Device Support for same !!!
 class Bpm {
 public:
-	Bpm(const string& str) : id(str),enabled(true) { }
-	~Bpm() { }
+	Bpm(const string& str) : id(str),enabled(true) { ++numInstances; }
+	~Bpm() { --numInstances; }
 	string getId() const { return id; }
 	double getX() const { return x; }
 	void setX(double x) { this->x = x; }
@@ -41,10 +41,14 @@ public:
 	bool isEnabled() const { return enabled; }
 	uint32_t getPosition() const { return position; }
 	void setPosition(uint32_t offs) { position=offs; }
+	//FIXME -- temporary!!
+	static uint32_t getNumInstances() { return numInstances; }
 
 private:
 	Bpm();
 	Bpm(const Bpm&);
+	const Bpm& operator=(const Bpm&);
+
 	const string id;
 	double x;
 	double y;
@@ -56,6 +60,8 @@ private:
 	double yVoltsPerMilli;
 	bool enabled;
 	uint32_t position;
+	//FIXME -- temporary debug var
+	static uint32_t numInstances;
 };
 
 #endif /* BPM_H_ */
