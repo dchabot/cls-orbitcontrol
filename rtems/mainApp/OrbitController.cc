@@ -502,6 +502,7 @@ rtems_task OrbitController::ocThreadStart(rtems_task_argument arg) {
 rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	static double sums[TOTAL_BPMS*2];
 	static double sorted[TOTAL_BPMS*2];
+	static double h[NumHOcm],v[NumVOcm];
 	static int once=0;
 	uint64_t now,then,tmp,numIters;
 	double sum,sumSqrs,avg,stdDev,maxTime;
@@ -526,6 +527,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			syslog(LOG_INFO, "OrbitController - Autonomous Mode:\n\tAvg = %0.9f +/- %0.9f [s], max=%0.9f [s]\n",avg,stdDev,maxTime);
 			/* zero the parameters for the next iteration...*/
 			sum=sumSqrs=avg=stdDev=maxTime=0.0;
+			numIters=0;
 #endif
 			++once;
 			stopAdcAcquisition();
@@ -587,6 +589,10 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 					//TODO -- we're eventually going to want to incorporate Dispersion effects here
 					rdtscll(then);
 					if(hResponseInitialized && vResponseInitialized/* && dispInitialized*/) {
+						memset(sums,0.0f,sizeof(sums)/sizeof(sums[0]));
+						memset(sorted,0.0f,sizeof(sorted)/sizeof(sorted[0]));
+						memset(h,0.0f,sizeof(h)/sizeof(h[0]));
+						memset(v,0.0f,sizeof(v)/sizeof(v[0]));
 						/* Calc and deliver new OCM setpoints:
 						 * NOTE: testing shows calc takes ~1ms
 						 * while OCM setpoint delivery req's ~5ms
@@ -613,64 +619,70 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 						//FIXME -- refactor calcs to private methods
 						//TODO: calc dispersion effect
 						//First, calc BPM deltas
-						for(bit=bpmMap.begin(); bit!=bpmMap.end(); bit++) {
+						uint32_t adcpos[NumBpm];
+						bit=bpmMap.begin();
+						for(uint32_t i=0; bit!=bpmMap.end(); bit++) {
 							if(bit->second->isEnabled()) {
 								//subtract reference and DC orbit-components
 								uint32_t pos = bit->second->getPosition();
 								sorted[2*pos] -= (bit->second->getXRef() + bit->second->getXOffs());
 								sorted[2*pos+1] -= (bit->second->getYRef() + bit->second->getYOffs());
+								adcpos[i]=pos;
 							}
 						}
 						lock();
-						double *h = new double[NumHOcm];
 						for(uint32_t i=0; i<NumHOcm; i++) {
 							bit=bpmMap.begin();
 							for(uint32_t j=0; j<NumBpm; bit++) {
 								if(bit->second->isEnabled()) {
 									uint32_t pos = bit->second->getPosition();
 									h[i] += hmat[i][j]*sorted[2*pos];
+									//syslog(LOG_INFO, "h[%i] += %.3e X %.3e = %.3e\n",i,hmat[i][j],sorted[2*pos],h[i]);
 									++j;
 								}
 							}
 							h[i] *= -1.0;
 						}
 						//calc vertical OCM setpoints
-						double *v = new double[NumVOcm];
 						for(uint32_t i=0; i<NumVOcm; i++) {
 							bit=bpmMap.begin();
 							for(uint32_t j=0; j<NumBpm; bit++) {
 								if(bit->second->isEnabled()) {
 									uint32_t pos = bit->second->getPosition();
 									v[i] += vmat[i][j]*sorted[2*pos+1];
+									//syslog(LOG_INFO, "v[%i] += %.3e X %.3e = %.3e\n",i,vmat[i][j],sorted[2*pos+1],v[i]);
 									++j;
 								}
 							}
 							v[i] *= -1.0;
 						}
 						//scale OCM setpoints (max step && %-age to apply)
-						double max;
-						for(uint32_t i=0,max=0; i<NumHOcm; i++) {
+						double max=0;
+						for(uint32_t i=0; i<NumHOcm; i++) {
 							double habs = fabs(h[i]);
 							if(habs > max) { max = habs; }
 						}
-						//syslog(LOG_INFO, "h-max=%.3e\n",max);
-						if(max > maxHStep) {
+						syslog(LOG_INFO, "h-max=%.3e\n",max);
+						if(max > (double)maxHStep) {
+							double scaleFactor = ((double)maxHStep)/max;
 							for(uint32_t i=0; i<NumHOcm; i++) {
-								h[i] *= (max/maxHStep);
-							}
-						}
-						for(uint32_t i=0,max=0; i<NumVOcm; i++) {
-							double vabs = fabs(v[i]);
-							if(vabs > max) { max = vabs; }
-						}
-						//syslog(LOG_INFO, "v-max=%.3e\n",max);
-						if(max > maxVStep) {
-							for(uint32_t i=0; i<NumVOcm; i++) {
-								v[i] *= (max/maxVStep);
+								h[i] *= scaleFactor;
 							}
 						}
 						for(uint32_t i=0; i<NumHOcm; i++) {
 							h[i] *= maxHFrac;
+						}
+						max=0;
+						for(uint32_t i=0; i<NumVOcm; i++) {
+							double vabs = fabs(v[i]);
+							if(vabs > max) { max = vabs; }
+						}
+						syslog(LOG_INFO, "v-max=%.3e\n",max);
+						if(max > (double)maxVStep) {
+							double scaleFactor = ((double)maxVStep)/max;
+							for(uint32_t i=0; i<NumVOcm; i++) {
+								v[i] *= scaleFactor;
+							}
 						}
 						for(uint32_t i=0; i<NumVOcm; i++) {
 							v[i] *= maxVFrac;
@@ -714,8 +726,6 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 								syslog(LOG_INFO, "\n\n\n");
 							}
 						}
-						delete []h;
-						delete []v;
 						rdtscll(now);
 #ifdef OC_DEBUG
 						tmp = now-then;

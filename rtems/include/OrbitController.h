@@ -174,8 +174,8 @@ private:
 	};
 	int32_t maxHStep;
 	int32_t maxVStep;
-	int32_t maxHFrac;
-	int32_t maxVFrac;
+	double maxHFrac;
+	double maxVFrac;
 	/* FIXME -- replace static arrays with vector<vector<double>> && vector<double>
 	 * NOTE  -- also replace const NumOcm/NumBpm,etc with static variables and let
 	 * 			the UI inform *us* of how many OCM/BPM are required...
