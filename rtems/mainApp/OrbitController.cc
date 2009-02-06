@@ -662,7 +662,6 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 							double habs = fabs(h[i]);
 							if(habs > max) { max = habs; }
 						}
-						syslog(LOG_INFO, "h-max=%.3e\n",max);
 						if(max > (double)maxHStep) {
 							double scaleFactor = ((double)maxHStep)/max;
 							for(uint32_t i=0; i<NumHOcm; i++) {
@@ -677,7 +676,6 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 							double vabs = fabs(v[i]);
 							if(vabs > max) { max = vabs; }
 						}
-						syslog(LOG_INFO, "v-max=%.3e\n",max);
 						if(max > (double)maxVStep) {
 							double scaleFactor = ((double)maxVStep)/max;
 							for(uint32_t i=0; i<NumVOcm; i++) {
