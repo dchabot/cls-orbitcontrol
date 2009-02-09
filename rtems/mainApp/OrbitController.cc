@@ -357,19 +357,21 @@ void OrbitController::showAllOcms() {
 
 	set<Ocm*>::iterator it;
 	for(it=hOcmSet.begin(); it!=hOcmSet.end(); it++) {
+		Ocm *och = (*it);
 		syslog(LOG_INFO, "%s: position=%i\tsetpoint=%i\tinCorrection=%s\n",
-				(*it)->getId().c_str(),
-				(*it)->getPosition(),
-				(*it)->getSetpoint(),
-				(*it)->isEnabled()?"true":"false");
+				och->getId().c_str(),
+				och->getPosition(),
+				och->getSetpoint(),
+				och->isEnabled()?"true":"false");
 	}
 	syslog(LOG_INFO, "\n\n\n");
 	for(it=vOcmSet.begin(); it!=vOcmSet.end(); it++) {
+		Ocm *ocv = (*it);
 		syslog(LOG_INFO, "%s: position=%i\tsetpoint=%i\tinCorrection=%s\n",
-						(*it)->getId().c_str(),
-						(*it)->getPosition(),
-						(*it)->getSetpoint(),
-						(*it)->isEnabled()?"true":"false");
+						ocv->getId().c_str(),
+						ocv->getPosition(),
+						ocv->getSetpoint(),
+						ocv->isEnabled()?"true":"false");
 	}
 	syslog(LOG_INFO, "\n\n\n");
 }
@@ -503,7 +505,6 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	static double sums[TOTAL_BPMS*2];
 	static double sorted[TOTAL_BPMS*2];
 	static double h[NumHOcm],v[NumVOcm];
-	static int once=0;
 	uint64_t now,then,tmp,numIters;
 	double sum,sumSqrs,avg,stdDev,maxTime;
 	extern double tscTicksPerSecond;
@@ -529,7 +530,6 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			sum=sumSqrs=avg=stdDev=maxTime=0.0;
 			numIters=0;
 #endif
-			++once;
 			stopAdcAcquisition();
 			resetAdcFifos();
 			while((lmode=getMode())==STANDBY) {
@@ -633,7 +633,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 						lock();
 						for(uint32_t i=0; i<NumHOcm; i++) {
 							bit=bpmMap.begin();
-							for(uint32_t j=0; j<NumBpm; bit++) {
+							for(uint32_t j=0; j<NumBpm && bit!=bpmMap.end(); bit++) {
 								Bpm *bpm = bit->second;
 								if(bpm->isEnabled()) {
 									uint32_t pos = bpm->getPosition();
@@ -647,7 +647,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 						//calc vertical OCM setpoints
 						for(uint32_t i=0; i<NumVOcm; i++) {
 							bit=bpmMap.begin();
-							for(uint32_t j=0; j<NumBpm; bit++) {
+							for(uint32_t j=0; j<NumBpm && bit!=bpmMap.end(); bit++) {
 								Bpm *bpm = bit->second;
 								if(bpm->isEnabled()) {
 									uint32_t pos = bpm->getPosition();
@@ -709,27 +709,24 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 							psbArray[i]->updateSetpoints();
 						}
 						if(lmode == TESTING) {
-							if(once) {
-								--once;
-								hit=hOcmSet.begin();
-								for(uint32_t i=0; hit!=hOcmSet.end(); hit++,i++) {
-									Ocm *och = (*hit);
-									if(och->isEnabled()) {
-										syslog(LOG_INFO, "%s=%i + %.3e\n",och->getId().c_str(),
-												och->getSetpoint(),h[i]);
-									}
+							hit=hOcmSet.begin();
+							for(uint32_t i=0; hit!=hOcmSet.end(); hit++,i++) {
+								Ocm *och = (*hit);
+								if(och->isEnabled()) {
+									syslog(LOG_INFO, "%s=%i + %.3e\n",och->getId().c_str(),
+											och->getSetpoint(),h[i]);
 								}
-								syslog(LOG_INFO, "\n\n\n");
-								vit=vOcmSet.begin();
-								for(uint32_t i=0; vit!=vOcmSet.end(); vit++,i++) {
-									Ocm *ocv = (*vit);
-									if(ocv->isEnabled()) {
-										syslog(LOG_INFO, "%s=%i + %.3e\n",ocv->getId().c_str(),
-												ocv->getSetpoint(),v[i]);
-									}
-								}
-								syslog(LOG_INFO, "\n\n\n");
 							}
+							syslog(LOG_INFO, "\n\n\n");
+							vit=vOcmSet.begin();
+							for(uint32_t i=0; vit!=vOcmSet.end(); vit++,i++) {
+								Ocm *ocv = (*vit);
+								if(ocv->isEnabled()) {
+									syslog(LOG_INFO, "%s=%i + %.3e\n",ocv->getId().c_str(),
+											ocv->getSetpoint(),v[i]);
+								}
+							}
+							syslog(LOG_INFO, "\n\n\n");
 						}
 						rdtscll(now);
 #ifdef OC_DEBUG
@@ -873,6 +870,8 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 			if(numSamplesSummed==localSamplesPerAvg) {
 				sortBPMData(sorted,sums,ds[0]->getChannelsPerFrame());
 				/* scale & update each BPM object, then execute client's BpmValueChangeCallback */
+#ifdef OC_DEBUG
+#if 1
 				map<string,Bpm*>::iterator it;
 				double cf = getBpmScaleFactor(numSamplesSummed);
 				for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
@@ -883,6 +882,8 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 					double y = sorted[pos+1]*cf/bpm->getYVoltsPerMilli();
 					bpm->setY(y);
 				}
+#endif
+#endif
 				if(bpmCB != 0) {
 					/* fire record processing */
 					this->bpmCB(bpmCBArg);
