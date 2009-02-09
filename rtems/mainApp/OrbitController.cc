@@ -604,38 +604,39 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 							sortBPMData(sorted,sums,rdSegments[0]->getChannelsPerFrame());
 							double sf = getBpmScaleFactor(numSamples);
 							for(bit=bpmMap.begin(); bit!=bpmMap.end(); bit++) {
-								uint32_t pos = bit->second->getPosition();
-								sorted[2*pos] *= sf/bit->second->getXVoltsPerMilli();
-								sorted[2*pos+1] *= sf/bit->second->getYVoltsPerMilli();
+								Bpm *bpm = bit->second;
+								uint32_t pos = bpm->getPosition();
+								sorted[2*pos] *= sf/bpm->getXVoltsPerMilli();
+								sorted[2*pos+1] *= sf/bpm->getYVoltsPerMilli();
 							}
 						}
 						else {//TESTING mode
 							for(bit=bpmMap.begin(); bit!=bpmMap.end(); bit++) {
-								uint32_t pos = bit->second->getPosition();
-								sorted[2*pos] = bit->second->getX();
-								sorted[2*pos+1] = bit->second->getY();
+								Bpm *bpm = bit->second;
+								uint32_t pos = bpm->getPosition();
+								sorted[2*pos] = bpm->getX();
+								sorted[2*pos+1] = bpm->getY();
 							}
 						}
 						//FIXME -- refactor calcs to private methods
 						//TODO: calc dispersion effect
 						//First, calc BPM deltas
-						uint32_t adcpos[NumBpm];
-						bit=bpmMap.begin();
-						for(uint32_t i=0; bit!=bpmMap.end(); bit++) {
-							if(bit->second->isEnabled()) {
+						for(bit=bpmMap.begin(); bit!=bpmMap.end(); bit++) {
+							Bpm *bpm = bit->second;
+							if(bpm->isEnabled()) {
 								//subtract reference and DC orbit-components
-								uint32_t pos = bit->second->getPosition();
-								sorted[2*pos] -= (bit->second->getXRef() + bit->second->getXOffs());
-								sorted[2*pos+1] -= (bit->second->getYRef() + bit->second->getYOffs());
-								adcpos[i]=pos;
+								uint32_t pos = bpm->getPosition();
+								sorted[2*pos] -= (bpm->getXRef() + bpm->getXOffs());
+								sorted[2*pos+1] -= (bpm->getYRef() + bpm->getYOffs());
 							}
 						}
 						lock();
 						for(uint32_t i=0; i<NumHOcm; i++) {
 							bit=bpmMap.begin();
 							for(uint32_t j=0; j<NumBpm; bit++) {
-								if(bit->second->isEnabled()) {
-									uint32_t pos = bit->second->getPosition();
+								Bpm *bpm = bit->second;
+								if(bpm->isEnabled()) {
+									uint32_t pos = bpm->getPosition();
 									h[i] += hmat[i][j]*sorted[2*pos];
 									//syslog(LOG_INFO, "h[%i] += %.3e X %.3e = %.3e\n",i,hmat[i][j],sorted[2*pos],h[i]);
 									++j;
@@ -647,8 +648,9 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 						for(uint32_t i=0; i<NumVOcm; i++) {
 							bit=bpmMap.begin();
 							for(uint32_t j=0; j<NumBpm; bit++) {
-								if(bit->second->isEnabled()) {
-									uint32_t pos = bit->second->getPosition();
+								Bpm *bpm = bit->second;
+								if(bpm->isEnabled()) {
+									uint32_t pos = bpm->getPosition();
 									v[i] += vmat[i][j]*sorted[2*pos+1];
 									//syslog(LOG_INFO, "v[%i] += %.3e X %.3e = %.3e\n",i,vmat[i][j],sorted[2*pos+1],v[i]);
 									++j;
@@ -688,37 +690,42 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 						unlock();
 						//distribute new OCM setpoints
 						set<Ocm*>::iterator hit,vit;
-						/*hit=hOcmSet.begin();
-						vit=vOcmSet.begin();
-						for(uint32_t i=0; hit!=hOcmSet.end() || vit!=vOcmSet.end(); hit++,vit++,i++) {
+						uint32_t i = 0;
+						for(hit=hOcmSet.begin(),vit=vOcmSet.begin();
+							hit!=hOcmSet.end() && vit!=vOcmSet.end();
+							hit++,vit++) {
 							//foreach Ocm:ocm->setSetpoint(val)
-							if((*hit)->isEnabled()) {
-								(*hit)->setSetpoint((int32_t)h[i]+(*hit)->getSetpoint());
+							Ocm *och = (*hit);
+							if(och->isEnabled()) {
+								och->setSetpoint((int32_t)h[i]+och->getSetpoint());
 							}
-							if((*vit)->isEnabled()) {
-								(*vit)->setSetpoint((int32_t)v[i]+(*vit)->getSetpoint());
+							Ocm *ocv = (*vit);
+							if(ocv->isEnabled()) {
+								ocv->setSetpoint((int32_t)v[i]+ocv->getSetpoint());
 							}
 						}
 						//distribute the UPDATE-signal to pwr-supply ctlrs
 						for(uint32_t i=0; i<psbArray.size(); i++) {
 							psbArray[i]->updateSetpoints();
-						}*/
+						}
 						if(lmode == TESTING) {
 							if(once) {
 								--once;
 								hit=hOcmSet.begin();
 								for(uint32_t i=0; hit!=hOcmSet.end(); hit++,i++) {
-									if((*hit)->isEnabled()) {
-										syslog(LOG_INFO, "%s=%i + %.3e\n",(*hit)->getId().c_str(),
-												(*hit)->getSetpoint(),h[i]);
+									Ocm *och = (*hit);
+									if(och->isEnabled()) {
+										syslog(LOG_INFO, "%s=%i + %.3e\n",och->getId().c_str(),
+												och->getSetpoint(),h[i]);
 									}
 								}
 								syslog(LOG_INFO, "\n\n\n");
 								vit=vOcmSet.begin();
 								for(uint32_t i=0; vit!=vOcmSet.end(); vit++,i++) {
-									if((*vit)->isEnabled()) {
-										syslog(LOG_INFO, "%s=%i + %.3e\n",(*vit)->getId().c_str(),
-												(*vit)->getSetpoint(),v[i]);
+									Ocm *ocv = (*vit);
+									if(ocv->isEnabled()) {
+										syslog(LOG_INFO, "%s=%i + %.3e\n",ocv->getId().c_str(),
+												ocv->getSetpoint(),v[i]);
 									}
 								}
 								syslog(LOG_INFO, "\n\n\n");
@@ -867,20 +874,22 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 				sortBPMData(sorted,sums,ds[0]->getChannelsPerFrame());
 				/* scale & update each BPM object, then execute client's BpmValueChangeCallback */
 				map<string,Bpm*>::iterator it;
-				int i;
 				double cf = getBpmScaleFactor(numSamplesSummed);
-				for(it=bpmMap.begin(),i=0; it!=bpmMap.end(); it++,i++) {
-					double x = sorted[i]*cf/it->second->getXVoltsPerMilli();
-					it->second->setX(x);
-					double y = sorted[i+1]*cf/it->second->getYVoltsPerMilli();
-					it->second->setY(y);
+				for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
+					Bpm *bpm = it->second;
+					uint32_t pos = bpm->getPosition();
+					double x = sorted[pos]*cf/bpm->getXVoltsPerMilli();
+					bpm->setX(x);
+					double y = sorted[pos+1]*cf/bpm->getYVoltsPerMilli();
+					bpm->setY(y);
 				}
 				if(bpmCB != 0) {
 					/* fire record processing */
 					this->bpmCB(bpmCBArg);
 				}
 				/* zero the array of running-sums,reset counter, update num pts in avg */
-				memset(sums, 0, sizeof(double)*NumBpmChannels);
+				memset(sums, 0, sizeof(sums)/sizeof(sums[0]));
+				memset(sorted, 0, sizeof(sorted)/sizeof(sorted[0]));
 				//memset(sumsSqrd, 0, sizeof(double)*NumBpmChannels);
 #ifdef OC_DEBUG
 				static int cnt=1;
