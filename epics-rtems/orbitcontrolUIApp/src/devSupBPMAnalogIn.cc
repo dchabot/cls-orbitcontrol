@@ -61,6 +61,7 @@ struct aiData {
 	~aiData(){};
 	Bpm* bpm;
 	aiType type;
+	double voltsPerMilli;
 };
 
 static aiType getRecType(string& type) {
@@ -115,6 +116,7 @@ static long init_record(void* air) {
 		// into *pointers*. That way we could hook record fields into each object instance...
 		if(aid->type==xval) { bpm->setXVoltsPerMilli(aip->eslo); }
 		else { bpm->setYVoltsPerMilli(aip->eslo); }
+		aid->voltsPerMilli=aip->eslo;
 		//hook our aiData object into this record instance
 		aip->dpvt = (void*)aid;
 	}
@@ -137,11 +139,18 @@ static long read_ai(void* air) {
 
 	if(aid->type == xval) {
 		aip->val = aid->bpm->getX();
-		aid->bpm->setXVoltsPerMilli(aip->eslo);
+		if(aip->eslo != aid->voltsPerMilli) {
+			/* our conversion factor has been changed; update the Bpm instance */
+			aid->bpm->setXVoltsPerMilli(aip->eslo);
+		}
+
 	}
 	else {
 		aip->val = aid->bpm->getY();
-		aid->bpm->setYVoltsPerMilli(aip->eslo);
+		if(aip->eslo != aid->voltsPerMilli) {
+			/* our conversion factor has been changed; update the Bpm instance */
+			aid->bpm->setYVoltsPerMilli(aip->eslo);
+		}
 	}
 	aip->udf=0;
 	return 1;

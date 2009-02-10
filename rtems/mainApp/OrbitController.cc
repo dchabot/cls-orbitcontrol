@@ -502,12 +502,13 @@ rtems_task OrbitController::ocThreadStart(rtems_task_argument arg) {
 }
 
 rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
-	static double sums[TOTAL_BPMS*2];
+	static double sums[NumAdcModules*32];
 	static double sorted[TOTAL_BPMS*2];
 	static double h[NumHOcm],v[NumVOcm];
 	uint64_t now,then,tmp,numIters;
 	double sum,sumSqrs,avg,stdDev,maxTime;
 	extern double tscTicksPerSecond;
+	static int nloops=0;
 
 	now=then=tmp=numIters=0;
 	sum=sumSqrs=avg=stdDev=maxTime=0.0;
@@ -525,7 +526,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			avg /= tscTicksPerSecond;
 			maxTime /= tscTicksPerSecond;
 
-			syslog(LOG_INFO, "OrbitController - Autonomous Mode:\n\tAvg = %0.9f +/- %0.9f [s], max=%0.9f [s]\n",avg,stdDev,maxTime);
+			syslog(LOG_INFO, "OrbitController - Autonomous Mode stats:\n\tAvg = %0.9f +/- %0.9f [s], max=%0.9f [s]\n",avg,stdDev,maxTime);
 			/* zero the parameters for the next iteration...*/
 			sum=sumSqrs=avg=stdDev=maxTime=0.0;
 			numIters=0;
@@ -544,6 +545,9 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			rtems_task_wake_after(2);
 			startAdcAcquisition();
 			while((lmode=getMode())!=STANDBY) {
+				nloops++;
+				if(nloops > 100000 || nloops<=0 || nloops<nloops-1) { goto bailout; }
+				//syslog(LOG_INFO, "OrbitController: nloops=%i\n",nloops);
 				//Wait for notification of ADC "fifo-half-full" event...
 				rendezvousWithIsr();
 				stopAdcAcquisition();
@@ -753,13 +757,14 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			break;
 		}
 	}
+bailout:
 	//state exit: silence the ADC's
 	stopAdcAcquisition();
 	resetAdcFifos();
 	//FIXME -- temporary!!!
 	rtems_task_wake_after(1000);
-	TestDirective(rtems_event_send((rtems_id)arg,1),"OrbitController: problem sending event to UI thread");
-	TestDirective(rtems_task_delete(ocTID),"OrbitController: problem deleting ocThread");
+	syslog(LOG_INFO, "OrbitController: suspending ocThread after %i iterations\n",nloops);
+	TestDirective(rtems_task_suspend(ocTID),"OrbitController: problem suspending ocThread");
 }
 
 void OrbitController::startAdcAcquisition() {
@@ -831,12 +836,15 @@ rtems_task OrbitController::bpmThreadStart(rtems_task_argument arg) {
 	oc->bpmThreadBody(oc->bpmThreadArg);
 }
 
+#define NDEBUG
+#include <assert.h>
+
 rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 	uint32_t nthFrame,nthAdc,nthChannel;
 	uint32_t localSamplesPerAvg = samplesPerAvg;
 	uint32_t numSamplesSummed=0;
 	AdcData *ds[NumAdcModules];
-	static double sums[NumBpmChannels];
+	static double sums[NumAdcModules*32];
 	static double sorted[NumBpmChannels];
 
 	syslog(LOG_INFO, "BpmController: entering main loop...\n");
@@ -845,22 +853,23 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 		rtems_status_code rc = rtems_message_queue_receive(bpmQueueId,ds,&bytes,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
 		TestDirective(rc,"BpmController: msg_q_rcv failure");
 		if(bytes != bpmMsgSize) {
+			//FIXME -- handle this error!!!
 			syslog(LOG_INFO, "BpmController: received %u bytes in msg: was expecting %u\n",
 								bytes,bpmMsgSize);
-			//FIXME -- handle this error!!!
 		}
 		/* XXX -- assumes each ADC Data Segment has an equal # of frames and channels per frame */
-        uint32_t nFrames = ds[0]->getFrames();
-        uint32_t frameOffset = ds[0]->getChannelsPerFrame();
-		for(nthFrame=0; nthFrame<nFrames; nthFrame++) { /* for each ADC frame... */
-			int nthFrameOffset = nthFrame*frameOffset;
-
+		uint32_t numFrames = ds[0]->getFrames();
+        uint32_t chPerFrame = ds[0]->getChannelsPerFrame();
+		for(nthFrame=0; nthFrame<numFrames; nthFrame++) { /* for each ADC frame... */
+			int nthFrameOffset = nthFrame*chPerFrame;
+			assert(nthFrameOffset<=(511*32));
 			for(nthAdc=0; nthAdc<NumAdcModules; nthAdc++) { /* for each ADC... */
-				int nthAdcOffset = nthAdc*frameOffset;
+				int nthAdcOffset = nthAdc*chPerFrame;
 				int32_t *buf = ds[nthAdc]->getBuffer();
-
-				for(nthChannel=0; nthChannel<frameOffset; nthChannel++) { /* for each channel of this frame... */
+				assert(nthAdcOffset<=96);
+				for(nthChannel=0; nthChannel<chPerFrame; nthChannel++) { /* for each channel of this frame... */
 					sums[nthAdcOffset+nthChannel] += (double)buf[nthFrameOffset+nthChannel];
+					assert((nthAdcOffset+nthChannel)<128);
 					//sumsSqrd[nthAdcOffset+nthChannel] += pow(sums[nthAdcOffset+nthChannel],2);
 				}
 
@@ -877,9 +886,9 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 				for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
 					Bpm *bpm = it->second;
 					uint32_t pos = bpm->getPosition();
-					double x = sorted[pos]*cf/bpm->getXVoltsPerMilli();
+					double x = sorted[2*pos]*cf/bpm->getXVoltsPerMilli();
 					bpm->setX(x);
-					double y = sorted[pos+1]*cf/bpm->getYVoltsPerMilli();
+					double y = sorted[2*pos+1]*cf/bpm->getYVoltsPerMilli();
 					bpm->setY(y);
 				}
 #endif
@@ -939,28 +948,28 @@ void OrbitController::sortBPMData(double *sortedArray,
 	int nthAdc = 0;
 
 	for(i=0,j=0; j<adc0ChMap_LENGTH; i++,j++) {
-		sortedArray[i] = rawArray[nthAdc+adc0ChMap[j]];
-		sortedArray[i+1] = rawArray[nthAdc+adc0ChMap[j]+1];
+		sortedArray[2*i] = rawArray[nthAdc+adc0ChMap[j]];
+		sortedArray[2*i+1] = rawArray[nthAdc+adc0ChMap[j]+1];
 	}
 	nthAdc += adcChannelsPerFrame;
 	for(j=0; j<adc1ChMap_LENGTH; i++,j++) {
-		sortedArray[i] = rawArray[nthAdc+adc1ChMap[j]];
-		sortedArray[i+1] = rawArray[nthAdc+adc1ChMap[j]+1];
+		sortedArray[2*i] = rawArray[nthAdc+adc1ChMap[j]];
+		sortedArray[2*i+1] = rawArray[nthAdc+adc1ChMap[j]+1];
 	}
 	nthAdc += adcChannelsPerFrame;
 	for(j=0; j<adc2ChMap_LENGTH; i++,j++) {
-		sortedArray[i] = rawArray[nthAdc+adc2ChMap[j]];
-		sortedArray[i+1] = rawArray[nthAdc+adc2ChMap[j]+1];
+		sortedArray[2*i] = rawArray[nthAdc+adc2ChMap[j]];
+		sortedArray[2*i+1] = rawArray[nthAdc+adc2ChMap[j]+1];
 	}
 	nthAdc += adcChannelsPerFrame;
 	for(j=0; j<adc3ChMap_LENGTH; i++,j++) {
-		sortedArray[i] = rawArray[nthAdc+adc3ChMap[j]];
-		sortedArray[i+1] = rawArray[nthAdc+adc3ChMap[j]+1];
+		sortedArray[2*i] = rawArray[nthAdc+adc3ChMap[j]];
+		sortedArray[2*i+1] = rawArray[nthAdc+adc3ChMap[j]+1];
 	}
 	nthAdc = 0;
 	for(j=0; j<adc4ChMap_LENGTH; i++,j++) {
-		sortedArray[i] = rawArray[nthAdc+adc4ChMap[j]];
-		sortedArray[i+1] = rawArray[nthAdc+adc4ChMap[j]+1];
+		sortedArray[2*i] = rawArray[nthAdc+adc4ChMap[j]];
+		sortedArray[2*i+1] = rawArray[nthAdc+adc4ChMap[j]+1];
 	}
 }
 

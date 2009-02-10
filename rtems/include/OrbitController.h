@@ -210,20 +210,25 @@ private:
 /* these channels may be moved around in the future */
 /* structure is x,y,x,y,x,y... map positions indicate the X positions ONLY ! */
 const int adc0ChMap_LENGTH=4;  /* 2404.1 */
+/*BPM {1401-01,1401-02,1401-03,1401-04}*/
 const int adc0ChMap[adc0ChMap_LENGTH] = {9*2,10*2,11*2,12*2};
 
 const int adc1ChMap_LENGTH=14; /* 2406.1 */
+/*BPM{1402-07,1402-08,1402-09,1402-10,1403-01,1403-02,1403-03,1403-04,1403-05,1404-01,1404-02,1404-03,1404-04,1404-05}*/
 const int adc1ChMap[adc1ChMap_LENGTH] = {1*2,2*2,3*2,0*2,4*2,5*2,6*2,7*2,8*2,9*2,10*2,11*2,12*2,13*2};
 
 const int adc2ChMap_LENGTH=14; /* 2406.3 */
+/* BPM{1405-01,1405-02,1405-03,1405-04,1405-05,1407-01,1406-02,1406-03,1406-04,1406-05,1407-03,1407-04,1407-05,1407-06 }*/
 const int adc2ChMap[adc2ChMap_LENGTH] = {0*2,1*2,2*2,3*2,4*2,6*2,7*2,8*2,9*2,5*2,10*2,11*2,12*2,13*2};
 
 /* April 28/08 BPM1408-01 replaced with Libera unit */
 /* May 1/08 BPM1410-01 replaced with Libera unit */
 const int adc3ChMap_LENGTH=13; /* 2408.1 */
+/* BPM{1408-01,1408-02,1408-03,1408-04,1408-05,1409-01,1409-02,1409-03,1409-04,1409-05,1410-02,1410-03,1410-04,1410-05} */
 const int adc3ChMap[adc3ChMap_LENGTH] = {1*2,2*2,3*2,4*2,5*2,6*2,7*2,8*2,9*2,11*2,12*2,13*2,14*2};
 
 const int adc4ChMap_LENGTH=9;
+/* BPM{1411-01,1411-02,1411-03,1411-04,1411-05,1412-02,1412-03,1412-04,1412-05 } */
 const int adc4ChMap[adc4ChMap_LENGTH] = {0*2,1*2,2*2,3*2,4*2,5*2,6*2,7*2,8*2};
 
 const int TOTAL_BPMS=(adc0ChMap_LENGTH + adc1ChMap_LENGTH + adc2ChMap_LENGTH + adc3ChMap_LENGTH + adc4ChMap_LENGTH);
