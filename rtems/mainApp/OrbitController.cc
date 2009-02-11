@@ -508,7 +508,6 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	uint64_t now,then,tmp,numIters;
 	double sum,sumSqrs,avg,stdDev,maxTime;
 	extern double tscTicksPerSecond;
-	static int nloops=0;
 
 	now=then=tmp=numIters=0;
 	sum=sumSqrs=avg=stdDev=maxTime=0.0;
@@ -545,9 +544,6 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			rtems_task_wake_after(2);
 			startAdcAcquisition();
 			while((lmode=getMode())!=STANDBY) {
-				nloops++;
-				if(nloops > 100000 || nloops<=0 || nloops<nloops-1) { goto bailout; }
-				//syslog(LOG_INFO, "OrbitController: nloops=%i\n",nloops);
 				//Wait for notification of ADC "fifo-half-full" event...
 				rendezvousWithIsr();
 				stopAdcAcquisition();
@@ -757,13 +753,11 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			break;
 		}
 	}
-bailout:
 	//state exit: silence the ADC's
 	stopAdcAcquisition();
 	resetAdcFifos();
 	//FIXME -- temporary!!!
 	rtems_task_wake_after(1000);
-	syslog(LOG_INFO, "OrbitController: suspending ocThread after %i iterations\n",nloops);
 	TestDirective(rtems_task_suspend(ocTID),"OrbitController: problem suspending ocThread");
 }
 
@@ -836,9 +830,6 @@ rtems_task OrbitController::bpmThreadStart(rtems_task_argument arg) {
 	oc->bpmThreadBody(oc->bpmThreadArg);
 }
 
-#define NDEBUG
-#include <assert.h>
-
 rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 	uint32_t nthFrame,nthAdc,nthChannel;
 	uint32_t localSamplesPerAvg = samplesPerAvg;
@@ -862,25 +853,21 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
         uint32_t chPerFrame = ds[0]->getChannelsPerFrame();
 		for(nthFrame=0; nthFrame<numFrames; nthFrame++) { /* for each ADC frame... */
 			int nthFrameOffset = nthFrame*chPerFrame;
-			assert(nthFrameOffset<=(511*32));
+
 			for(nthAdc=0; nthAdc<NumAdcModules; nthAdc++) { /* for each ADC... */
 				int nthAdcOffset = nthAdc*chPerFrame;
 				int32_t *buf = ds[nthAdc]->getBuffer();
-				assert(nthAdcOffset<=96);
+
 				for(nthChannel=0; nthChannel<chPerFrame; nthChannel++) { /* for each channel of this frame... */
 					sums[nthAdcOffset+nthChannel] += (double)buf[nthFrameOffset+nthChannel];
-					assert((nthAdcOffset+nthChannel)<128);
 					//sumsSqrd[nthAdcOffset+nthChannel] += pow(sums[nthAdcOffset+nthChannel],2);
 				}
-
 			}
 			numSamplesSummed++;
 
 			if(numSamplesSummed==localSamplesPerAvg) {
 				sortBPMData(sorted,sums,ds[0]->getChannelsPerFrame());
 				/* scale & update each BPM object, then execute client's BpmValueChangeCallback */
-#ifdef OC_DEBUG
-#if 1
 				map<string,Bpm*>::iterator it;
 				double cf = getBpmScaleFactor(numSamplesSummed);
 				for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
@@ -891,16 +878,14 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 					double y = sorted[2*pos+1]*cf/bpm->getYVoltsPerMilli();
 					bpm->setY(y);
 				}
-#endif
-#endif
 				if(bpmCB != 0) {
 					/* fire record processing */
 					this->bpmCB(bpmCBArg);
 				}
 				/* zero the array of running-sums,reset counter, update num pts in avg */
-				memset(sums, 0, sizeof(sums)/sizeof(sums[0]));
-				memset(sorted, 0, sizeof(sorted)/sizeof(sorted[0]));
-				//memset(sumsSqrd, 0, sizeof(double)*NumBpmChannels);
+				memset(sums, 0, sizeof(sums[0])*NumAdcModules*chPerFrame);
+				memset(sorted, 0, sizeof(sorted[0])*NumBpmChannels);
+				//memset(sumsSqrd, 0, sizeof(sumsSqrd[0])*NumAdcModules*chPerFrame);
 #ifdef OC_DEBUG
 				static int cnt=1;
 				syslog(LOG_INFO, "BpmController: finished processing block %i with %u frames\n",cnt++,numSamplesSummed);
