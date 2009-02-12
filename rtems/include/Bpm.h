@@ -37,6 +37,10 @@ public:
 	void setXVoltsPerMilli(double val) { this->xVoltsPerMilli=val; }
 	double getYVoltsPerMilli() const { return yVoltsPerMilli; }
 	void setYVoltsPerMilli(double val) { yVoltsPerMilli=val; }
+	double getXSNR() const { return xSnr; }
+	void setXSNR(double val) { xSnr = val; }
+	double getYSNR() const { return ySnr; }
+	void setYSNR(double val) { ySnr = val; }
 	void setEnabled(bool b) { enabled = b; }
 	bool isEnabled() const { return enabled; }
 	uint32_t getPosition() const { return position; }
@@ -58,6 +62,8 @@ private:
 	double yOffs;
 	double xVoltsPerMilli;
 	double yVoltsPerMilli;
+	double xSnr; //SNR==signal-to-noise (20log(avg/sigma) [dB])
+	double ySnr;
 	bool enabled;
 	uint32_t position;
 	//FIXME -- temporary debug var

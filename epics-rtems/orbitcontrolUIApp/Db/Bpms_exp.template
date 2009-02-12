@@ -67,6 +67,24 @@ record(ai, "BPM$(clsName)-exp:y") {
 	field(ESLO, "$(y-voltsPerMilli)")
 }
 
+record(ai, "BPM$(clsName)-exp:x:snr") {
+	field(DTYP, "BPM AnalogIn")
+	field(INP, "@xsnr $(ringOrder)")
+	field(SCAN, "Event")
+	field(EVNT, "$(bpmChangeEvent)")
+	field(PRIO, "HIGH")
+	field(EGU, "dB")
+}
+
+record(ai, "BPM$(clsName)-exp:y:snr") {
+	field(DTYP, "BPM AnalogIn")
+	field(INP, "@ysnr $(ringOrder)")
+	field(SCAN, "Event")
+	field(EVNT, "$(bpmChangeEvent)")
+	field(PRIO, "HIGH")
+	field(EGU, "dB")
+}
+
 record(ao, "BPM$(clsName)-exp:x:reference") {
 	field(DTYP, "BPM AnalogOut")
 	field(OMSL, "supervisory")

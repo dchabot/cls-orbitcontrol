@@ -836,7 +836,9 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 	uint32_t numSamplesSummed=0;
 	AdcData *ds[NumAdcModules];
 	static double sums[NumAdcModules*32];
-	static double sorted[NumBpmChannels];
+	static double sumsSqrd[NumAdcModules*32];
+	static double sortedSums[NumBpmChannels];
+	static double sortedSumsSqrd[NumBpmChannels];
 
 	syslog(LOG_INFO, "BpmController: entering main loop...\n");
 	for(;;) {
@@ -857,26 +859,38 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 			for(nthAdc=0; nthAdc<NumAdcModules; nthAdc++) { /* for each ADC... */
 				int nthAdcOffset = nthAdc*chPerFrame;
 				int32_t *buf = ds[nthAdc]->getBuffer();
+				double val;
 
 				for(nthChannel=0; nthChannel<chPerFrame; nthChannel++) { /* for each channel of this frame... */
-					sums[nthAdcOffset+nthChannel] += (double)buf[nthFrameOffset+nthChannel];
-					//sumsSqrd[nthAdcOffset+nthChannel] += pow(sums[nthAdcOffset+nthChannel],2);
+					val = (double)buf[nthFrameOffset+nthChannel];
+					sums[nthAdcOffset+nthChannel] += val;
+					sumsSqrd[nthAdcOffset+nthChannel] += (val*val);
 				}
 			}
 			numSamplesSummed++;
 
 			if(numSamplesSummed==localSamplesPerAvg) {
-				sortBPMData(sorted,sums,ds[0]->getChannelsPerFrame());
-				/* scale & update each BPM object, then execute client's BpmValueChangeCallback */
+				sortBPMData(sortedSums,sums,ds[0]->getChannelsPerFrame());
+				/* scale & update each BPM object's x&&y, then execute client's BpmValueChangeCallback */
 				map<string,Bpm*>::iterator it;
 				double cf = getBpmScaleFactor(numSamplesSummed);
 				for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
 					Bpm *bpm = it->second;
 					uint32_t pos = bpm->getPosition();
-					double x = sorted[2*pos]*cf/bpm->getXVoltsPerMilli();
+					double x = sortedSums[2*pos]*cf/bpm->getXVoltsPerMilli();
 					bpm->setX(x);
-					double y = sorted[2*pos+1]*cf/bpm->getYVoltsPerMilli();
+					double y = sortedSums[2*pos+1]*cf/bpm->getYVoltsPerMilli();
 					bpm->setY(y);
+				}
+				/* also update each BPM instance's x&&y SNR: */
+				sortBPMData(sortedSumsSqrd,sumsSqrd,ds[0]->getChannelsPerFrame());
+				for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
+					Bpm *bpm = it->second;
+					uint32_t pos = bpm->getPosition();
+					double xsnr = getBpmSNR(sortedSums[2*pos],sortedSumsSqrd[2*pos],numSamplesSummed);
+					bpm->setXSNR(xsnr);
+					double ysnr = getBpmSNR(sortedSums[2*pos],sortedSumsSqrd[2*pos],numSamplesSummed);
+					bpm->setYSNR(ysnr);
 				}
 				if(bpmCB != 0) {
 					/* fire record processing */
@@ -884,8 +898,9 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 				}
 				/* zero the array of running-sums,reset counter, update num pts in avg */
 				memset(sums, 0, sizeof(sums[0])*NumAdcModules*chPerFrame);
-				memset(sorted, 0, sizeof(sorted[0])*NumBpmChannels);
-				//memset(sumsSqrd, 0, sizeof(sumsSqrd[0])*NumAdcModules*chPerFrame);
+				memset(sortedSums, 0, sizeof(sortedSums[0])*NumBpmChannels);
+				memset(sumsSqrd, 0, sizeof(sumsSqrd[0])*NumAdcModules*chPerFrame);
+				memset(sortedSumsSqrd, 0, sizeof(sortedSumsSqrd[0])*NumBpmChannels);
 #ifdef OC_DEBUG
 				static int cnt=1;
 				syslog(LOG_INFO, "BpmController: finished processing block %i with %u frames\n",cnt++,numSamplesSummed);
@@ -983,7 +998,6 @@ uint32_t OrbitController::sumAdcSamples(double* sums, AdcData** data) {
 
 			for(nthChannel=0; nthChannel<frameOffset; nthChannel++) { /* for each channel of this frame... */
 				sums[nthAdcOffset+nthChannel] += (double)buf[nthFrameOffset+nthChannel];
-				//sumsSqrd[nthAdcOffset+nthChannel] += pow(sums[nthAdcOffset+nthChannel],2);
 			}
 
 		}
@@ -991,4 +1005,12 @@ uint32_t OrbitController::sumAdcSamples(double* sums, AdcData** data) {
 	numSamplesSummed++;
 	}
 	return numSamplesSummed;
+}
+
+double OrbitController::getBpmSNR(double sum, double sumSqr, uint32_t n) {
+	// SNR = 10*log((avg/sigma)^2) [dB]
+	double num = pow(sum,2);
+	double den = (sumSqr*(double)n) - num;
+
+	return 10.0*log10(num/den);
 }

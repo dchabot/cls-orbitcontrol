@@ -204,6 +204,7 @@ private:
 	uint32_t sumAdcSamples(double* sums, AdcData** data);
 	void sortBPMData(double *sortedArray,double *rawArray,uint32_t adcChannelsPerFrame);
 	double getBpmScaleFactor(uint32_t numSamples);
+	double getBpmSNR(double sum, double sumSqr, uint32_t n);
 };
 
 /* here are the ADC channel mappings based on the current drawings*/

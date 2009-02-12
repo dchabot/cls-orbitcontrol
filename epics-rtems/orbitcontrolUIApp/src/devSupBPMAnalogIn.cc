@@ -54,7 +54,7 @@ struct {
 
 epicsExportAddress(dset,devSupBPMAnalogIn);
 
-enum aiType {xval,yval};
+enum aiType {xval,yval,xsnr,ysnr};
 
 struct aiData {
 	aiData(Bpm* b, aiType t):bpm(b),type(t){};
@@ -67,6 +67,8 @@ struct aiData {
 static aiType getRecType(string& type) {
 	if(type.compare("xval")==0) { return xval; }
 	else if(type.compare("yval")==0) { return yval; }
+	else if(type.compare("xsnr")==0) { return xsnr; }
+	else if(type.compare("ysnr")==0) { return ysnr; }
 	else {
 		type.append(": unknown record type!!! WTF ?!?!?!?");
 		throw runtime_error(type.c_str());
@@ -136,21 +138,35 @@ static long init_record(void* air) {
 static long read_ai(void* air) {
 	aiRecord *aip = (aiRecord*)air;
 	aiData *aid = (aiData*)aip->dpvt;
+	aiType type = aid->type;
 
-	if(aid->type == xval) {
+	switch(type) {
+	case(xval):
 		aip->val = aid->bpm->getX();
 		if(aip->eslo != aid->voltsPerMilli) {
 			/* our conversion factor has been changed; update the Bpm instance */
 			aid->bpm->setXVoltsPerMilli(aip->eslo);
+			aid->voltsPerMilli = aip->eslo;
 		}
-
-	}
-	else {
+		break;
+	case(yval):
 		aip->val = aid->bpm->getY();
 		if(aip->eslo != aid->voltsPerMilli) {
 			/* our conversion factor has been changed; update the Bpm instance */
 			aid->bpm->setYVoltsPerMilli(aip->eslo);
+			aid->voltsPerMilli = aip->eslo;
 		}
+		break;
+	case(xsnr):
+		aip->val = aid->bpm->getXSNR();
+		break;
+	case(ysnr):
+		aip->val = aid->bpm->getYSNR();
+		break;
+	default:
+		syslog(LOG_INFO, "Unknown BPM AnalogIn type =%i\n",type);
+		aip->udf=1;
+		return -1;
 	}
 	aip->udf=0;
 	return 1;
