@@ -9,6 +9,7 @@ pattern
     {  clsName     	crateId  vmeBaseAddr	channel    isInCorrection	ringOrder}
 
     {  BID1408-02		3	0x00700010		5			0					49	}
-    {  BID1411-02		3	0x00700010		6			0					50	}
-    {  BID1410-03		3   0x00700010   	7			0					51	}
+    {  BID1410-03		3   0x00700010   	7			0					50	}
+    {  BID1411-02		3	0x00700010		6			0					51	}
+    
 

@@ -589,10 +589,10 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 					//TODO -- we're eventually going to want to incorporate Dispersion effects here
 					rdtscll(then);
 					if(hResponseInitialized && vResponseInitialized/* && dispInitialized*/) {
-						memset(sums,0.0f,sizeof(sums)/sizeof(sums[0]));
-						memset(sorted,0.0f,sizeof(sorted)/sizeof(sorted[0]));
-						memset(h,0.0f,sizeof(h)/sizeof(h[0]));
-						memset(v,0.0f,sizeof(v)/sizeof(v[0]));
+						memset(sums,0,sizeof(sums));
+						memset(sorted,0,sizeof(sorted));
+						memset(h,0,sizeof(h));
+						memset(v,0,sizeof(v));
 						/* Calc and deliver new OCM setpoints:
 						 * NOTE: testing shows calc takes ~1ms
 						 * while OCM setpoint delivery req's ~5ms
@@ -642,7 +642,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 									++j;
 								}
 							}
-							h[i] *= -1.0;
+							//h[i] *= -1.0;
 						}
 						//calc vertical OCM setpoints
 						for(uint32_t i=0; i<NumVOcm; i++) {
@@ -656,7 +656,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 									++j;
 								}
 							}
-							v[i] *= -1.0;
+							//v[i] *= -1.0;
 						}
 						//scale OCM setpoints (max step && %-age to apply)
 						double max=0;
@@ -708,7 +708,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 						for(uint32_t i=0; i<psbArray.size(); i++) {
 							psbArray[i]->updateSetpoints();
 						}
-						if(lmode == TESTING) {
+						if(lmode==TESTING) {
 							hit=hOcmSet.begin();
 							for(uint32_t i=0; hit!=hOcmSet.end(); hit++,i++) {
 								Ocm *och = (*hit);
@@ -727,6 +727,16 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 								}
 							}
 							syslog(LOG_INFO, "\n\n\n");
+							for(bit=bpmMap.begin(); bit!=bpmMap.end(); bit++) {
+								Bpm *bpm = bit->second;
+								if(bpm->isEnabled()) {
+									uint32_t pos = bpm->getPosition();
+									syslog(LOG_INFO, "%s: x=%.3e\ty=%.3e\n",
+											bpm->getId().c_str(),
+											sorted[2*pos]+(bpm->getXRef() + bpm->getXOffs()),
+											sorted[2*pos+1]+(bpm->getYRef() + bpm->getYOffs()));
+								}
+							}
 						}
 						rdtscll(now);
 #ifdef OC_DEBUG
@@ -889,7 +899,7 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 					uint32_t pos = bpm->getPosition();
 					double xsnr = getBpmSNR(sortedSums[2*pos],sortedSumsSqrd[2*pos],numSamplesSummed);
 					bpm->setXSNR(xsnr);
-					double ysnr = getBpmSNR(sortedSums[2*pos],sortedSumsSqrd[2*pos],numSamplesSummed);
+					double ysnr = getBpmSNR(sortedSums[2*pos+1],sortedSumsSqrd[2*pos+1],numSamplesSummed);
 					bpm->setYSNR(ysnr);
 				}
 				if(bpmCB != 0) {
@@ -897,10 +907,10 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 					this->bpmCB(bpmCBArg);
 				}
 				/* zero the array of running-sums,reset counter, update num pts in avg */
-				memset(sums, 0, sizeof(sums[0])*NumAdcModules*chPerFrame);
-				memset(sortedSums, 0, sizeof(sortedSums[0])*NumBpmChannels);
-				memset(sumsSqrd, 0, sizeof(sumsSqrd[0])*NumAdcModules*chPerFrame);
-				memset(sortedSumsSqrd, 0, sizeof(sortedSumsSqrd[0])*NumBpmChannels);
+				memset(sums,0,sizeof(sums));
+				memset(sortedSums,0,sizeof(sortedSums));
+				memset(sumsSqrd,0,sizeof(sumsSqrd));
+				memset(sortedSumsSqrd,0,sizeof(sortedSumsSqrd));
 #ifdef OC_DEBUG
 				static int cnt=1;
 				syslog(LOG_INFO, "BpmController: finished processing block %i with %u frames\n",cnt++,numSamplesSummed);
