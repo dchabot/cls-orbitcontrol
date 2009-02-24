@@ -15,6 +15,12 @@
 using std::cout;
 using std::endl;
 
+
+extern "C" void setAutonomousMode() {
+	OrbitController *oc = OrbitController::getInstance();
+	oc->setMode(AUTONOMOUS);
+}
+
 extern "C" void setAssistedMode() {
 	OrbitController *oc = OrbitController::getInstance();
 	oc->setMode(ASSISTED);
@@ -39,7 +45,7 @@ extern "C" void showAllOcms() {
 extern "C" void startApp(char* epicsApp) {
 	OrbitController* oc = OrbitController::getInstance();
 	try {
-		oc->initialize();
+		//oc->initialize();
 		if(epicsApp != 0) {
 			//parse and start the EPICS app, orbitcontrolUI:
 			cexpsh(epicsApp);

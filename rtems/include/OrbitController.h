@@ -18,6 +18,12 @@
 #include <AdcData.h>
 #include <Ocm.h>
 #include <PowerSupplyBulk.h>
+#include <Initializing.h>
+#include <Standby.h>
+#include <Assisted.h>
+#include <Autonomous.h>
+#include <Testing.h>
+
 #include <vector>
 #include <map>
 #include <set>
@@ -107,6 +113,13 @@ private:
 	const OrbitController& operator=(const OrbitController&);
 	~OrbitController();
 
+	friend class Initializing;
+	friend class Standby;
+	friend class Assisted;
+	friend class Autonomous;
+	friend class Testing;
+
+	void changeState(State*);
 	void lock();
 	void unlock();
 	void startAdcAcquisition();
@@ -150,6 +163,10 @@ private:
 	vector<AdcReader*> rdrArray;
 	vector<PowerSupplyBulk*> psbArray;
 	AdcData* rdSegments[NumAdcModules];
+
+	State *state;
+	rtems_id stateQueueId;
+	rtems_name stateQueueName;
 
 	bool initialized;
 	OrbitControllerMode mode;
