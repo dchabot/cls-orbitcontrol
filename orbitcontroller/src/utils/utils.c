@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <syslog.h>
 
-#include <bsp.h> /* rtemsReboot() */
+#include <bsp/bootcard.h> /* rtemsReboot() */
 #include "utils.h"
 #include <rtems-gdb-stub.h> /*rtems_gdb_breakpoint()*/
 
@@ -18,7 +18,7 @@ void FatalErrorHandler(FatalErrorCallback cb) {
 		/* give the syslogger a chance to send the msg... */
 		rtems_clock_get(RTEMS_CLOCK_GET_TICKS_PER_SECOND, &tps);
 		rtems_task_wake_after(5*tps);
-		rtemsReboot();
+		bsp_reset();
 	}
 }
 

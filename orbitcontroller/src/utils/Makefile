@@ -1,5 +1,5 @@
 #
-#  $Id: src/libics110bl/Makefile 1.1 2008/06/25 14:26:20CST Daron Chabot (chabotd) Exp  $
+#  $Id: $
 #
 # Templates/Makefile.lib
 #       Template library Makefile
@@ -7,12 +7,12 @@
 
 LIBDIR= $(RTEMS_MAKEFILE_PATH)/lib
 # xxx- your library names goes here
-LIBNAME= libics110bl
+LIBNAME= libutils
 OBJNAME= $(LIBNAME).obj
 LIB=${ARCH}/${LIBNAME}.a
 
 # C and C++ source names, if any, go here -- minus the .c or .cc
-C_PIECES= ics110bl
+C_PIECES= utils spinDelay findTscFreq
 
 C_FILES=$(C_PIECES:%=%.c)
 C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
@@ -21,7 +21,7 @@ CC_PIECES=
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
 
-H_FILES= ics110bl.h
+H_FILES=utils.h
 
 # Assembly source names, if any, go here -- minus the .S
 S_PIECES=
@@ -39,10 +39,8 @@ include $(RTEMS_ROOT)/make/lib.cfg
 #
 # Add local stuff here using +=
 #
-INCLUDE_DIR=../include
+INCLUDE_DIR= ../../include
 CFLAGS += -I ${INCLUDE_DIR}
-
-
 #
 # Add your list of files to delete here.  The config files
 #  already know how to delete some stuff, so you may want
@@ -60,18 +58,18 @@ endif
 all:	${ARCH} $(SRCS) $(LIB)
 
 $(LIB): ${OBJS}
+	$(INSTALL_VARIANT) -m 644 ${H_FILES} ${INCLUDE_DIR}
 	$(make-library)
 	$(LD) -o $(OBJNAME) -r --whole-archive $(LIB)
 # Install the library, appending _g or _p as appropriate.
 # for include files, just use $(INSTALL_CHANGE)
 install:  all
-	$(INSTALL_VARIANT) -m 644 $(H_FILES) $(INCLUDE_DIR)
-	$(INSTALL_VARIANT) -m 644 $(OBJNAME) $(LIBDIR)
-	$(INSTALL_VARIANT) -m 644 $(LIB) $(LIBDIR)
+#	test -d "${INCLUDE_DIR}" || mkdir ${INCLUDE_DIR}
+#	$(INSTALL_VARIANT) -m 644 $(OBJNAME) $(LIBDIR)
+#	$(INSTALL_VARIANT) -m 644 $(LIB) $(LIBDIR)
 	$(INSTALL_VARIANT) -m 644 $(OBJNAME) /home/chabotd/ioc1009-109
 # copy to tftp server bootfile location
 #	scp $(OBJNAME) epics@srv-unix:$(RTEMS_SITE_INSTALLDIR)
-	
 
-	
-	
+
+

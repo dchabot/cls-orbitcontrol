@@ -8,7 +8,7 @@ include $(TOP)/configure/CONFIG
 #=============================
 # Build the IOC application
 
-USR_CFLAGS_RTEMS += -g -I ../../../../rtems/include
+USR_CFLAGS_RTEMS += -g -I ../../../../orbitcontroller/include
 USR_CXXFLAGS_RTEMS += ${USR_CFLAGS_RTEMS}
 USR_LDFLAGS_RTEMS += -g -Wl,-Map,linkmap
 

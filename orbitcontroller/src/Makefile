@@ -7,5 +7,5 @@ include $(RTEMS_MAKEFILE_PATH)/Makefile.inc
 include $(RTEMS_CUSTOM)
 include $(RTEMS_ROOT)/make/directory.cfg
 
-SUBDIRS=orbitcontroller orbitcontrolUI
+SUBDIRS=utils main
 

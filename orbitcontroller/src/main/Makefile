@@ -2,8 +2,10 @@
 # 	Template leaf node Makefile
 #
 
-PGMS=${ARCH}/orbitcontroller.obj
-INCLUDE_DIR=../include
+PGMS=orbitcontroller.obj
+INCLUDE_DIR=../../include
+HARDWARE_DIR=../hardware
+STATE_DIR=../states
 # C source names, if any, go here -- minus the .c
 #C_PIECES+=AdcReaderThread 
 #C_PIECES+=OrbitControllerUtils 
@@ -11,17 +13,20 @@ INCLUDE_DIR=../include
 #C_PIECES+=DataHandler
 #C_PIECES+=PSController
 
-C_FILES=$(C_PIECES:%=%.c)
-C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
+#C_FILES=$(C_PIECES:%=%.c)
+#C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
 
 # C++ source names, if any, go here -- minus the .cc
-CC_PIECES=VmeCrate VmeModule Ics110blModule Vmic2536Module
-CC_PIECES+=OrbitController OrbitControlException
-CC_PIECES+=AdcReader AdcIsr
-CC_PIECES+=Ocm PowerSupplyBulk StartApp
-CC_PIECES+=State Standby Initializing Assisted Autonomous Testing
+CC_PIECES=${HARDWARE_DIR}/VmeCrate ${HARDWARE_DIR}/VmeModule  
+CC_PIECES+=${HARDWARE_DIR}/Vmic2536Module ${HARDWARE_DIR}/Ics110blModule
+CC_PIECES+=${HARDWARE_DIR}/Ocm ${HARDWARE_DIR}/PowerSupplyBulk
+CC_PIECES+=${HARDWARE_DIR}/AdcReader ${HARDWARE_DIR}/AdcIsr 
+CC_PIECES+=${STATE_DIR}/State ${STATE_DIR}/Initializing ${STATE_DIR}/Standby 
+CC_PIECES+=${STATE_DIR}/Assisted ${STATE_DIR}/Autonomous ${STATE_DIR}/Testing
+CC_PIECES+=OrbitController OrbitControlException StartApp
+
 CC_FILES=$(CC_PIECES:%=%.cc)
-CC_O_FILES=$(CC_PIECES:%=${ARCH}/%.o)
+CC_O_FILES=$(CC_PIECES:%=%.o)
 
 
 H_PIECES=${INCLUDE_DIR}/Bpm ${INCLUDE_DIR}/BpmController
@@ -36,12 +41,12 @@ H_PIECES+=${INCLUDE_DIR}/Assisted ${INCLUDE_DIR}/Autonomous ${INCLUDE_DIR}/Testi
 H_FILES=$(H_PIECES:%=%.h)
 
 # Assembly source names, if any, go here -- minus the .S
-S_PIECES=
-S_FILES=$(S_PIECES:%=%.S)
-S_O_FILES=$(S_FILES:%.S=${ARCH}/%.o)
+#S_PIECES=
+#S_FILES=$(S_PIECES:%=%.S)
+#S_O_FILES=$(S_FILES:%.S=${ARCH}/%.o)
 
-SRCS=$(C_FILES) $(CC_FILES) $(H_FILES) $(S_FILES)
-OBJS=$(C_O_FILES) $(CC_O_FILES) $(S_O_FILES)
+SRCS=$(CC_FILES) $(H_FILES) #$(C_FILES) $(S_FILES)
+OBJS=$(CC_O_FILES) #$(C_O_FILES) $(S_O_FILES)
 
 # List of RTEMS managers to be included in the application goes here.
 # Use:
@@ -57,7 +62,7 @@ include $(RTEMS_ROOT)/make/leaf.cfg
 #
 # (OPTIONAL) Add local stuff here using +=
 #
-CFLAGS+= -I ../include -I $(RTEMS_MAKEFILE_PATH)/lib/include
+CFLAGS+= -I ${INCLUDE_DIR} -I $(RTEMS_MAKEFILE_PATH)/lib/include
 CXXFLAGS += ${CFLAGS}
 
 
@@ -72,10 +77,10 @@ endif
 #  'make clobber' already includes 'make clean'
 #
 
-#CLEAN_ADDITIONS += xxx-your-debris-goes-here
+CLEAN_ADDITIONS += ${HARDWARE_DIR}/*.o ${STATE_DIR}/*.o
 CLOBBER_ADDITIONS +=
 
-all:	${ARCH} $(SRCS) $(PGMS)
+all:	$(SRCS) $(PGMS)
 
 $(filter %.obj, $(PGMS)): ${OBJS}
 #	$(LD) -o $(PGMS) -r ${OBJS}
