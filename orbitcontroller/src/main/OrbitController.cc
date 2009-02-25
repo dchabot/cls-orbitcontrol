@@ -527,6 +527,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	}
 	syslog(LOG_INFO, "OrbitController: entering main processing loop\n");
 	for(;;) {
+		msgSize = 0; // MUST reset this per iteration!!
 		rtems_message_queue_receive(stateQueueId,&lmode,&msgSize,RTEMS_NO_WAIT,RTEMS_NO_TIMEOUT);
 		//FIXME -- TestDirective(rc,"OrbitController--stateQ msq_rcv problem");
 		if(msgSize!=sizeof(OrbitControllerMode)) {
