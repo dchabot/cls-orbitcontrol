@@ -11,7 +11,7 @@
 
 Autonomous* Autonomous::instance=0;
 
-static uint64_t now,then,tmp,numIters;
+static uint64_t now,then,tmp,numIters,start,end,period;
 static double sum,sumSqrs,avg,stdDev,maxTime;
 extern double tscTicksPerSecond;
 
@@ -47,6 +47,7 @@ void Autonomous::exitAction() {
 	maxTime /= tscTicksPerSecond;
 
 	syslog(LOG_INFO, "OrbitController - Autonomous Mode stats:\n\tAvg = %0.9f +/- %0.9f [s], max=%0.9f [s]\n",avg,stdDev,maxTime);
+	syslog(LOG_INFO, "OrbitController - Autonomous Mode: avgFreq=%.3g Hz\n",1.0/((double)(period/numIters)/tscTicksPerSecond));
 	/* zero the parameters for the next iteration...*/
 	sum=sumSqrs=avg=stdDev=maxTime=0.0;
 	numIters=0;
@@ -58,7 +59,12 @@ void Autonomous::stateAction() {
 	static double sums[NumAdcModules*32];
 	static double sorted[TOTAL_BPMS*2];
 	static double h[NumHOcm],v[NumVOcm];
+	static int once=1;
 
+	end=start;
+	rdtscll(start);
+	if(once) { once=0; }
+	else { period += start-end; }
 	//Wait for notification of ADC "fifo-half-full" event...
 	oc->rendezvousWithIsr();
 	oc->stopAdcAcquisition();
@@ -118,7 +124,7 @@ void Autonomous::stateAction() {
 					++j;
 				}
 			}
-			//h[i] *= -1.0;
+			h[i] *= -1.0;
 		}
 		//calc vertical OCM setpoints
 		for(uint32_t i=0; i<NumVOcm; i++) {
@@ -132,7 +138,7 @@ void Autonomous::stateAction() {
 					++j;
 				}
 			}
-			//v[i] *= -1.0;
+			v[i] *= -1.0;
 		}
 		//scale OCM setpoints (max step && %-age to apply)
 		double max=0;
@@ -167,17 +173,19 @@ void Autonomous::stateAction() {
 		//distribute new OCM setpoints
 		set<Ocm*>::iterator hit,vit;
 		uint32_t i = 0;
-		for(hit=oc->hOcmSet.begin(),vit=oc->vOcmSet.begin();
-			hit!=oc->hOcmSet.end() && vit!=oc->vOcmSet.end();
-			hit++,vit++) {
-			//foreach Ocm:ocm->setSetpoint(val)
+		for(hit=oc->hOcmSet.begin(); hit!=oc->hOcmSet.end(); hit++) {
 			Ocm *och = (*hit);
 			if(och->isEnabled()) {
 				och->setSetpoint((int32_t)h[i]+och->getSetpoint());
+				i++;
 			}
+		}
+		i=0;
+		for(vit=oc->vOcmSet.begin(); vit!=oc->vOcmSet.end(); vit++) {
 			Ocm *ocv = (*vit);
 			if(ocv->isEnabled()) {
 				ocv->setSetpoint((int32_t)v[i]+ocv->getSetpoint());
+				i++;
 			}
 		}
 		//distribute the UPDATE-signal to pwr-supply ctlrs

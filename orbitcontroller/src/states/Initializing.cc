@@ -85,7 +85,7 @@ void Initializing::stateAction() {
 	TestDirective(rc,"OrbitController: RDR barrier_create() failure");
 	oc->spQueueName = rtems_build_name('S','P','Q','1');
 	rc = rtems_message_queue_create(oc->spQueueName,
-									NumOcm+1/*FIXME--(see ntbk#2 pg22) max msgs in queue*/,
+									NumOcm*10/*FIXME--(see ntbk#2 pg22) max msgs in queue*/,
 									sizeof(OrbitController::SetpointMsg)/*max msg size (bytes)*/,
 									RTEMS_LOCAL|RTEMS_FIFO,
 									&oc->spQueueId);

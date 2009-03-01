@@ -519,8 +519,8 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	OrbitControllerMode lmode;
 	size_t msgSize;
 
-	//goto Standby mode
-	changeState(states[STANDBY]);
+	//goto Assisted mode
+	changeState(states[ASSISTED]);
 	//FIXME -- incorporate publish/subscribe Observer model!!!
 	if(mcCallback) {
 		this->mcCallback(mcCallbackArg);
@@ -691,7 +691,7 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 				memset(sortedSums,0,sizeof(sortedSums));
 				memset(sumsSqrd,0,sizeof(sumsSqrd));
 				memset(sortedSumsSqrd,0,sizeof(sortedSumsSqrd));
-#ifdef OC_DEBUG
+#if 0 //def OC_DEBUG
 				static int cnt=1;
 				syslog(LOG_INFO, "BpmController: finished processing block %i with %u frames\n",cnt++,numSamplesSummed);
 #endif
