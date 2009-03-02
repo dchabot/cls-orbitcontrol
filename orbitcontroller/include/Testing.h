@@ -16,10 +16,9 @@ class OrbitController;
 class Testing : public State {
 public:
 	virtual ~Testing() { }
-	static Testing* getInstance(OrbitController*);
+	static Testing* getInstance();
 
 protected:
-	Testing(OrbitController*);
 	Testing();
 	Testing(const Testing&);
 	const Testing& operator=(const Testing&);

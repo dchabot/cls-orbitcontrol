@@ -10,12 +10,12 @@
 
 Testing* Testing::instance=0;
 
-Testing::Testing(OrbitController* aCtlr)
-	: State("Testing",TESTING),oc(aCtlr) { }
+Testing::Testing()
+	: State("Testing",TESTING),oc(OrbitController::instance) { }
 
-Testing* Testing::getInstance(OrbitController* aCtlr) {
+Testing* Testing::getInstance() {
 	if(instance==0) {
-		instance = new Testing(aCtlr);
+		instance = new Testing();
 	}
 	return instance;
 }
@@ -35,25 +35,11 @@ void Testing::exitAction() {
 }
 
 void Testing::stateAction() {
-	static double sums[NumAdcModules*32];
 	static double sorted[TOTAL_BPMS*2];
 	static double h[NumHOcm],v[NumVOcm];
 
-	//Wait for notification of ADC "fifo-half-full" event...
-	oc->rendezvousWithIsr();
-	oc->stopAdcAcquisition();
-	oc->activateAdcReaders();
-	//Wait (block) 'til AdcReaders have completed their block-reads: ~3 ms duration
-	oc->rendezvousWithAdcReaders();
-	oc->resetAdcFifos();
-	oc->startAdcAcquisition();
-	oc->enableAdcInterrupts();
-	/* At this point, we have approx 50 ms to "do our thing" (at 10 kHz ADC framerate)
-	 * before ADC FIFOs reach their 1/2-full point and trigger another interrupt.
-	 */
 	//TODO -- we're eventually going to want to incorporate Dispersion effects here
 	if(oc->hResponseInitialized && oc->vResponseInitialized/* && oc->dispInitialized*/) {
-		memset(sums,0,sizeof(sums));
 		memset(sorted,0,sizeof(sorted));
 		memset(h,0,sizeof(h));
 		memset(v,0,sizeof(v));
@@ -94,7 +80,7 @@ void Testing::stateAction() {
 					++j;
 				}
 			}
-			//h[i] *= -1.0;
+			h[i] *= -1.0;
 		}
 		//calc vertical OCM setpoints
 		for(uint32_t i=0; i<NumVOcm; i++) {
@@ -108,7 +94,7 @@ void Testing::stateAction() {
 					++j;
 				}
 			}
-			//v[i] *= -1.0;
+			v[i] *= -1.0;
 		}
 		//scale OCM setpoints (max step && %-age to apply)
 		double max=0;
@@ -143,38 +129,40 @@ void Testing::stateAction() {
 		//distribute new OCM setpoints
 		set<Ocm*>::iterator hit,vit;
 		uint32_t i = 0;
-		for(hit=oc->hOcmSet.begin(),vit=oc->vOcmSet.begin();
-			hit!=oc->hOcmSet.end() && vit!=oc->vOcmSet.end();
-			hit++,vit++) {
-			//foreach Ocm:ocm->setSetpoint(val)
+		for(hit=oc->hOcmSet.begin(); hit!=oc->hOcmSet.end(); hit++) {
 			Ocm *och = (*hit);
 			if(och->isEnabled()) {
 				och->setSetpoint((int32_t)h[i]+och->getSetpoint());
+				i++;
 			}
+		}
+		i=0;
+		for(vit=oc->vOcmSet.begin(); vit!=oc->vOcmSet.end(); vit++) {
 			Ocm *ocv = (*vit);
 			if(ocv->isEnabled()) {
 				ocv->setSetpoint((int32_t)v[i]+ocv->getSetpoint());
+				i++;
 			}
 		}
 		//distribute the UPDATE-signal to pwr-supply ctlrs
-		for(uint32_t i=0; i<oc->psbArray.size(); i++) {
+		for(i=0; i<oc->psbArray.size(); i++) {
 			oc->psbArray[i]->updateSetpoints();
 		}
 		hit=oc->hOcmSet.begin();
-		for(uint32_t i=0; hit!=oc->hOcmSet.end(); hit++,i++) {
+		for(i=0; hit!=oc->hOcmSet.end(); hit++,i++) {
 			Ocm *och = (*hit);
 			if(och->isEnabled()) {
 				syslog(LOG_INFO, "%s=%i + %.3e\n",och->getId().c_str(),
-						och->getSetpoint(),h[i]);
+						och->getSetpoint()-(int32_t)h[i],h[i]);
 			}
 		}
 		syslog(LOG_INFO, "\n\n\n");
 		vit=oc->vOcmSet.begin();
-		for(uint32_t i=0; vit!=oc->vOcmSet.end(); vit++,i++) {
+		for(i=0; vit!=oc->vOcmSet.end(); vit++,i++) {
 			Ocm *ocv = (*vit);
 			if(ocv->isEnabled()) {
 				syslog(LOG_INFO, "%s=%i + %.3e\n",ocv->getId().c_str(),
-						ocv->getSetpoint(),v[i]);
+						ocv->getSetpoint()-(int32_t)v[i],v[i]);
 			}
 		}
 		syslog(LOG_INFO, "\n\n\n");
@@ -189,7 +177,5 @@ void Testing::stateAction() {
 			}
 		}
 	}
-	//hand raw ADC data off to processing thread
-	oc->enqueueAdcData();
 }
 

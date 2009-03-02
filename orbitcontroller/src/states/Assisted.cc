@@ -13,12 +13,12 @@
 
 Assisted* Assisted::instance=0;
 
-Assisted::Assisted(OrbitController* aCtlr)
-	: State("Assisted", ASSISTED),oc(aCtlr) { }
+Assisted::Assisted()
+	: State("Assisted",ASSISTED),oc(OrbitController::instance) { }
 
-Assisted* Assisted::getInstance(OrbitController* aCtlr) {
+Assisted* Assisted::getInstance() {
 	if(instance==0) {
-		instance = new Assisted(aCtlr);
+		instance = new Assisted();
 	}
 	return instance;
 }
@@ -42,7 +42,7 @@ void Assisted::stateAction() {
 	//Wait for notification of ADC "fifo-half-full" event...
 	oc->rendezvousWithIsr();
 	oc->stopAdcAcquisition();
-	oc->activateAdcReaders();
+	oc->activateAdcReaders(HALF_FIFO_LENGTH/oc->adcArray[0]->getChannelsPerFrame());
 	//Wait (block) 'til AdcReaders have completed their block-reads: ~3 ms duration
 	oc->rendezvousWithAdcReaders();
 	oc->resetAdcFifos();

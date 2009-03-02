@@ -16,10 +16,9 @@ class OrbitController;
 class Assisted : public State {
 public:
 	virtual ~Assisted() { }
-	static Assisted* getInstance(OrbitController*);
+	static Assisted* getInstance();
 
 protected:
-	Assisted(OrbitController*);
 	Assisted();
 	Assisted(const Assisted&);
 	const Assisted& operator=(const Assisted&);

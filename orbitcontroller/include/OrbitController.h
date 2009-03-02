@@ -22,6 +22,7 @@
 #include <Standby.h>
 #include <Assisted.h>
 #include <Autonomous.h>
+#include <Timed.h>
 #include <Testing.h>
 
 #include <vector>
@@ -44,7 +45,7 @@ const uint32_t NumAdcReaders = 4;
 const uint32_t NumVmeCrates = 4;
 
 //FIXME -- this should be implemented as a class, 'cause c++ enums suck ass :-(
-enum OrbitControllerMode {INITIALIZING,STANDBY,ASSISTED,AUTONOMOUS,TESTING};
+enum OrbitControllerMode {INITIALIZING,STANDBY,ASSISTED,AUTONOMOUS,TIMED,TESTING};
 typedef void (*OrbitControllerModeChangeCallback)(void*);
 
 #define OC_DEBUG
@@ -117,6 +118,7 @@ private:
 	friend class Standby;
 	friend class Assisted;
 	friend class Autonomous;
+	friend class Timed;
 	friend class Testing;
 
 	void changeState(State*);
@@ -129,7 +131,7 @@ private:
 	void disableAdcInterrupts();
 	void rendezvousWithIsr();
 	void rendezvousWithAdcReaders();
-	void activateAdcReaders();
+	void activateAdcReaders(uint32_t);
 	void enqueueAdcData();
 
 	static rtems_task ocThreadStart(rtems_task_argument arg);

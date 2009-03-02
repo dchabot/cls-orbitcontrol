@@ -1,4 +1,4 @@
-### NOTE: "Initializing" mode is not available through the UI
+### NOTE: "Initializing" mode is not set-able through the UI
 record(mbbo, "OrbitController:mode") {
 	field(DTYP, "OrbitController Mbbio")
 	field(OMSL, "supervisory")
@@ -8,10 +8,12 @@ record(mbbo, "OrbitController:mode") {
 	field(TWVL, "2")
 	field(THVL, "3")
 	field(FRVL, "4")
+	field(FVVL, "5")
 	field(ONST, "Standby")
 	field(TWST, "Assisted")
 	field(THST, "Autonomous")
-	field(FRST, "Testing")
+	field(FRST, "Timed")
+	field(FVST, "Testing")
 }
 
 record(mbbi, "OrbitController:mode:fbk") {
@@ -25,11 +27,24 @@ record(mbbi, "OrbitController:mode:fbk") {
 	field(TWVL, "2")
 	field(THVL, "3")
 	field(FRVL, "4")
+	field(FVVL, "5")
 	field(ZRST, "Initializing")
 	field(ONST, "Standby")
 	field(TWST, "Assisted")
 	field(THST, "Autonomous")
-	field(FRST, "Testing")
+	field(FRST, "Timed")
+	field(FVST, "Testing")
+}
+
+### if beam-current is < 2.5 mA, ensure we get set to Assisted mode!!!
+record(calcout, "OrbitController:pct:monitor") {
+	field(SCAN, "0.5 seconds")
+	field(INPA,"PCT:mA:fbk NPP")
+	field(INPB, "2.5")
+	field(INPC, "OrbitController:mode:fbk NPP")
+	field(CALC, "A<B?2:C)
+	field(OUT, "OrbitController:mode")
+	field(OOPT, "On Change")
 }
 
 ### FIXME!!!

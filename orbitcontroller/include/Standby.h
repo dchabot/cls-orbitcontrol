@@ -16,10 +16,9 @@ class OrbitController;
 class Standby : public State {
 public:
 	virtual ~Standby(){}
-	static Standby* getInstance(OrbitController*);
+	static Standby* getInstance();
 
 protected:
-	Standby(OrbitController*);
 	Standby();
 	Standby(const Standby&);
 	const Standby& operator=(const Standby&);

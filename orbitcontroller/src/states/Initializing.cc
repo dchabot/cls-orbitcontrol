@@ -33,12 +33,12 @@ const uint32_t NumDioModules = sizeof(dioconfig)/sizeof(DioConfig);
 
 Initializing* Initializing::instance=0;
 
-Initializing::Initializing(OrbitController* aCtlr)
-	: State("Initializing",(int)INITIALIZING),oc(aCtlr) { }
+Initializing::Initializing()
+	: State("Initializing",INITIALIZING),oc(OrbitController::instance) { }
 
-Initializing* Initializing::getInstance(OrbitController* aCtlr) {
+Initializing* Initializing::getInstance() {
 	if(instance==0) {
-		instance = new Initializing(aCtlr);
+		instance = new Initializing();
 	}
 	return instance;
 }

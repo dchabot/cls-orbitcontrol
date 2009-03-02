@@ -16,10 +16,9 @@ class OrbitController;
 class Initializing : public State {
 public:
 	virtual ~Initializing(){ }
-	static Initializing* getInstance(OrbitController*);
+	static Initializing* getInstance();
 
 protected:
-	Initializing(OrbitController*);
 	Initializing();
 	Initializing(const Initializing&);
 	const Initializing& operator=(const Initializing&);

@@ -16,10 +16,9 @@ class OrbitController;
 class Autonomous : public State {
 public:
 	virtual ~Autonomous() { }
-	static Autonomous* getInstance(OrbitController*);
+	static Autonomous* getInstance();
 
 protected:
-	Autonomous(OrbitController*);
 	Autonomous();
 	Autonomous(const Autonomous&);
 	const Autonomous& operator=(const Autonomous&);

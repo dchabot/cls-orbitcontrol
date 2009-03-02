@@ -10,12 +10,12 @@
 
 Standby* Standby::instance=0;
 
-Standby::Standby(OrbitController* aCtlr)
-	: State("Standby",STANDBY),oc(aCtlr) { }
+Standby::Standby()
+	: State("Standby",STANDBY),oc(OrbitController::instance) { }
 
-Standby* Standby::getInstance(OrbitController* aCtlr) {
+Standby* Standby::getInstance() {
 	if(instance==0) {
-		instance = new Standby(aCtlr);
+		instance = new Standby();
 	}
 	return instance;
 }

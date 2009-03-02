@@ -5,39 +5,57 @@
  *      Author: chabotd
  */
 
-#include <Autonomous.h>
+#include <Timed.h>
 #include <cmath> //fabs(double)
 #include <tscDefs.h>
+#include <OrbitControlException.h>
 
-Autonomous* Autonomous::instance=0;
+
+Timed* Timed::instance=0;
 
 static uint64_t now,then,tmp,numIters,start,end,period;
 static double sum,sumSqrs,avg,stdDev,maxTime;
 extern double tscTicksPerSecond;
+static rtems_id periodId;
+static rtems_interval periodTicks;
+static uint32_t numFrames;
+static rtems_rate_monotonic_period_statistics rmsStats;
 
 
-Autonomous::Autonomous()
-	: State("Autonomous",AUTONOMOUS),oc(OrbitController::instance) { }
+Timed::Timed()
+	: State("Timed",TIMED),oc(OrbitController::instance) { }
 
-Autonomous* Autonomous::getInstance() {
+Timed* Timed::getInstance() {
 	if(instance==0) {
-		instance = new Autonomous();
+		instance = new Timed();
 	}
 	return instance;
 }
 
-void Autonomous::entryAction() {
+void Timed::entryAction() {
 	syslog(LOG_INFO, "OrbitController: entering state %s",toString().c_str());
-	oc->mode = AUTONOMOUS;
+	oc->mode = TIMED;
+	rtems_status_code rc = rtems_rate_monotonic_create(rtems_build_name('P','E','R','1'),&periodId);
+	TestDirective(rc, "OrbitController: failure creating RMS period");
+	periodTicks = 10; //FIXME -- make this value an OrbitController attribute
+	numFrames = ((((uint32_t)ceil(oc->adcFrameRateFeedback))*1000)/oc->rtemsTicksPerSecond)*periodTicks;
 	//start on the "edge" of a clock-tick:
 	rtems_task_wake_after(2);
+	//initiate the RMS period
+	rc = rtems_rate_monotonic_period(periodId,periodTicks);
+	TestDirective(rc,"OrbitController: Timed->onEntry() RMS period failure");
+	oc->disableAdcInterrupts();
 	oc->startAdcAcquisition();
 }
 
-void Autonomous::exitAction() {
+void Timed::exitAction() {
+	rtems_status_code rc = rtems_rate_monotonic_cancel(periodId);
+	TestDirective(rc, "OrbitController: failure cancelling RMS period");
 	//state exit: silence the ADC's
 	oc->stopAdcAcquisition();
 	oc->resetAdcFifos();
+	rc = rtems_rate_monotonic_delete(periodId);
+	TestDirective(rc,"OrbitController: failure deleting RMS period");
 #ifdef OC_DEBUG
 	stdDev = (1.0/(double)(numIters))*sumSqrs - (1.0/(double)(numIters*numIters))*(sum*sum);
 	stdDev = sqrt(stdDev);
@@ -46,8 +64,8 @@ void Autonomous::exitAction() {
 	avg /= tscTicksPerSecond;
 	maxTime /= tscTicksPerSecond;
 
-	syslog(LOG_INFO, "OrbitController - Autonomous Mode stats:\n\tAvg = %0.9f +/- %0.9f [s], max=%0.9f [s]\n",avg,stdDev,maxTime);
-	syslog(LOG_INFO, "OrbitController - Autonomous Mode: avgFreq=%.3g Hz\n",1.0/((double)(period/numIters)/tscTicksPerSecond));
+	syslog(LOG_INFO, "OrbitController - Timed Mode stats:\n\tAvg = %0.9f +/- %0.9f [s], max=%0.9f [s]\n",avg,stdDev,maxTime);
+	syslog(LOG_INFO, "OrbitController - Timed Mode: avgFreq=%.3g Hz\n",1.0/((double)(period/numIters)/tscTicksPerSecond));
 	/* zero the parameters for the next iteration...*/
 	sum=sumSqrs=avg=stdDev=maxTime=0.0;
 	numIters=0;
@@ -55,30 +73,21 @@ void Autonomous::exitAction() {
 	syslog(LOG_INFO, "OrbitController: leaving state %s.\n",toString().c_str());
 }
 
-void Autonomous::stateAction() {
+void Timed::stateAction() {
 	static double sums[NumAdcModules*32];
 	static double sorted[TOTAL_BPMS*2];
 	static double h[NumHOcm],v[NumVOcm];
-	static int once=1;
 
-	end=start;
-	rdtscll(start);
-	if(once) { once=0; }
-	else { period += start-end; }
-	//Wait for notification of ADC "fifo-half-full" event...
-	oc->rendezvousWithIsr();
-	oc->stopAdcAcquisition();
-	oc->activateAdcReaders(HALF_FIFO_LENGTH/oc->adcArray[0]->getChannelsPerFrame());
-	//Wait (block) 'til AdcReaders have completed their block-reads: ~3 ms duration
+	//block for periodTicks and re-initialize RMS period
+	rtems_status_code rc = rtems_rate_monotonic_period(periodId,periodTicks);
+	TestDirective(rc,"OrbitController: failure with RMS period");
+	oc->activateAdcReaders(numFrames);
+	//Wait (block) 'til AdcReaders have completed their block-reads
 	oc->rendezvousWithAdcReaders();
+	oc->stopAdcAcquisition();
 	oc->resetAdcFifos();
 	oc->startAdcAcquisition();
-	oc->enableAdcInterrupts();
-	/* At this point, we have approx 50 ms to "do our thing" (at 10 kHz ADC framerate)
-	 * before ADC FIFOs reach their 1/2-full point and trigger another interrupt.
-	 */
 	//TODO -- we're eventually going to want to incorporate Dispersion effects here
-	rdtscll(then);
 	if(oc->hResponseInitialized && oc->vResponseInitialized/* && oc->dispInitialized*/) {
 		memset(sums,0,sizeof(sums));
 		memset(sorted,0,sizeof(sorted));
@@ -192,8 +201,7 @@ void Autonomous::stateAction() {
 		for(uint32_t i=0; i<oc->psbArray.size(); i++) {
 			oc->psbArray[i]->updateSetpoints();
 		}
-		rdtscll(now);
-#ifdef OC_DEBUG
+#if 0
 		tmp = now-then;
 		sum += (double)tmp;
 		sumSqrs += (double)(tmp*tmp);

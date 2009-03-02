@@ -15,27 +15,7 @@
 #include <cmath> //fabs(double)
 #include <tscDefs.h>
 
-struct DioConfig {
-	uint32_t baseAddr;
-	uint32_t crateId;
-};
 
-static DioConfig dioconfig[] = {
-	{VMIC_2536_DEFAULT_BASE_ADDR,0},
-	{VMIC_2536_DEFAULT_BASE_ADDR,1},
-	{VMIC_2536_DEFAULT_BASE_ADDR,2},
-	{VMIC_2536_DEFAULT_BASE_ADDR,3}
-#if 0
-	,{VMIC_2536_DEFAULT_BASE_ADDR+0x20,0},
-	{VMIC_2536_DEFAULT_BASE_ADDR+0x20,1},
-	{VMIC_2536_DEFAULT_BASE_ADDR+0x20,2},
-	{VMIC_2536_DEFAULT_BASE_ADDR+0x20,3},
-/* this oddball module controls chicane pwr supplies. Must be last in struct!! */
-	{VMIC_2536_DEFAULT_BASE_ADDR+0x10,3}
-#endif
-};
-
-const uint32_t NumDioModules = sizeof(dioconfig)/sizeof(DioConfig);
 static State *states[TESTING+1];
 
 uint32_t Bpm::numInstances=0;
@@ -95,6 +75,7 @@ OrbitController::~OrbitController() {
 	psbArray.clear();
 	for(uint32_t i=0; i<crateArray.size(); i++) { delete crateArray[i]; }
 	crateArray.clear();
+	for(uint32_t i=0; i<TESTING; i++) { delete states[i]; }
 	instance = 0;
 }
 
@@ -102,11 +83,12 @@ OrbitController* OrbitController::getInstance() {
 	//FIXME -- not thread-safe!!
 	if(instance==0) {
 		instance = new OrbitController();
-		states[INITIALIZING] = Initializing::getInstance(instance);
-		states[STANDBY] = Standby::getInstance(instance);
-		states[ASSISTED] = Assisted::getInstance(instance);
-		states[AUTONOMOUS] = Autonomous::getInstance(instance);
-		states[TESTING] = Testing::getInstance(instance);
+		states[INITIALIZING] = Initializing::getInstance();
+		states[STANDBY] = Standby::getInstance();
+		states[ASSISTED] = Assisted::getInstance();
+		states[AUTONOMOUS] = Autonomous::getInstance();
+		states[TIMED] = Timed::getInstance();
+		states[TESTING] = Testing::getInstance();
 		instance->state = states[INITIALIZING];
 	}
 	return instance;
@@ -114,97 +96,11 @@ OrbitController* OrbitController::getInstance() {
 
 void OrbitController::destroyInstance() { delete instance; }
 
-/*
-void OrbitController::initialize(const double adcSampleRate) {
-	rtems_status_code rc;
-	syslog(LOG_INFO, "OrbitController: initializing...\n");
-	rc = rtems_semaphore_create(rtems_build_name('O','R','B','m'), \
-					1 initial count, RTEMS_BINARY_SEMAPHORE | \
-					RTEMS_INHERIT_PRIORITY | RTEMS_PRIORITY, \
-					RTEMS_NO_PRIORITY, &mutexId);
-	TestDirective(rc, "OrbitController: mutex create failure");
-	//create thread and barriers for Rendezvous Pattern
-	ocThreadName = rtems_build_name('O','R','B','C');
-	rc = rtems_task_create(ocThreadName,
-							ocThreadPriority,
-							RTEMS_MINIMUM_STACK_SIZE*8,
-							RTEMS_FLOATING_POINT|RTEMS_LOCAL,
-							RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),
-							&ocTID);
-	TestDirective(rc,"OrbitController: task_create failure");
-	isrBarrierName = rtems_build_name('i','s','r','B');
-	rc = rtems_barrier_create(isrBarrierName,
-								RTEMS_BARRIER_AUTOMATIC_RELEASE|RTEMS_LOCAL,
-								NumAdcModules+1,
-								&isrBarrierId);
-	TestDirective(rc,"OrbitController: ISR barrier_create() failure");
-	rdrBarrierName = rtems_build_name('a','d','c','B');
-	rc = rtems_barrier_create(rdrBarrierName,
-								RTEMS_BARRIER_AUTOMATIC_RELEASE|RTEMS_LOCAL,
-								NumAdcModules+1,
-								&rdrBarrierId);
-	TestDirective(rc,"OrbitController: RDR barrier_create() failure");
-	spQueueName = rtems_build_name('S','P','Q','1');
-	rc = rtems_message_queue_create(spQueueName,
-									NumOcm+1max msgs in queue,
-									sizeof(SetpointMsg)max msg size (bytes),
-									RTEMS_LOCAL|RTEMS_FIFO,
-									&spQueueId);
-	TestDirective(rc, "OrbitController: power-supply msg_queue_create() failure");
-	bpmThreadName = rtems_build_name('B','P','M','t');
-	rc = rtems_task_create(bpmThreadName,
-								bpmThreadPriority,
-								RTEMS_MINIMUM_STACK_SIZE*8,
-								RTEMS_FLOATING_POINT|RTEMS_LOCAL,
-								RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),
-								&bpmTID);
-	TestDirective(rc,"BpmController: thread_create failure");
-	bpmQueueName = rtems_build_name('B','P','M','q');
-	rc = rtems_message_queue_create(bpmQueueName,
-									bpmMaxMsgsmax msgs in queue,
-									bpmMsgSizemax msg size (bytes),
-									RTEMS_LOCAL|RTEMS_FIFO,
-									&bpmQueueId);
-
-	rtems_clock_get(RTEMS_CLOCK_GET_TICKS_PER_SECOND, &rtemsTicksPerSecond);
-	//initialize hardware: VME crates, ADC, and DIO modules
-	for(uint32_t i=0; i<NumVmeCrates; i++) {
-		crateArray.push_back(new VmeCrate(i));
-	}
-	for(uint32_t i=0; i<NumAdcModules; i++) {
-		adcArray.push_back(new Ics110blModule(crateArray[i],ICS110B_DEFAULT_BASEADDR));
-		adcArray[i]->initialize(adcSampleRate,INTERNAL_CLOCK,ICS110B_INTERNAL);
-		syslog(LOG_INFO,"%s[%u]: framerate=%g kHz, ch/Frame = %d\n",
-									adcArray[i]->getType(),i,
-									adcArray[i]->getFrameRate(),
-									adcArray[i]->getChannelsPerFrame());
-	}
-	adcFrameRateSetpoint = adcSampleRate;
-	adcFrameRateFeedback = adcArray[0]->getFrameRate();
-	for(uint32_t i=0; i<NumDioModules; i++) {
-		dioArray.push_back(new Vmic2536Module(crateArray[dioconfig[i].crateId],
-												dioconfig[i].baseAddr));
-		dioArray[i]->initialize();
-		//FIXME -- when all OCM are "fast" do we need 4 or 8 PowerSupplyBulk objects ???
-		psbArray.push_back(new PowerSupplyBulk(dioArray[i],30));
-	}
-	for(uint32_t i=0; i<NumAdcModules; i++) {
-		isrArray.push_back(new AdcIsr(adcArray[i],isrBarrierId));
-		rdrArray.push_back(new AdcReader(adcArray[i], rdrBarrierId));
-		rdrArray[i]->start(0);
-	}
-	rendezvousWithAdcReaders();
-	initialized = true;
-	mode=STANDBY;
-	syslog(LOG_INFO, "OrbitController: initialized and synchronized with AdcReaders...\n");
-}
-*/
-
 void OrbitController::start(rtems_task_argument ocThreadArg,
 							rtems_task_argument bpmThreadArg) {
 	//FIXME--
 	if(initialized==false) {
-		changeState(Initializing::getInstance(this));
+		changeState(states[INITIALIZING]);
 	}
 	//fire up the OrbitController and BpmController threads:
 	this->ocThreadArg = ocThreadArg;
@@ -601,10 +497,9 @@ void OrbitController::rendezvousWithAdcReaders() {
 	TestDirective(rc,"OrbitController: RDR barrier_wait() failure");
 }
 
-void OrbitController::activateAdcReaders() {
+void OrbitController::activateAdcReaders(uint32_t numFrames) {
 	for(uint32_t i=0; i<NumAdcModules; i++) {
-		rdSegments[i] = new AdcData(adcArray[i],
-							HALF_FIFO_LENGTH/adcArray[i]->getChannelsPerFrame());
+		rdSegments[i] = new AdcData(adcArray[i],numFrames);
 		//this'll unblock the associated AdcReader thread:
 		rdrArray[i]->read(rdSegments[i]);
 	}
