@@ -79,7 +79,7 @@ endif
 #  'make clobber' already includes 'make clean'
 #
 
-CLEAN_ADDITIONS += ${HARDWARE_DIR}/*.o ${STATE_DIR}/*.o
+CLEAN_ADDITIONS += ${HARDWARE_DIR}/*.o ${STATE_DIR}/*.o $(PGMS)
 CLOBBER_ADDITIONS +=
 
 all:	$(SRCS) $(PGMS)

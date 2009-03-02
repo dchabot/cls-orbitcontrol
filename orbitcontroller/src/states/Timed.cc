@@ -15,6 +15,7 @@ Timed* Timed::instance=0;
 
 static uint64_t now,then,tmp,numIters,start,end,period;
 static double sum,sumSqrs,avg,stdDev,maxTime;
+static int once=1;
 extern double tscTicksPerSecond;
 static rtems_id periodId;
 static rtems_interval periodTicks;
@@ -68,7 +69,9 @@ void Timed::exitAction() {
 	syslog(LOG_INFO, "OrbitController - Timed Mode: avgFreq=%.3g Hz\n",1.0/((double)(period/numIters)/tscTicksPerSecond));
 	/* zero the parameters for the next iteration...*/
 	sum=sumSqrs=avg=stdDev=maxTime=0.0;
-	numIters=0;
+	numIters=period=0;
+	once=1;
+	start=end=0;
 #endif
 	syslog(LOG_INFO, "OrbitController: leaving state %s.\n",toString().c_str());
 }
@@ -78,6 +81,11 @@ void Timed::stateAction() {
 	static double sorted[TOTAL_BPMS*2];
 	static double h[NumHOcm],v[NumVOcm];
 
+
+	end=start;
+	rdtscll(start);
+	if(once) { once=0; }
+	else { period += start-end; }
 	//block for periodTicks and re-initialize RMS period
 	rtems_status_code rc = rtems_rate_monotonic_period(periodId,periodTicks);
 	TestDirective(rc,"OrbitController: failure with RMS period");
@@ -87,6 +95,7 @@ void Timed::stateAction() {
 	oc->stopAdcAcquisition();
 	oc->resetAdcFifos();
 	oc->startAdcAcquisition();
+	rdtscll(then);
 	//TODO -- we're eventually going to want to incorporate Dispersion effects here
 	if(oc->hResponseInitialized && oc->vResponseInitialized/* && oc->dispInitialized*/) {
 		memset(sums,0,sizeof(sums));
@@ -201,7 +210,8 @@ void Timed::stateAction() {
 		for(uint32_t i=0; i<oc->psbArray.size(); i++) {
 			oc->psbArray[i]->updateSetpoints();
 		}
-#if 0
+		rdtscll(now);
+#ifdef OC_DEBUG
 		tmp = now-then;
 		sum += (double)tmp;
 		sumSqrs += (double)(tmp*tmp);

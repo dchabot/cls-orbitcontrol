@@ -415,13 +415,13 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	OrbitControllerMode lmode;
 	size_t msgSize;
 
-	//goto Assisted mode
+	syslog(LOG_INFO, "OrbitController: entering main processing loop\n");
+	//goto Assisted mode as our first state *after* INITIALIZING
 	changeState(states[ASSISTED]);
 	//FIXME -- incorporate publish/subscribe Observer model!!!
 	if(mcCallback) {
 		this->mcCallback(mcCallbackArg);
 	}
-	syslog(LOG_INFO, "OrbitController: entering main processing loop\n");
 	for(;;) {
 		msgSize = 0; // MUST reset this per iteration!!
 		rtems_message_queue_receive(stateQueueId,&lmode,&msgSize,RTEMS_NO_WAIT,RTEMS_NO_TIMEOUT);

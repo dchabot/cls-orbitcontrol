@@ -16,6 +16,11 @@ using std::cout;
 using std::endl;
 
 
+extern "C" void setTimedMode() {
+	OrbitController *oc = OrbitController::getInstance();
+	oc->setMode(TIMED);
+}
+
 extern "C" void setAutonomousMode() {
 	OrbitController *oc = OrbitController::getInstance();
 	oc->setMode(AUTONOMOUS);
