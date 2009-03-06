@@ -42,7 +42,7 @@ record(calcout, "OrbitController:pct:monitor") {
 	field(INPA,"PCT1402-01:mA:fbk CPP") #this is our trigger
 	field(INPB, "2.5")
 	field(INPC, "OrbitController:mode:fbk NPP")
-	field(CALC, "A<B?2:C)
+	field(CALC, "A<B?2:C")
 	field(OUT, "OrbitController:mode")
 	field(OOPT, "On Change")
 }

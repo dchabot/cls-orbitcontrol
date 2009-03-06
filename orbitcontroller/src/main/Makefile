@@ -24,7 +24,7 @@ CC_PIECES+=${HARDWARE_DIR}/AdcReader ${HARDWARE_DIR}/AdcIsr
 CC_PIECES+=${STATE_DIR}/State ${STATE_DIR}/Initializing ${STATE_DIR}/Standby 
 CC_PIECES+=${STATE_DIR}/Assisted ${STATE_DIR}/Autonomous ${STATE_DIR}/Timed
 CC_PIECES+=${STATE_DIR}/Testing
-CC_PIECES+=OrbitController OrbitControlException StartApp
+CC_PIECES+=OrbitController OrbitControlException StartApp FastAlgorithm
 
 CC_FILES=$(CC_PIECES:%=%.cc)
 CC_O_FILES=$(CC_PIECES:%=%.o)

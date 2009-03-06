@@ -71,8 +71,7 @@ typedef void (*OrbitControllerModeChangeCallback)(void*);
 class OrbitController : public OcmController,public BpmController {
 public:
 	static OrbitController* getInstance();
-	void initialize(const double adcSampleRate=10.1);
-	void start(rtems_task_argument arg1, rtems_task_argument arg2);
+	void start(rtems_task_argument, rtems_task_argument);
 	void destroyInstance();
 	double getAdcFrameRateSetpoint() const { return adcFrameRateSetpoint; }
 	double getAdcFrameRateFeedback() const { return adcFrameRateFeedback; }
@@ -121,6 +120,8 @@ private:
 	friend class Timed;
 	friend class Testing;
 
+	friend void fastAlgorithm(OrbitController*);
+
 	void changeState(State*);
 	void lock();
 	void unlock();
@@ -131,7 +132,7 @@ private:
 	void disableAdcInterrupts();
 	void rendezvousWithIsr();
 	void rendezvousWithAdcReaders();
-	void activateAdcReaders(uint32_t);
+	void activateAdcReaders(rtems_id,uint32_t);
 	void enqueueAdcData();
 
 	static rtems_task ocThreadStart(rtems_task_argument arg);

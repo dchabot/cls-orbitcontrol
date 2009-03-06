@@ -78,10 +78,10 @@ rtems_task AdcReader::threadBody(rtems_task_argument arg) {
 										instance,rtems_status_text(rc));
 			throw OrbitControlException(msg);
 		}
-#ifndef OC_DEBUG
+#if 1//ndef OC_DEBUG
 		/* chk for FIFO-FULL or FIFO-not-1/2-FULL conditions */
 		adcStatus = adc->getStatus();
-		if((adcStatus&ICS110B_FIFO_FULL) || !(adcStatus&ICS110B_FIFO_HALF_FULL)) {
+		if((adcStatus&ICS110B_FIFO_FULL) || (adcStatus&ICS110B_FIFO_EMPTY)) {
 			//this should "never happen": Fatal if it does...
 			char msg[256];
 			snprintf(msg,sizeof(msg),"AdcReader[%d] (pre-BLT) has abnormal status=%#hx",instance, adcStatus);
@@ -91,10 +91,10 @@ rtems_task AdcReader::threadBody(rtems_task_argument arg) {
 		/* get the data... */
 		wordsRequested = data->getFrames()*adc->getChannelsPerFrame();
 		int readStatus = adc->readFifo((uint32_t *)data->getBuffer(),wordsRequested,&wordsRead);
-#ifndef OC_DEBUG
+#if 1//ndef OC_DEBUG
 		/* chk for FIFO-1/2-FULL (still ?!?) or FIFO-empty conditions */
 		adcStatus = adc->getStatus();
-		if((adcStatus&ICS110B_FIFO_HALF_FULL) || (adcStatus&ICS110B_FIFO_EMPTY)) {
+		if((adcStatus&ICS110B_FIFO_HALF_FULL) /*|| (adcStatus&ICS110B_FIFO_EMPTY)*/) {
 			//again, this should "never happen": Fatal if it does...
 			char msg[256];
 			snprintf(msg,sizeof(msg),"AdcReader[%d] (post-BLT) has abnormal status=%#hx",instance, adcStatus);

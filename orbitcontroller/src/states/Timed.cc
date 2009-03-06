@@ -21,7 +21,9 @@ static rtems_id periodId;
 static rtems_interval periodTicks;
 static uint32_t numFrames;
 static rtems_rate_monotonic_period_statistics rmsStats;
+static rtems_id bufId;
 
+extern void fastAlgorithm(OrbitController*);
 
 Timed::Timed()
 	: State("Timed",TIMED),oc(OrbitController::instance) { }
@@ -40,23 +42,38 @@ void Timed::entryAction() {
 	TestDirective(rc, "OrbitController: failure creating RMS period");
 	periodTicks = 10; //FIXME -- make this value an OrbitController attribute
 	numFrames = ((((uint32_t)ceil(oc->adcFrameRateFeedback))*1000)/oc->rtemsTicksPerSecond)*periodTicks;
+	syslog(LOG_INFO, "OrbitController: Timed State using %u ADC frames per RMS period\n",numFrames);
+
+	uint32_t bufLength = NumAdcModules*oc->adcArray[0]->getChannelsPerFrame()*numFrames*(11)*sizeof(int32_t);
+	uint32_t bufSize = oc->adcArray[0]->getChannelsPerFrame()*numFrames*sizeof(int32_t);
+	int32_t *buf = new int32_t[bufLength/4];
+	if(buf==0) { throw OrbitControlException("Can't allocate memory for Timed State buffer"); }
+	rc = rtems_partition_create(rtems_build_name('B','U','F','3'),buf,
+								bufLength,bufSize,RTEMS_LOCAL,&bufId);
+	TestDirective(rc,"Timed State: failure creating Partition");
 	//start on the "edge" of a clock-tick:
 	rtems_task_wake_after(2);
+	oc->disableAdcInterrupts();
+	oc->resetAdcFifos();
+	oc->startAdcAcquisition();
 	//initiate the RMS period
 	rc = rtems_rate_monotonic_period(periodId,periodTicks);
 	TestDirective(rc,"OrbitController: Timed->onEntry() RMS period failure");
-	oc->disableAdcInterrupts();
-	oc->startAdcAcquisition();
+	//rtems_task_wake_after(periodTicks);
 }
 
 void Timed::exitAction() {
-	rtems_status_code rc = rtems_rate_monotonic_cancel(periodId);
-	TestDirective(rc, "OrbitController: failure cancelling RMS period");
 	//state exit: silence the ADC's
 	oc->stopAdcAcquisition();
 	oc->resetAdcFifos();
-	rc = rtems_rate_monotonic_delete(periodId);
+	rtems_status_code rc = rtems_rate_monotonic_delete(periodId);
 	TestDirective(rc,"OrbitController: failure deleting RMS period");
+	//nuke our ADC buffer Partition
+	if(rtems_partition_delete(bufId) == RTEMS_RESOURCE_IN_USE) {
+		while(rtems_partition_delete(bufId)==RTEMS_RESOURCE_IN_USE) {
+			rtems_task_wake_after(10);
+		}
+	}
 #ifdef OC_DEBUG
 	stdDev = (1.0/(double)(numIters))*sumSqrs - (1.0/(double)(numIters*numIters))*(sum*sum);
 	stdDev = sqrt(stdDev);
@@ -77,151 +94,40 @@ void Timed::exitAction() {
 }
 
 void Timed::stateAction() {
-	static double sums[NumAdcModules*32];
-	static double sorted[TOTAL_BPMS*2];
-	static double h[NumHOcm],v[NumVOcm];
-
-
 	end=start;
 	rdtscll(start);
 	if(once) { once=0; }
 	else { period += start-end; }
-	//block for periodTicks and re-initialize RMS period
+
+	//block for remainder of periodTicks and re-initialize RMS period
 	rtems_status_code rc = rtems_rate_monotonic_period(periodId,periodTicks);
 	TestDirective(rc,"OrbitController: failure with RMS period");
-	oc->activateAdcReaders(numFrames);
+	//rtems_interval _then = rtems_clock_get_ticks_since_boot();
+
+	oc->stopAdcAcquisition();
+	rdtscll(then);
+	oc->activateAdcReaders(bufId,numFrames);
+	rdtscll(now);
 	//Wait (block) 'til AdcReaders have completed their block-reads
 	oc->rendezvousWithAdcReaders();
-	oc->stopAdcAcquisition();
+
 	oc->resetAdcFifos();
 	oc->startAdcAcquisition();
-	rdtscll(then);
-	//TODO -- we're eventually going to want to incorporate Dispersion effects here
-	if(oc->hResponseInitialized && oc->vResponseInitialized/* && oc->dispInitialized*/) {
-		memset(sums,0,sizeof(sums));
-		memset(sorted,0,sizeof(sorted));
-		memset(h,0,sizeof(h));
-		memset(v,0,sizeof(v));
-		/* Calc and deliver new OCM setpoints:
-		 * NOTE: testing shows calc takes ~1ms
-		 * while OCM setpoint delivery req's ~5ms
-		 * for 48 OCMs (scales linearly with # OCM)
-		 */
-		map<string,Bpm*>::iterator bit;
-		uint32_t numSamples = oc->sumAdcSamples(sums,oc->rdSegments);
-		oc->sortBPMData(sorted,sums,oc->rdSegments[0]->getChannelsPerFrame());
-		double sf = oc->getBpmScaleFactor(numSamples);
-		for(bit=oc->bpmMap.begin(); bit!=oc->bpmMap.end(); bit++) {
-			Bpm *bpm = bit->second;
-			uint32_t pos = bpm->getPosition();
-			sorted[2*pos] *= sf/bpm->getXVoltsPerMilli();
-			sorted[2*pos+1] *= sf/bpm->getYVoltsPerMilli();
-		}
 
-		//FIXME -- refactor calcs to private methods
-		//TODO: calc dispersion effect
-		//First, calc BPM deltas
-		for(bit=oc->bpmMap.begin(); bit!=oc->bpmMap.end(); bit++) {
-			Bpm *bpm = bit->second;
-			if(bpm->isEnabled()) {
-				//subtract reference and DC orbit-components
-				uint32_t pos = bpm->getPosition();
-				sorted[2*pos] -= (bpm->getXRef() + bpm->getXOffs());
-				sorted[2*pos+1] -= (bpm->getYRef() + bpm->getYOffs());
-			}
-		}
-		oc->lock();
-		for(uint32_t i=0; i<NumHOcm; i++) {
-			bit=oc->bpmMap.begin();
-			for(uint32_t j=0; j<NumBpm && bit!=oc->bpmMap.end(); bit++) {
-				Bpm *bpm = bit->second;
-				if(bpm->isEnabled()) {
-					uint32_t pos = bpm->getPosition();
-					h[i] += oc->hmat[i][j]*sorted[2*pos];
-					//syslog(LOG_INFO, "h[%i] += %.3e X %.3e = %.3e\n",i,hmat[i][j],sorted[2*pos],h[i]);
-					++j;
-				}
-			}
-			h[i] *= -1.0;
-		}
-		//calc vertical OCM setpoints
-		for(uint32_t i=0; i<NumVOcm; i++) {
-			bit=oc->bpmMap.begin();
-			for(uint32_t j=0; j<NumBpm && bit!=oc->bpmMap.end(); bit++) {
-				Bpm *bpm = bit->second;
-				if(bpm->isEnabled()) {
-					uint32_t pos = bpm->getPosition();
-					v[i] += oc->vmat[i][j]*sorted[2*pos+1];
-					//syslog(LOG_INFO, "v[%i] += %.3e X %.3e = %.3e\n",i,vmat[i][j],sorted[2*pos+1],v[i]);
-					++j;
-				}
-			}
-			v[i] *= -1.0;
-		}
-		//scale OCM setpoints (max step && %-age to apply)
-		double max=0;
-		for(uint32_t i=0; i<NumHOcm; i++) {
-			double habs = fabs(h[i]);
-			if(habs > max) { max = habs; }
-		}
-		if(max > (double)oc->maxHStep) {
-			double scaleFactor = ((double)oc->maxHStep)/max;
-			for(uint32_t i=0; i<NumHOcm; i++) {
-				h[i] *= scaleFactor;
-			}
-		}
-		for(uint32_t i=0; i<NumHOcm; i++) {
-			h[i] *= oc->maxHFrac;
-		}
-		max=0;
-		for(uint32_t i=0; i<NumVOcm; i++) {
-			double vabs = fabs(v[i]);
-			if(vabs > max) { max = vabs; }
-		}
-		if(max > (double)oc->maxVStep) {
-			double scaleFactor = ((double)oc->maxVStep)/max;
-			for(uint32_t i=0; i<NumVOcm; i++) {
-				v[i] *= scaleFactor;
-			}
-		}
-		for(uint32_t i=0; i<NumVOcm; i++) {
-			v[i] *= oc->maxVFrac;
-		}
-		oc->unlock();
-		//distribute new OCM setpoints
-		set<Ocm*>::iterator hit,vit;
-		uint32_t i = 0;
-		for(hit=oc->hOcmSet.begin(); hit!=oc->hOcmSet.end(); hit++) {
-			Ocm *och = (*hit);
-			if(och->isEnabled()) {
-				och->setSetpoint((int32_t)h[i]+och->getSetpoint());
-				i++;
-			}
-		}
-		i=0;
-		for(vit=oc->vOcmSet.begin(); vit!=oc->vOcmSet.end(); vit++) {
-			Ocm *ocv = (*vit);
-			if(ocv->isEnabled()) {
-				ocv->setSetpoint((int32_t)v[i]+ocv->getSetpoint());
-				i++;
-			}
-		}
-		//distribute the UPDATE-signal to pwr-supply ctlrs
-		for(uint32_t i=0; i<oc->psbArray.size(); i++) {
-			oc->psbArray[i]->updateSetpoints();
-		}
-		rdtscll(now);
+	fastAlgorithm(oc);
+
 #ifdef OC_DEBUG
-		tmp = now-then;
-		sum += (double)tmp;
-		sumSqrs += (double)(tmp*tmp);
-		if((double)tmp>maxTime) {
-			maxTime = (double)tmp;
-		}
-		++numIters;
-#endif
+	tmp = now-then;
+	sum += (double)tmp;
+	sumSqrs += (double)(tmp*tmp);
+	if((double)tmp>maxTime) {
+		maxTime = (double)tmp;
 	}
+	++numIters;
+#endif
 	//hand raw ADC data off to processing thread
 	oc->enqueueAdcData();
+	//rtems_interval _now = rtems_clock_get_ticks_since_boot();
+	//rtems_task_wake_after(periodTicks-(_now-_then));
 }
 

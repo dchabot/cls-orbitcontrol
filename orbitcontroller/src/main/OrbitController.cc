@@ -256,28 +256,23 @@ Ocm* OrbitController::getOcmById(const string& id) {
 	return ocm;
 }
 
+static void printOcmInfo(Ocm* ocm) {
+	syslog(LOG_INFO, "%s: position=%i setpoint=%i inCorrection=%s delay=%u us\n",
+					ocm->getId().c_str(),
+					ocm->getPosition(),
+					ocm->getSetpoint(),
+					ocm->isEnabled()?"true":"false",
+					ocm->getDelay());
+}
+
 void OrbitController::showAllOcms() {
 	syslog(LOG_INFO, "Total # of OCM instances=%i\tTotal # OCM registered=%i\n",
 						Ocm::getNumInstances(),hOcmSet.size()+vOcmSet.size());
 
 	set<Ocm*>::iterator it;
-	for(it=hOcmSet.begin(); it!=hOcmSet.end(); it++) {
-		Ocm *och = (*it);
-		syslog(LOG_INFO, "%s: position=%i\tsetpoint=%i\tinCorrection=%s\n",
-				och->getId().c_str(),
-				och->getPosition(),
-				och->getSetpoint(),
-				och->isEnabled()?"true":"false");
-	}
+	for(it=hOcmSet.begin(); it!=hOcmSet.end(); it++) { printOcmInfo(*it); }
 	syslog(LOG_INFO, "\n\n\n");
-	for(it=vOcmSet.begin(); it!=vOcmSet.end(); it++) {
-		Ocm *ocv = (*it);
-		syslog(LOG_INFO, "%s: position=%i\tsetpoint=%i\tinCorrection=%s\n",
-						ocv->getId().c_str(),
-						ocv->getPosition(),
-						ocv->getSetpoint(),
-						ocv->isEnabled()?"true":"false");
-	}
+	for(it=vOcmSet.begin(); it!=vOcmSet.end(); it++) { printOcmInfo(*it); }
 	syslog(LOG_INFO, "\n\n\n");
 }
 
@@ -411,6 +406,10 @@ rtems_task OrbitController::ocThreadStart(rtems_task_argument arg) {
 	oc->ocThreadBody(oc->ocThreadArg);
 }
 
+static uint64_t now,then,tmp,numIters,start,end,period;
+static double sum,sumSqrs,avg,stdDev,maxTime;
+extern double tscTicksPerSecond;
+
 rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	OrbitControllerMode lmode;
 	size_t msgSize;
@@ -437,6 +436,19 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			if(mcCallback) {
 				this->mcCallback(mcCallbackArg);
 			}
+#ifdef OC_DEBUG
+			stdDev = (1.0/(double)(numIters))*sumSqrs - (1.0/(double)(numIters*numIters))*(sum*sum);
+			stdDev = sqrt(stdDev);
+			stdDev /= tscTicksPerSecond;
+			avg = sum/((double)numIters);
+			avg /= tscTicksPerSecond;
+			maxTime /= tscTicksPerSecond;
+
+			syslog(LOG_INFO, "OrbitController - AdcData stats:\n\tAvg = %0.9f +/- %0.9f [s], max=%0.9f [s]\n",avg,stdDev,maxTime);
+			/* zero the parameters for the next iteration...*/
+			sum=sumSqrs=avg=stdDev=maxTime=0.0;
+			numIters=0;
+#endif
 		}
 	}
 	//state exit: silence the ADC's
@@ -497,12 +509,23 @@ void OrbitController::rendezvousWithAdcReaders() {
 	TestDirective(rc,"OrbitController: RDR barrier_wait() failure");
 }
 
-void OrbitController::activateAdcReaders(uint32_t numFrames) {
+void OrbitController::activateAdcReaders(rtems_id bufId, uint32_t numFrames) {
 	for(uint32_t i=0; i<NumAdcModules; i++) {
-		rdSegments[i] = new AdcData(adcArray[i],numFrames);
+		rdtscll(then);
+		rdSegments[i] = new AdcData(bufId,adcArray[i]->getChannelsPerFrame(),numFrames);
+		rdtscll(now);
 		//this'll unblock the associated AdcReader thread:
 		rdrArray[i]->read(rdSegments[i]);
 	}
+#ifdef OC_DEBUG
+	tmp = now-then;
+	sum += (double)tmp;
+	sumSqrs += (double)(tmp*tmp);
+	if((double)tmp>maxTime) {
+		maxTime = (double)tmp;
+	}
+	++numIters;
+#endif
 }
 
 void OrbitController::enqueueAdcData() {

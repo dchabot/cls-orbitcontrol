@@ -19,6 +19,9 @@ using std::string;
  * to implement these sub-classes as Singletons.
  *
  * Clients MUST NOT override the changeState(State* s) method!
+ *
+ * XXX -- NOTE also that client implementations of the pure virtual methods
+ * MUST NOT block for significant periods !!!!!!!!!!!!!!!
  */
 class State {
 public:

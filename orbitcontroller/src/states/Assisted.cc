@@ -8,10 +8,12 @@
 #include <Assisted.h>
 #include <Ocm.h>
 #include <OrbitControlException.h>
-
+#include <ics110bl.h>
 
 
 Assisted* Assisted::instance=0;
+static rtems_id bufId;
+
 
 Assisted::Assisted()
 	: State("Assisted",ASSISTED),oc(OrbitController::instance) { }
@@ -26,15 +28,31 @@ Assisted* Assisted::getInstance() {
 void Assisted::entryAction() {
 	syslog(LOG_INFO, "OrbitController: entering state %s",toString().c_str());
 	oc->mode = ASSISTED;
+	uint32_t numFrames = HALF_FIFO_LENGTH/oc->adcArray[0]->getChannelsPerFrame();
+	uint32_t bufLength = NumAdcModules*oc->adcArray[0]->getChannelsPerFrame()*numFrames*(11)*sizeof(int32_t);
+	uint32_t bufSize = oc->adcArray[0]->getChannelsPerFrame()*numFrames*sizeof(int32_t);
+	int32_t *buf = new int32_t[bufLength/4];
+	if(buf==0) { throw OrbitControlException("Can't allocate memory for Assisted State buffer"); }
+	rtems_status_code rc = rtems_partition_create(rtems_build_name('B','U','F','1'),buf,
+								bufLength,bufSize,RTEMS_LOCAL,&bufId);
+	TestDirective(rc,"Assisted State: failure creating Partition");
 	//start on the "edge" of a clock-tick:
 	rtems_task_wake_after(2);
 	oc->startAdcAcquisition();
+	oc->enableAdcInterrupts();
 }
 
 void Assisted::exitAction() {
 	//state exit: silence the ADC's
 	oc->stopAdcAcquisition();
 	oc->resetAdcFifos();
+	oc->disableAdcInterrupts();
+	//nuke our ADC buffer Partition
+	if(rtems_partition_delete(bufId) == RTEMS_RESOURCE_IN_USE) {
+		while(rtems_partition_delete(bufId)==RTEMS_RESOURCE_IN_USE) {
+			rtems_task_wake_after(10);
+		}
+	}
 	syslog(LOG_INFO, "OrbitController: leaving state %s.\n",toString().c_str());
 }
 
@@ -42,7 +60,7 @@ void Assisted::stateAction() {
 	//Wait for notification of ADC "fifo-half-full" event...
 	oc->rendezvousWithIsr();
 	oc->stopAdcAcquisition();
-	oc->activateAdcReaders(HALF_FIFO_LENGTH/oc->adcArray[0]->getChannelsPerFrame());
+	oc->activateAdcReaders(bufId,HALF_FIFO_LENGTH/oc->adcArray[0]->getChannelsPerFrame());
 	//Wait (block) 'til AdcReaders have completed their block-reads: ~3 ms duration
 	oc->rendezvousWithAdcReaders();
 	oc->resetAdcFifos();

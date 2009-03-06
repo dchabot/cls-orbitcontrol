@@ -7,7 +7,7 @@ PGMS=${ARCH}/tests.obj
 # C source names, if any, go here -- minus the .c
 #C_PIECES=readoutTest irqTest mmapTest delayTest
 #C_PIECES+=adcAcquireTest SpawnTask adcFifoTest spinTest
-C_PIECES=
+C_PIECES=mallocTest
 C_FILES=$(C_PIECES:%=%.c)
 C_O_FILES=$(C_PIECES:%=${ARCH}/%.o)
 
@@ -40,7 +40,7 @@ include $(RTEMS_ROOT)/make/leaf.cfg
 #
 # (OPTIONAL) Add local stuff here using +=
 #
-CFLAGS+= -I ../include 
+CFLAGS+= -I ../../include 
 CXXFLAGS+=${CFLAGS}
 #
 # Add your list of files to delete here.  The config files

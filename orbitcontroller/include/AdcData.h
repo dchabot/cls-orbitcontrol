@@ -8,23 +8,30 @@
 #ifndef ADCDATASEGMENT_H_
 #define ADCDATASEGMENT_H_
 
+#include <rtems.h>
 #include <stdint.h>
-#include <Ics110blModule.h>
+#include <OrbitControlException.h>
+
 
 /**
- * Data-type returned by Ics110blModules.
+ * Data-type returned by AdcReaders.
  */
 class AdcData {
 public:
-	AdcData(Ics110blModule* adc, uint32_t frames) :
+	AdcData(rtems_id id, uint32_t chPerFrame, uint32_t frames) :
 		//ctor-initializer list
+		bufId(id),
 		numFrames(frames),
-		channelsPerFrame(adc->getChannelsPerFrame()),
-		bufSize(adc->getChannelsPerFrame()*numFrames)
+		channelsPerFrame(chPerFrame),
+		bufSize(channelsPerFrame*numFrames)
 	{
-		buf = new int32_t[bufSize];
+		rtems_status_code rc = rtems_partition_get_buffer(bufId, (void**)&buf);
+		TestDirective(rc,"AdcData: failure obtaining buffer");
 	}
-	~AdcData() { delete []buf; }
+	~AdcData() {
+		rtems_status_code rc = rtems_partition_return_buffer(bufId,buf);
+		TestDirective(rc, "AdcData: failure returning buffer");
+	}
 	int32_t* getBuffer() const { return buf; }
 	uint32_t getFrames() const { return numFrames; }
 	uint32_t getChannelsPerFrame() const { return channelsPerFrame; }
@@ -33,6 +40,8 @@ public:
 private:
 	AdcData();
 	AdcData(const AdcData&);
+
+	const rtems_id bufId;
 	const uint32_t numFrames;
 	const uint32_t channelsPerFrame;
 	const uint32_t bufSize;

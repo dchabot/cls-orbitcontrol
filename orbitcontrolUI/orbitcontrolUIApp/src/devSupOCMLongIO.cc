@@ -51,7 +51,7 @@ struct {
 
 epicsExportAddress(dset,devSupOCMLongOut);
 
-enum loType {setpoint,xStep,yStep};
+enum loType {setpoint,xStep,yStep,delay};
 
 struct OcmLongoutData {
 	loType type;
@@ -72,10 +72,10 @@ init_record(void* lor) {
 	//check OCM LongOut loType:
 	int needOcm = !isalpha((int)lorp->out.value.instio.string[0]);
 	if(needOcm) {
-		//this is a "setpoint"-type record
-		/* strip off the ":dac" from the record name; this will form the OCM's id */
+		//this is a "setpoint" or "delay"-type record
+		/* strip off the $(clsName)-prefix from the record name; this will form the OCM's id */
 		string name(lorp->name);
-		size_t pos = name.find(":dac");
+		size_t pos = name.find_first_of(":");
 		string id = name.substr(0,pos);
 		/* <rant> WTF doesn't c++ have a string tokenizer method ?!?!? </rant> */
 		char cbuf[128] = {0};
@@ -91,7 +91,9 @@ init_record(void* lor) {
 			return -1;
 		}
 		OcmLongoutData *old = new OcmLongoutData();
-		old->type = setpoint;
+		string type = name.substr(pos);
+		if(type.compare(":dac")==0) { old->type = setpoint; }
+		else if(type.compare(":delay")==0) { old->type = delay; }
 		old->ocm = ocm;
 		lorp->dpvt = (void*)old;
 	}
@@ -135,6 +137,12 @@ write_longout(void* lor) {
 			break;
 		case(yStep):
 			ocmCtlr->setMaxVerticalStep(lorp->val);
+			break;
+		case(delay):
+#ifdef OC_DEBUG
+			syslog(LOG_INFO, "Setting %s to %hhu microsec\n",lorp->name,(uint8_t)lorp->val);
+#endif
+			old->ocm->setDelay((uint8_t)lorp->val);
 			break;
 		default:
 			syslog(LOG_INFO,"%s: unknown loType=%i !!\n",lorp->name,old->type);

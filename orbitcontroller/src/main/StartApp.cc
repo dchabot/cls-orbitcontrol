@@ -7,6 +7,7 @@
 
 #include <syslog.h>
 #include <rtems.h>
+#include <bsp/bootcard.h> /* bsp_reset() (aka reboot) */
 #include <OrbitController.h>
 #include <OrbitControlException.h>
 #include <cexp.h>
@@ -14,7 +15,7 @@
 #include <iostream>
 using std::cout;
 using std::endl;
-
+using std::set_terminate;
 
 extern "C" void setTimedMode() {
 	OrbitController *oc = OrbitController::getInstance();
@@ -45,6 +46,14 @@ extern "C" void showAllOcms() {
 	OrbitController *oc = OrbitController::getInstance();
 	oc->showAllOcms();
 }
+
+//replace std::terminate()
+static void terminator() {
+	//syslog(LOG_INFO, "Terminating OrbitControl App and rebooting...\n");
+	bsp_reset();
+}
+
+static void (*old_terminate)() = set_terminate(terminator);
 
 /* avoid c++ name-mangling, make this callable from "c"... (i.e. CEXP cmdline) */
 extern "C" void startApp(char* epicsApp) {

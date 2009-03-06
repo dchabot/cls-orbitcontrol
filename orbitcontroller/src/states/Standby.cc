@@ -24,6 +24,7 @@ void Standby::entryAction() {
 	syslog(LOG_INFO, "OrbitController: entering state %s",toString().c_str());
 	oc->stopAdcAcquisition();
 	oc->resetAdcFifos();
+	oc->disableAdcInterrupts();
 	oc->mode = STANDBY;
 }
 
