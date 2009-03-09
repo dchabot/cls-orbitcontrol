@@ -25,11 +25,12 @@ public:
 		channelsPerFrame(chPerFrame),
 		bufSize(channelsPerFrame*numFrames)
 	{
-		rtems_status_code rc = rtems_partition_get_buffer(bufId, (void**)&buf);
+		rtems_status_code rc = rtems_region_get_segment(bufId,bufSize*sizeof(int32_t),
+									RTEMS_NO_WAIT,RTEMS_NO_TIMEOUT,(void**)&buf);
 		TestDirective(rc,"AdcData: failure obtaining buffer");
 	}
 	~AdcData() {
-		rtems_status_code rc = rtems_partition_return_buffer(bufId,buf);
+		rtems_status_code rc = rtems_region_return_segment(bufId,buf);
 		TestDirective(rc, "AdcData: failure returning buffer");
 	}
 	int32_t* getBuffer() const { return buf; }

@@ -14,7 +14,6 @@ Autonomous* Autonomous::instance=0;
 static uint64_t now,then,tmp,numIters,start,end,period;
 static double sum,sumSqrs,avg,stdDev,maxTime;
 extern double tscTicksPerSecond;
-static rtems_id bufId;
 
 extern void fastAlgorithm(OrbitController*);
 
@@ -31,14 +30,6 @@ Autonomous* Autonomous::getInstance() {
 void Autonomous::entryAction() {
 	syslog(LOG_INFO, "OrbitController: entering state %s",toString().c_str());
 	oc->mode = AUTONOMOUS;
-	uint32_t numFrames = HALF_FIFO_LENGTH/oc->adcArray[0]->getChannelsPerFrame();
-	uint32_t bufLength = NumAdcModules*oc->adcArray[0]->getChannelsPerFrame()*numFrames*(11)*sizeof(int32_t);
-	uint32_t bufSize = oc->adcArray[0]->getChannelsPerFrame()*numFrames*sizeof(int32_t);
-	int32_t *buf = new int32_t[bufLength/4];
-	if(buf==0) { throw OrbitControlException("Can't allocate memory for Autonomous State buffer"); }
-	rtems_status_code rc = rtems_partition_create(rtems_build_name('B','U','F','2'),buf,
-								bufLength,bufSize,RTEMS_LOCAL,&bufId);
-	TestDirective(rc,"Autonomous State: failure creating Partition");
 	//start on the "edge" of a clock-tick:
 	rtems_task_wake_after(2);
 	oc->startAdcAcquisition();
@@ -50,12 +41,6 @@ void Autonomous::exitAction() {
 	oc->stopAdcAcquisition();
 	oc->resetAdcFifos();
 	oc->disableAdcInterrupts();
-	//nuke our ADC buffer Partition
-	if(rtems_partition_delete(bufId) == RTEMS_RESOURCE_IN_USE) {
-		while(rtems_partition_delete(bufId)==RTEMS_RESOURCE_IN_USE) {
-			rtems_task_wake_after(10);
-		}
-	}
 #ifdef OC_DEBUG
 	stdDev = (1.0/(double)(numIters))*sumSqrs - (1.0/(double)(numIters*numIters))*(sum*sum);
 	stdDev = sqrt(stdDev);
@@ -83,7 +68,7 @@ void Autonomous::stateAction() {
 	//Wait for notification of ADC "fifo-half-full" event...
 	oc->rendezvousWithIsr();
 	oc->stopAdcAcquisition();
-	oc->activateAdcReaders(bufId,HALF_FIFO_LENGTH/oc->adcArray[0]->getChannelsPerFrame());
+	oc->activateAdcReaders(HALF_FIFO_LENGTH/oc->adcArray[0]->getChannelsPerFrame());
 	//Wait (block) 'til AdcReaders have completed their block-reads: ~3 ms duration
 	oc->rendezvousWithAdcReaders();
 	oc->resetAdcFifos();

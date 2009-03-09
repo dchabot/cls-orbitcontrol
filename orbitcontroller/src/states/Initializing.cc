@@ -54,7 +54,7 @@ void Initializing::exitAction() {
 
 void Initializing::stateAction() {
 	rtems_status_code rc;
-	const double adcSampleRate = 10.1;//kHz
+	const double adcSampleRate = 10.15;//kHz. results in 10.05 kHz frame-rate.
 
 	syslog(LOG_INFO, "OrbitController: initializing...\n");
 	rc = rtems_semaphore_create(rtems_build_name('O','R','B','m'), \
@@ -114,6 +114,7 @@ void Initializing::stateAction() {
 	TestDirective(rc, "OrbitController: State msg_q_create failure");
 
 	rtems_clock_get(RTEMS_CLOCK_GET_TICKS_PER_SECOND, &oc->rtemsTicksPerSecond);
+
 	//initialize hardware: VME crates, ADC, and DIO modules
 	for(uint32_t i=0; i<NumVmeCrates; i++) {
 		oc->crateArray.push_back(new VmeCrate(i));
@@ -128,6 +129,18 @@ void Initializing::stateAction() {
 	}
 	oc->adcFrameRateSetpoint = adcSampleRate;
 	oc->adcFrameRateFeedback = oc->adcArray[0]->getFrameRate();
+	//set up our buffer pool
+	uint32_t numFrames = HALF_FIFO_LENGTH/ICS110B_DEFAULT_CHANNELS_PER_FRAME; //max of 512 frames
+	uint32_t numChannelsPerFrame = ICS110B_DEFAULT_CHANNELS_PER_FRAME; //32 channels/frame
+	//bufLength is approx. 3 MB. See Notebook #2, pg 25-26 for logic.
+	uint32_t bufLength = NumAdcModules*numChannelsPerFrame*numFrames*(oc->bpmMaxMsgs+2)*sizeof(int32_t);
+	oc->bufPool = new int32_t[bufLength];
+	oc->bufPoolName = rtems_build_name('B','U','F','R');
+	rc = rtems_region_create(oc->bufPoolName,oc->bufPool,bufLength,
+								numChannelsPerFrame*sizeof(int32_t),
+								RTEMS_LOCAL|RTEMS_FIFO,&oc->bufPoolId);
+	TestDirective(rc,"OrbitController: failure initializing buffer pool Region");
+
 	for(uint32_t i=0; i<NumDioModules; i++) {
 		oc->dioArray.push_back(new Vmic2536Module(oc->crateArray[dioconfig[i].crateId],
 									dioconfig[i].baseAddr));

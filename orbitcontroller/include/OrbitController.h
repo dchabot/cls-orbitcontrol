@@ -132,7 +132,7 @@ private:
 	void disableAdcInterrupts();
 	void rendezvousWithIsr();
 	void rendezvousWithAdcReaders();
-	void activateAdcReaders(rtems_id,uint32_t);
+	void activateAdcReaders(uint32_t);
 	void enqueueAdcData();
 
 	static rtems_task ocThreadStart(rtems_task_argument arg);
@@ -158,6 +158,10 @@ private:
 	rtems_name isrBarrierName;
 	rtems_id rdrBarrierId;
 	rtems_name rdrBarrierName;
+
+	rtems_id bufPoolId;
+	rtems_name bufPoolName;
+	int32_t *bufPool;
 
 	vector<VmeCrate*> crateArray;
 	vector<Ics110blModule*> adcArray;

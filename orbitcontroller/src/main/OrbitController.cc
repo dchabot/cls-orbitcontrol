@@ -31,6 +31,7 @@ OrbitController::OrbitController() :
 	adcFrameRateSetpoint(0),adcFrameRateFeedback(0),
 	isrBarrierId(0),isrBarrierName(0),
 	rdrBarrierId(0),rdrBarrierName(0),
+	bufPoolId(0),bufPoolName(0),bufPool(0),
 	state(NULL),stateQueueId(0),stateQueueName(0),
 	initialized(false),mode(INITIALIZING),
 	spQueueId(0),spQueueName(0),
@@ -76,6 +77,7 @@ OrbitController::~OrbitController() {
 	for(uint32_t i=0; i<crateArray.size(); i++) { delete crateArray[i]; }
 	crateArray.clear();
 	for(uint32_t i=0; i<TESTING; i++) { delete states[i]; }
+	if(bufPoolId) { rtems_region_delete(bufPoolId); delete []bufPool; }
 	instance = 0;
 }
 
@@ -406,7 +408,7 @@ rtems_task OrbitController::ocThreadStart(rtems_task_argument arg) {
 	oc->ocThreadBody(oc->ocThreadArg);
 }
 
-static uint64_t now,then,tmp,numIters,start,end,period;
+static uint64_t now,then,tmp,numIters;
 static double sum,sumSqrs,avg,stdDev,maxTime;
 extern double tscTicksPerSecond;
 
@@ -509,10 +511,10 @@ void OrbitController::rendezvousWithAdcReaders() {
 	TestDirective(rc,"OrbitController: RDR barrier_wait() failure");
 }
 
-void OrbitController::activateAdcReaders(rtems_id bufId, uint32_t numFrames) {
+void OrbitController::activateAdcReaders(uint32_t numFrames) {
 	for(uint32_t i=0; i<NumAdcModules; i++) {
 		rdtscll(then);
-		rdSegments[i] = new AdcData(bufId,adcArray[i]->getChannelsPerFrame(),numFrames);
+		rdSegments[i] = new AdcData(bufPoolId,adcArray[i]->getChannelsPerFrame(),numFrames);
 		rdtscll(now);
 		//this'll unblock the associated AdcReader thread:
 		rdrArray[i]->read(rdSegments[i]);
