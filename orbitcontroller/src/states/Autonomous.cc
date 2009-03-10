@@ -53,7 +53,7 @@ void Autonomous::exitAction() {
 	syslog(LOG_INFO, "OrbitController - Autonomous Mode: avgFreq=%.3g Hz\n",1.0/((double)(period/numIters)/tscTicksPerSecond));
 	/* zero the parameters for the next iteration...*/
 	sum=sumSqrs=avg=stdDev=maxTime=0.0;
-	numIters=0;
+	numIters=start=end=period=0;
 #endif
 	syslog(LOG_INFO, "OrbitController: leaving state %s.\n",toString().c_str());
 }

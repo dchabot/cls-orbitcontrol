@@ -23,7 +23,7 @@ record(longin, "$(clsName):dac:fbk") {
 }
 
 # benchmarking shows that 30 microsec is about the lowest common setting that works (consistently)
-record(longout, "$(clsName)-exp:delay") {
+record(longout, "$(clsName):delay") {
 	field(DESC, "OCM ch$(channel) I/O delay")
 	field(DTYP, "OCM LongIO")
 	field(OMSL, "supervisory")
@@ -39,7 +39,7 @@ record(longout, "$(clsName)-exp:delay") {
 	field(EGU, "microsec")
 }
 
-record(bo, "$(clsName)-exp:isInCorrection") {
+record(bo, "$(clsName):isInCorrection") {
 	field(DTYP, "OCM BinaryOut")
 	field(OMSL, "supervisory")
 	field(DOL, "$(isInCorrection)")
@@ -47,3 +47,4 @@ record(bo, "$(clsName)-exp:isInCorrection") {
 	field(ZNAM, "False")
 	field(ONAM, "True")
 }
+

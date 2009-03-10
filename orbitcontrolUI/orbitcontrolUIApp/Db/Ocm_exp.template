@@ -47,3 +47,4 @@ record(bo, "$(clsName)-exp:isInCorrection") {
 	field(ZNAM, "False")
 	field(ONAM, "True")
 }
+
