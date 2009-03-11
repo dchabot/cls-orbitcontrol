@@ -21,6 +21,7 @@
 #include <epicsExport.h>
 #include <syslog.h>
 #include <OrbitController.h>
+#include <Command.h>
 #include <string>
 using std::string;
 
@@ -84,7 +85,8 @@ static long init_mbbi_record(void* mbbir) {
 
 	if(mbbip->evnt != 0) {
 		OrbitController *oc = OrbitController::getInstance();
-		oc->setModeChangeCallback(onOrbitControllerModeChange,(void*)mbbip->evnt);
+		Command* cmd = new Command(onOrbitControllerModeChange,(void*)mbbip->evnt);
+		oc->registerForModeEvents(cmd);
 	}
 
 	return 0;

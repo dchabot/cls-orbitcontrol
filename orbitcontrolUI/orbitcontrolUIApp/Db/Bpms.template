@@ -34,22 +34,22 @@ record(ai, "BPM$(clsName):y") {
 	field(ESLO, "$(y-voltsPerMilli)")
 }
 
-record(ai, "BPM$(clsName):x:snr") {
+record(ai, "BPM$(clsName):x:sigma") {
 	field(DTYP, "BPM AnalogIn")
-	field(INP, "@xsnr $(ringOrder)")
+	field(INP, "@xsigma $(ringOrder)")
 	field(SCAN, "Event")
 	field(EVNT, "$(bpmChangeEvent)")
 	field(PRIO, "HIGH")
-	field(EGU, "dB")
+	field(EGU, "m")
 }
 
-record(ai, "BPM$(clsName):y:snr") {
+record(ai, "BPM$(clsName):y:sigma") {
 	field(DTYP, "BPM AnalogIn")
-	field(INP, "@ysnr $(ringOrder)")
+	field(INP, "@ysigma $(ringOrder)")
 	field(SCAN, "Event")
 	field(EVNT, "$(bpmChangeEvent)")
 	field(PRIO, "HIGH")
-	field(EGU, "dB")
+	field(EGU, "m")
 }
 
 record(ao, "BPM$(clsName):x:reference") {

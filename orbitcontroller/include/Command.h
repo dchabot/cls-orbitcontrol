@@ -9,18 +9,22 @@
 #define COMMAND_H_
 
 typedef void* CommandArg;
+typedef void (*CommandFunc)(CommandArg);
 
 class Command {
 public:
-	Command(CommandArg c):arg(c){}
-	virtual ~Command() {}
-	virtual void execute()=0;
+	Command(CommandFunc f, CommandArg c) : func(f),arg(c) { }
+	virtual ~Command() { }
+	void execute() {
+		this->func(arg);
+	}
 
 private:
 	Command();
 	Command(const Command&);
 	const Command& operator=(const Command&);
 
+	CommandFunc func;
 	CommandArg arg;
 };
 

@@ -20,6 +20,7 @@
 #include <epicsExport.h>
 #include <syslog.h>
 #include <OrbitController.h>
+#include <Command.h>
 #include <stdlib.h>
 #include <string>
 #include <stdexcept>
@@ -54,7 +55,7 @@ struct {
 
 epicsExportAddress(dset,devSupBPMAnalogIn);
 
-enum aiType {xval,yval,xsnr,ysnr};
+enum aiType {xval,yval,xsigma,ysigma};
 
 struct aiData {
 	aiData(Bpm* b, aiType t):bpm(b),type(t){};
@@ -67,8 +68,8 @@ struct aiData {
 static aiType getRecType(string& type) {
 	if(type.compare("xval")==0) { return xval; }
 	else if(type.compare("yval")==0) { return yval; }
-	else if(type.compare("xsnr")==0) { return xsnr; }
-	else if(type.compare("ysnr")==0) { return ysnr; }
+	else if(type.compare("xsigma")==0) { return xsigma; }
+	else if(type.compare("ysigma")==0) { return ysigma; }
 	else {
 		type.append(": unknown record type!!! WTF ?!?!?!?");
 		throw runtime_error(type.c_str());
@@ -114,10 +115,10 @@ static long init_record(void* air) {
 	try {
 		aiData *aid = new aiData(bpm,getRecType(type));
 		//FIXME -- what happens if aip->eslo is changed via caput ??
-		// Nothing: that's what!! Could refactor UI-controlled Bpm class-attributes
-		// into *pointers*. That way we could hook record fields into each object instance...
+		// Nothing: that's what!!
+		// Update: fixed. See read_ai() below.
 		if(aid->type==xval) { bpm->setXVoltsPerMilli(aip->eslo); }
-		else { bpm->setYVoltsPerMilli(aip->eslo); }
+		else if(aid->type==yval) { bpm->setYVoltsPerMilli(aip->eslo); }
 		aid->voltsPerMilli=aip->eslo;
 		//hook our aiData object into this record instance
 		aip->dpvt = (void*)aid;
@@ -129,7 +130,8 @@ static long init_record(void* air) {
 	//register ONCE ONLY for BPM value-change events:
 	if(once) {
 		once=0;
-		bpmctlr->setBpmValueChangeCallback(onBpmValueChange,(void*)aip->evnt);
+		Command* cmd = new Command(onBpmValueChange,(void*)aip->evnt);
+		bpmctlr->registerForBpmEvents(cmd);
 	}
 	return 0;
 }
@@ -157,11 +159,11 @@ static long read_ai(void* air) {
 			aid->voltsPerMilli = aip->eslo;
 		}
 		break;
-	case(xsnr):
-		aip->val = aid->bpm->getXSNR();
+	case(xsigma):
+		aip->val = aid->bpm->getXSigma();
 		break;
-	case(ysnr):
-		aip->val = aid->bpm->getYSNR();
+	case(ysigma):
+		aip->val = aid->bpm->getYSigma();
 		break;
 	default:
 		syslog(LOG_INFO, "Unknown BPM AnalogIn type =%i\n",type);

@@ -57,6 +57,7 @@ void Initializing::stateAction() {
 	const double adcSampleRate = 10.15;//kHz. results in 10.05 kHz frame-rate.
 
 	syslog(LOG_INFO, "OrbitController: initializing...\n");
+	oc->modeChangePublisher = new Publisher();
 	rc = rtems_semaphore_create(rtems_build_name('O','R','B','m'), \
 					1 /*initial count*/, RTEMS_BINARY_SEMAPHORE | \
 					RTEMS_INHERIT_PRIORITY | RTEMS_PRIORITY, \
@@ -105,6 +106,7 @@ void Initializing::stateAction() {
 									RTEMS_LOCAL|RTEMS_FIFO,
 									&oc->bpmQueueId);
 	TestDirective(rc,"BpmController: msg_q_create failure");
+	oc->bpmEventPublisher = new Publisher();
 	oc->stateQueueName = rtems_build_name('S','T','A','Q');
 	rc = rtems_message_queue_create(oc->stateQueueName,
 										5/* FIXME -- max msgs in queue*/,

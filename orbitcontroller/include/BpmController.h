@@ -10,8 +10,7 @@
 
 #include <stdint.h>
 #include <Bpm.h>
-
-typedef void (*BpmValueChangeCallback)(void*);
+#include <Command.h>
 
 class BpmController {
 public:
@@ -22,7 +21,7 @@ public:
 	virtual void showAllBpms()=0;
 	virtual uint32_t getSamplesPerAvg() const=0;
 	virtual void setSamplesPerAvg(uint32_t num)=0;
-	virtual void setBpmValueChangeCallback(BpmValueChangeCallback cb, void* cbArg)=0;
+	virtual void registerForBpmEvents(Command*)=0;
 };
 
 

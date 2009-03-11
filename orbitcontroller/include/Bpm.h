@@ -18,8 +18,8 @@ const uint32_t NumBpm=48;
 //FIXME -- req'r state for X && Y enabled, as well as Device Support for same !!!
 class Bpm {
 public:
-	Bpm(const string& str) : id(str),enabled(true) { ++numInstances; }
-	~Bpm() { --numInstances; }
+	Bpm(const string& str) : id(str),enabled(true) { }
+	~Bpm() { }
 	string getId() const { return id; }
 	double getX() const { return x; }
 	void setX(double x) { this->x = x; }
@@ -37,16 +37,14 @@ public:
 	void setXVoltsPerMilli(double val) { this->xVoltsPerMilli=val; }
 	double getYVoltsPerMilli() const { return yVoltsPerMilli; }
 	void setYVoltsPerMilli(double val) { yVoltsPerMilli=val; }
-	double getXSNR() const { return xSnr; }
-	void setXSNR(double val) { xSnr = val; }
-	double getYSNR() const { return ySnr; }
-	void setYSNR(double val) { ySnr = val; }
+	double getXSigma() const { return xSigma; }
+	void setXSigma(double val) { xSigma = val; }
+	double getYSigma() const { return ySigma; }
+	void setYSigma(double val) { ySigma = val; }
 	void setEnabled(bool b) { enabled = b; }
 	bool isEnabled() const { return enabled; }
 	uint32_t getPosition() const { return position; }
 	void setPosition(uint32_t offs) { position=offs; }
-	//FIXME -- temporary!!
-	static uint32_t getNumInstances() { return numInstances; }
 
 private:
 	Bpm();
@@ -62,12 +60,10 @@ private:
 	double yOffs;
 	double xVoltsPerMilli;
 	double yVoltsPerMilli;
-	double xSnr; //SNR==signal-to-noise (20log(avg/sigma) [dB])
-	double ySnr;
+	double xSigma; //sigma==standard deviation
+	double ySigma;
 	bool enabled;
 	uint32_t position;
-	//FIXME -- temporary debug var
-	static uint32_t numInstances;
 };
 
 #endif /* BPM_H_ */

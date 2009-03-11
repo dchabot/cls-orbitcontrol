@@ -10,6 +10,7 @@
 
 #include <BpmController.h>
 #include <OcmController.h>
+
 #include <VmeCrate.h>
 #include <Ics110blModule.h>
 #include <Vmic2536Module.h>
@@ -18,6 +19,9 @@
 #include <AdcData.h>
 #include <Ocm.h>
 #include <PowerSupplyBulk.h>
+
+#include <Publisher.h>
+
 #include <Initializing.h>
 #include <Standby.h>
 #include <Assisted.h>
@@ -46,7 +50,6 @@ const uint32_t NumVmeCrates = 4;
 
 //FIXME -- this should be implemented as a class, 'cause c++ enums suck ass :-(
 enum OrbitControllerMode {INITIALIZING,STANDBY,ASSISTED,AUTONOMOUS,TIMED,TESTING};
-typedef void (*OrbitControllerModeChangeCallback)(void*);
 
 #define OC_DEBUG
 #ifdef OC_DEBUG
@@ -77,7 +80,7 @@ public:
 	double getAdcFrameRateFeedback() const { return adcFrameRateFeedback; }
 	OrbitControllerMode getMode();
 	void setMode(OrbitControllerMode mode);
-	void setModeChangeCallback(OrbitControllerModeChangeCallback cb, void* cbArg);
+	void registerForModeEvents(Command*);
 
 	//virtual methods inherited from abstract base-class OcmController:
 	Ocm* registerOcm(const string& str,uint32_t crateId,
@@ -102,7 +105,7 @@ public:
 	void registerBpm(Bpm* bpm);
 	void unregisterBpm(Bpm* bpm);
 	Bpm* getBpmById(const string& id);
-	void setBpmValueChangeCallback(BpmValueChangeCallback cb, void* cbArg);
+	void registerForBpmEvents(Command*);
 	uint32_t getSamplesPerAvg() const { return samplesPerAvg; }
 	void setSamplesPerAvg(uint32_t num) { samplesPerAvg = num; }
 	void showAllBpms();
@@ -141,8 +144,7 @@ private:
 	rtems_task bpmThreadBody(rtems_task_argument arg);
 
 	static OrbitController* instance;
-	OrbitControllerModeChangeCallback mcCallback;
-	void* mcCallbackArg;
+	Publisher* modeChangePublisher;
 	rtems_id mutexId;
 	rtems_id ocTID;
 	rtems_name ocThreadName;
@@ -222,13 +224,12 @@ private:
 	rtems_task_priority bpmThreadPriority;
 	rtems_id bpmQueueId;
 	rtems_name bpmQueueName;
-	BpmValueChangeCallback bpmCB;
-	void* bpmCBArg;
+	Publisher* bpmEventPublisher;
 	//BpmController private methods
 	uint32_t sumAdcSamples(double* sums, AdcData** data);
 	void sortBPMData(double *sortedArray,double *rawArray,uint32_t adcChannelsPerFrame);
 	double getBpmScaleFactor(uint32_t numSamples);
-	double getBpmSNR(double sum, double sumSqr, uint32_t n);
+	double getBpmSigma(double sum, double sumSqr, uint32_t n);
 };
 
 /* here are the ADC channel mappings based on the current drawings*/

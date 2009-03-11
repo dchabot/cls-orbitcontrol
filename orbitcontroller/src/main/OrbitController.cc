@@ -15,6 +15,15 @@
 #include <cmath> //fabs(double)
 #include <tscDefs.h>
 
+//BPM data-conversion factors:
+static const int mmPerMeter = 1000;
+// accounts for 24-bits of adc-data stuffed into the 3 MSB of a 32-bit word
+static const int ShiftFactor = (1<<8);
+// accounts for the voltage-divider losses of an LPF aft of each Bergoz unit
+static const double LPF_Factor = 1.015;
+// AdcPerVolt==(1<<23)/(20 Volts)
+static const double AdcPerVolt = 419430.4;
+static const double BpmFactor = LPF_Factor/(ShiftFactor*AdcPerVolt*mmPerMeter);
 
 static State *states[TESTING+1];
 
@@ -23,7 +32,7 @@ OrbitController* OrbitController::instance = 0;
 
 OrbitController::OrbitController() :
 	//ctor-initializer list
-	mcCallback(0), mcCallbackArg(0),
+	modeChangePublisher(0),
 	mutexId(0),ocTID(0),ocThreadName(0),ocThreadArg(0),
 	ocThreadPriority(OrbitControllerPriority),
 	rtemsTicksPerSecond(0),adcFramesPerTick(0),
@@ -39,8 +48,8 @@ OrbitController::OrbitController() :
 	bpmMsgSize(sizeof(rdSegments)),bpmMaxMsgs(10),
 	bpmTID(0),bpmThreadName(0),
 	bpmThreadArg(0),bpmThreadPriority(OrbitControllerPriority+3),
-	bpmQueueId(0),bpmQueueName(0),
-	bpmCB(0),bpmCBArg(0)
+	bpmQueueId(0),bpmQueueName(0),bpmEventPublisher(0)
+
 { }
 
 OrbitController::~OrbitController() {
@@ -58,6 +67,8 @@ OrbitController::~OrbitController() {
 	map<string,Bpm*>::iterator bpmit;
 	for(bpmit=bpmMap.begin(); bpmit!=bpmMap.end(); bpmit++) { delete bpmit->second; }
 	bpmMap.clear();
+	delete bpmEventPublisher;
+	delete modeChangePublisher;
 	set<Ocm*>::iterator ocmit;
 	for(ocmit=hOcmSet.begin(); ocmit!=hOcmSet.end(); ocmit++) { delete *ocmit; }
 	hOcmSet.clear();
@@ -132,9 +143,8 @@ void OrbitController::setMode(OrbitControllerMode mode) {
  * Refactor the BPM and OCM callback mechanisms using standard
  * Observer && Command patterns (i.e. vectors of observers and their cmds,publish,etc)
  */
-void OrbitController::setModeChangeCallback(OrbitControllerModeChangeCallback cb, void* cbArg) {
-	mcCallback = cb;
-	mcCallbackArg = cbArg;
+void OrbitController::registerForModeEvents(Command* cmd) {
+	modeChangePublisher->subscribe(cmd);
 }
 /********************** OcmController public interface *********************/
 /**
@@ -154,21 +164,6 @@ static ocmType getOcmType(const string& id) {
     syslog(LOG_INFO, "Can't identify type with id=%s\n",id.c_str());
     return UNKNOWN;
 }
-
-/*static void mapInsertOcm(map<string,Ocm*,OcmCompare>& m, Ocm* ocm) {
-	pair<set<Ocm*>::iterator,bool> ret;
-	ret = m.insert(pair<string,Ocm*>(ocm->getId(),ocm));
-	if(ret.second != false) {
-		syslog(LOG_INFO, "OcmController: added %s to %s OCM map.\n",
-							ocm->getId().c_str(),
-							getOcmType(ocm->getId())==HORIZONTAL?"horizontal":"vertical");
-	}
-	else {
-		syslog(LOG_INFO, "Failed to insert %s in OcmMap; it already exists!\n",
-								ocm->getId().c_str());
-		delete ocm;
-	}
-}*/
 
 Ocm* OrbitController::registerOcm(const string& id,
 									uint32_t crateId,
@@ -373,9 +368,8 @@ void OrbitController::showAllBpms() {
 	}
 }
 
-void OrbitController::setBpmValueChangeCallback(BpmValueChangeCallback cb, void* cbArg) {
-	bpmCB=cb;
-	bpmCBArg=cbArg;
+void OrbitController::registerForBpmEvents(Command* cmd) {
+	bpmEventPublisher->subscribe(cmd);
 }
 
 /*********************** private methods *****************************************/
@@ -413,10 +407,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	syslog(LOG_INFO, "OrbitController: entering main processing loop\n");
 	//goto Assisted mode as our first state *after* INITIALIZING
 	changeState(states[ASSISTED]);
-	//FIXME -- incorporate publish/subscribe Observer model!!!
-	if(mcCallback) {
-		this->mcCallback(mcCallbackArg);
-	}
+	modeChangePublisher->publish();
 	for(;;) {
 		msgSize = 0; // MUST reset this per iteration!!
 		rtems_message_queue_receive(stateQueueId,&lmode,&msgSize,RTEMS_NO_WAIT,RTEMS_NO_TIMEOUT);
@@ -428,10 +419,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 		else {
 			//transition to new State
 			changeState(states[lmode]);
-			//FIXME -- incorporate publish/subscribe Observer model!!!
-			if(mcCallback) {
-				this->mcCallback(mcCallbackArg);
-			}
+			modeChangePublisher->publish();
 #ifdef OC_DEBUG
 			stdDev = (1.0/(double)(numIters))*sumSqrs - (1.0/(double)(numIters*numIters))*(sum*sum);
 			stdDev = sqrt(stdDev);
@@ -591,15 +579,12 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 				for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
 					Bpm *bpm = it->second;
 					uint32_t pos = bpm->getPosition();
-					double xsnr = getBpmSNR(sortedSums[2*pos],sortedSumsSqrd[2*pos],numSamplesSummed);
-					bpm->setXSNR(xsnr);
-					double ysnr = getBpmSNR(sortedSums[2*pos+1],sortedSumsSqrd[2*pos+1],numSamplesSummed);
-					bpm->setYSNR(ysnr);
+					double xsnr = getBpmSigma(sortedSums[2*pos],sortedSumsSqrd[2*pos],numSamplesSummed);
+					bpm->setXSigma(xsnr);
+					double ysnr = getBpmSigma(sortedSums[2*pos+1],sortedSumsSqrd[2*pos+1],numSamplesSummed);
+					bpm->setYSigma(ysnr);
 				}
-				if(bpmCB != 0) {
-					/* fire record processing */
-					this->bpmCB(bpmCBArg);
-				}
+				bpmEventPublisher->publish();
 				/* zero the array of running-sums,reset counter, update num pts in avg */
 				memset(sums,0,sizeof(sums));
 				memset(sortedSums,0,sizeof(sortedSums));
@@ -627,15 +612,7 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 }
 
 double OrbitController::getBpmScaleFactor(uint32_t numSamples) {
-	const int mmPerMeter = 1000;
-	// accounts for 24-bits of adc-data stuffed into the 3 MSB of a 32-bit word
-	const int ShiftFactor = (1<<8);
-	// accounts for the voltage-divider losses of an LPF aft of each Bergoz unit
-	const double LPF_Factor = 1.015;
-	// AdcPerVolt==(1<<23)/(20 Volts)
-	const double AdcPerVolt = 419430.4;
-
-	return LPF_Factor/(numSamples*ShiftFactor*AdcPerVolt*mmPerMeter);
+	return BpmFactor/numSamples;
 }
 
 /**
@@ -711,10 +688,10 @@ uint32_t OrbitController::sumAdcSamples(double* sums, AdcData** data) {
 	return numSamplesSummed;
 }
 
-double OrbitController::getBpmSNR(double sum, double sumSqr, uint32_t n) {
-	// SNR = 10*log((avg/sigma)^2) [dB]
-	double num = pow(sum,2);
-	double den = (sumSqr*(double)n) - num;
+double OrbitController::getBpmSigma(double sum, double sumSqr, uint32_t n) {
+	// sigma = sqrt(((1/n)*sumSqr)-(sum/n)^2) [m]
+	double a = sumSqr/n;
+	double b = pow((sum/n),2);
 
-	return 10.0*log10(num/den);
+	return sqrt(a-b)*BpmFactor;
 }
