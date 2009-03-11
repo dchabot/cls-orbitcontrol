@@ -14,10 +14,10 @@
 
 class PowerSupplyBulk {
 public:
-	PowerSupplyBulk(Vmic2536Module* m, uint32_t microsec):mod(m),delay(microsec) {}
-	virtual ~PowerSupplyBulk() {}
-	void updateSetpoints()const;
-	uint32_t getDelay()const { return delay; }
+	PowerSupplyBulk(Vmic2536Module* m):mod(m),delay(35) { }
+	~PowerSupplyBulk() { }
+	void updateSetpoints() const;
+	uint32_t getDelay() const { return delay; }
 	void setDelay(uint32_t microsec) {  delay=microsec; }
 
 private:

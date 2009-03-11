@@ -40,7 +40,7 @@ enum ocmType {HORIZONTAL=1,VERTICAL=0,UNKNOWN=-1};
 class Ocm {
 public:
 	Ocm(const string& str,Vmic2536Module* module,uint8_t chan);
-	virtual ~Ocm();
+	~Ocm() { }
 	bool isEnabled() const { return enabled; }
 	void setEnabled(bool b) { enabled=b; }
 	void setSetpoint(int32_t sp);
@@ -51,8 +51,6 @@ public:
 	void setDelay(uint8_t usec) { delay=usec; }
 	uint32_t getPosition() const { return position; }
 	void setPosition(uint32_t p) { position=p; }
-	//FIXME -- temporary!!
-	static uint32_t getNumInstances() { return numInstances; }
 
 private:
 	Ocm();
@@ -67,8 +65,6 @@ private:
 	int32_t feedback;
 	uint8_t delay; //opto-isolator on/off delay
 	uint32_t position;
-	//FIXME -- temporary debug var
-	static uint32_t numInstances;
 };
 
 #endif /* OCM_H_ */

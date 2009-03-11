@@ -146,7 +146,7 @@ void Initializing::stateAction() {
 									dioconfig[i].baseAddr));
 		oc->dioArray[i]->initialize();
 		//FIXME -- when all OCM are "fast" do we need 4 or 8 PowerSupplyBulk objects ???
-		oc->psbArray.push_back(new PowerSupplyBulk(oc->dioArray[i],30));
+		oc->psbArray.push_back(new PowerSupplyBulk(oc->dioArray[i]));
 	}
 	for(uint32_t i=0; i<NumAdcModules; i++) {
 		oc->isrArray.push_back(new AdcIsr(oc->adcArray[i],oc->isrBarrierId));

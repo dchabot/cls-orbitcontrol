@@ -18,7 +18,6 @@
 
 static State *states[TESTING+1];
 
-uint32_t Bpm::numInstances=0;
 /* THE singleton instance of this class */
 OrbitController* OrbitController::instance = 0;
 
@@ -268,9 +267,6 @@ static void printOcmInfo(Ocm* ocm) {
 }
 
 void OrbitController::showAllOcms() {
-	syslog(LOG_INFO, "Total # of OCM instances=%i\tTotal # OCM registered=%i\n",
-						Ocm::getNumInstances(),hOcmSet.size()+vOcmSet.size());
-
 	set<Ocm*>::iterator it;
 	for(it=hOcmSet.begin(); it!=hOcmSet.end(); it++) { printOcmInfo(*it); }
 	syslog(LOG_INFO, "\n\n\n");
@@ -316,7 +312,7 @@ void OrbitController::setHorizontalResponseMatrix(double h[NumHOcm*NumBpm]) {
 	unlock();
 #ifdef OC_DEBUG
 	for(col=0; col<2; col++) {
-		for(row=0; row<NumVOcm; row++) {
+		for(row=0; row<NumHOcm; row++) {
 			syslog(LOG_INFO, "hmat[%i][%i]=%.3e\n",row,col,hmat[row][col]);
 		}
 	}
@@ -366,8 +362,6 @@ Bpm* OrbitController::getBpmById(const string& id) {
 }
 
 void OrbitController::showAllBpms() {
-	syslog(LOG_INFO, "Total # of BPM instances=%i\tTotal # BPM registered=%i\n",
-							Bpm::getNumInstances(),bpmMap.size());
 	map<string,Bpm*>::iterator it;
 	for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
 		syslog(LOG_INFO, "%s: pos=%i x=%.3e y=%.3e enabled=%s\n",

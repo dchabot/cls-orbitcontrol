@@ -22,12 +22,13 @@ record(longin, "$(clsName)-exp:dac:fbk") {
 	field(EGU, "DAC")
 }
 
-# benchmarking shows that 30 microsec is about the lowest common setting that works (consistently)
+# 35 microsec is about the lowest common setting that works (consistently)
 record(longout, "$(clsName)-exp:delay") {
 	field(DESC, "OCM ch$(channel) I/O delay")
 	field(DTYP, "OCM LongIO")
+	field(PINI, "1")
 	field(OMSL, "supervisory")
-	field(DOL, "30")
+	field(DOL, "35")
 	field(OUT, "@$(crateId) $(vmeBaseAddr) $(channel) $(ringOrder)")
 	field(SCAN, "Passive")
 	field(HOPR, "100")
