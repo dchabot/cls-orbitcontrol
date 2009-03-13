@@ -99,12 +99,12 @@ void Initializing::stateAction() {
 								RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),
 								&oc->bpmTID);
 	TestDirective(rc,"BpmController: thread_create failure");
-	oc->bpmQueueName = rtems_build_name('B','P','M','q');
-	rc = rtems_message_queue_create(oc->bpmQueueName,
-									oc->bpmMaxMsgs/*max msgs in queue*/,
-									oc->bpmMsgSize/*max msg size (bytes)*/,
+	oc->adcQueueName = rtems_build_name('B','P','M','q');
+	rc = rtems_message_queue_create(oc->adcQueueName,
+									oc->adcMaxMsgs/*max msgs in queue*/,
+									oc->adcMsgSize/*max msg size (bytes)*/,
 									RTEMS_LOCAL|RTEMS_FIFO,
-									&oc->bpmQueueId);
+									&oc->adcQueueId);
 	TestDirective(rc,"BpmController: msg_q_create failure");
 	oc->bpmEventPublisher = new Publisher();
 	oc->stateQueueName = rtems_build_name('S','T','A','Q');
@@ -114,6 +114,14 @@ void Initializing::stateAction() {
 										RTEMS_LOCAL|RTEMS_FIFO,
 										&oc->stateQueueId);
 	TestDirective(rc, "OrbitController: State msg_q_create failure");
+	oc->ocmThreadName = rtems_build_name('O','C','M','t');
+	rc = rtems_task_create(oc->ocmThreadName,
+								oc->ocmThreadPriority,
+								RTEMS_MINIMUM_STACK_SIZE*8,
+								RTEMS_FLOATING_POINT|RTEMS_LOCAL,
+								RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),
+								&oc->ocmTID);
+	TestDirective(rc,"OcmController: thread create failure");
 
 	rtems_clock_get(RTEMS_CLOCK_GET_TICKS_PER_SECOND, &oc->rtemsTicksPerSecond);
 
@@ -135,7 +143,7 @@ void Initializing::stateAction() {
 	uint32_t numFrames = HALF_FIFO_LENGTH/ICS110B_DEFAULT_CHANNELS_PER_FRAME; //max of 512 frames
 	uint32_t numChannelsPerFrame = ICS110B_DEFAULT_CHANNELS_PER_FRAME; //32 channels/frame
 	//bufLength is approx. 3 MB. See Notebook #2, pg 25-26 for logic.
-	uint32_t bufLength = NumAdcModules*numChannelsPerFrame*numFrames*(oc->bpmMaxMsgs+2)*sizeof(int32_t);
+	uint32_t bufLength = NumAdcModules*numChannelsPerFrame*numFrames*(oc->adcMaxMsgs+2)*sizeof(int32_t);
 	oc->bufPool = new int32_t[bufLength];
 	oc->bufPoolName = rtems_build_name('B','U','F','R');
 	rc = rtems_region_create(oc->bufPoolName,oc->bufPool,bufLength,

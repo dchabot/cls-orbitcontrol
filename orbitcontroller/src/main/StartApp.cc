@@ -64,7 +64,7 @@ extern "C" void startApp(char* epicsApp) {
 			//parse and start the EPICS app, orbitcontrolUI:
 			cexpsh(epicsApp);
 		}
-		oc->start(rtems_task_self(),0);
+		oc->start();
 	}
 	catch(OrbitControlException& ex) {
 		cout << "Caught Exception!!!" << endl;
