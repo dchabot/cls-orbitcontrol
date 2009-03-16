@@ -11,9 +11,8 @@
 #include <OrbitControlException.h>
 
 
-static uint64_t now,then,tmp,numIters,start,end,period;
+static uint64_t now,then,tmp,numIters;
 static double sum,sumSqrs,avg,stdDev,maxTime;
-static int once=1;
 static rtems_interval periodTicks;
 extern double tscTicksPerSecond;
 static rtems_id timerId;
@@ -70,23 +69,15 @@ void Timed::exitAction() {
 	maxTime /= tscTicksPerSecond;
 
 	syslog(LOG_INFO, "OrbitController - Timed Mode stats:\n\tAvg = %0.9f +/- %0.9f [s], max=%0.9f [s]\n",avg,stdDev,maxTime);
-	syslog(LOG_INFO, "OrbitController - Timed Mode: avgFreq=%.3g Hz\n",1.0/((double)(period/numIters)/tscTicksPerSecond));
 	/* zero the parameters for the next iteration...*/
 	sum=sumSqrs=avg=stdDev=maxTime=0.0;
-	numIters=period=0;
-	once=1;
-	start=end=0;
+	numIters=0;
 #endif
 	syslog(LOG_INFO, "OrbitController: leaving state %s.\n",toString().c_str());
 }
 
 void Timed::stateAction() {
 	rtems_event_set eventsIn = 0;
-
-	end=start;
-	rdtscll(start);
-	if(once) { once=0; }
-	else { period += start-end; }
 
 	rtems_status_code rc = rtems_event_receive(RTEMS_EVENT_1,
 												RTEMS_WAIT|RTEMS_EVENT_ANY,

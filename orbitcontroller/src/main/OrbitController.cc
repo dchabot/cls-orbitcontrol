@@ -420,16 +420,18 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			changeState(state);
 		}
 		else {
+#ifdef OC_DEBUG
+			if(mode==TIMED) {
+				syslog(LOG_INFO, "OrbitController - Timed Mode: avgFreq=%.3g Hz\n",1.0/((double)(__period/numIters)/tscTicksPerSecond));
+				/* zero the parameters for the next iteration...*/
+				numIters=__period=0;
+				once=1;
+				__start=__end=0;
+			}
+#endif
 			//transition to new State
 			changeState(states[lmode]);
 			modeChangePublisher->publish();
-#ifdef OC_DEBUG
-			syslog(LOG_INFO, "OrbitController - Timed Mode: avgFreq=%.3g Hz\n",1.0/((double)(__period/numIters)/tscTicksPerSecond));
-			/* zero the parameters for the next iteration...*/
-			numIters=__period=0;
-			once=1;
-			__start=__end=0;
-#endif
 		}
 	}
 	//state exit: silence the ADC's
@@ -726,10 +728,12 @@ rtems_task OrbitController::ocmThreadBody(rtems_task_argument arg) {
 		}
 		else if(mode==AUTONOMOUS || mode==TIMED) {
 #ifdef OC_DEBUG
-			__end=__start;
-			rdtscll(__start);
-			if(once) { once=0; }
-			else { __period += __start-__end; }
+			if(mode==TIMED) {
+				__end=__start;
+				rdtscll(__start);
+				if(once) { once=0; }
+				else { __period += __start-__end; ++numIters; }
+			}
 #endif
 			uint32_t bytes;
 			rtems_status_code rc = rtems_message_queue_receive(adcQueueId,ds,&bytes,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
