@@ -12,7 +12,7 @@
 #include <vmic2536.h>
 #include <stdint.h>
 
-#define VMIC2536MODULE_USE_SINGLE_CYCLE_VME_ACCESS
+//#define VMIC2536MODULE_USE_SINGLE_CYCLE_VME_ACCESS
 
 class Vmic2536Module : public VmeModule {
 public:

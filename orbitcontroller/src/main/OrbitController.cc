@@ -396,10 +396,6 @@ rtems_task OrbitController::ocThreadStart(rtems_task_argument arg) {
 	oc->ocThreadBody(oc->ocThreadArg);
 }
 
-static uint64_t now,then,tmp,numIters;
-static double sum,sumSqrs,avg,stdDev,maxTime;
-extern double tscTicksPerSecond;
-
 rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	OrbitControllerMode lmode;
 	size_t msgSize;
@@ -420,19 +416,6 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			//transition to new State
 			changeState(states[lmode]);
 			modeChangePublisher->publish();
-#ifdef OC_DEBUG
-			stdDev = (1.0/(double)(numIters))*sumSqrs - (1.0/(double)(numIters*numIters))*(sum*sum);
-			stdDev = sqrt(stdDev);
-			stdDev /= tscTicksPerSecond;
-			avg = sum/((double)numIters);
-			avg /= tscTicksPerSecond;
-			maxTime /= tscTicksPerSecond;
-
-			syslog(LOG_INFO, "OrbitController - AdcData stats:\n\tAvg = %0.9f +/- %0.9f [s], max=%0.9f [s]\n",avg,stdDev,maxTime);
-			/* zero the parameters for the next iteration...*/
-			sum=sumSqrs=avg=stdDev=maxTime=0.0;
-			numIters=0;
-#endif
 		}
 	}
 	//state exit: silence the ADC's
@@ -495,21 +478,10 @@ void OrbitController::rendezvousWithAdcReaders() {
 
 void OrbitController::activateAdcReaders(uint32_t numFrames) {
 	for(uint32_t i=0; i<NumAdcModules; i++) {
-		rdtscll(then);
 		rdSegments[i] = new AdcData(bufPoolId,adcArray[i]->getChannelsPerFrame(),numFrames);
-		rdtscll(now);
 		//this'll unblock the associated AdcReader thread:
 		rdrArray[i]->read(rdSegments[i]);
 	}
-#ifdef OC_DEBUG
-	tmp = now-then;
-	sum += (double)tmp;
-	sumSqrs += (double)(tmp*tmp);
-	if((double)tmp>maxTime) {
-		maxTime = (double)tmp;
-	}
-	++numIters;
-#endif
 }
 
 void OrbitController::enqueueAdcData() {

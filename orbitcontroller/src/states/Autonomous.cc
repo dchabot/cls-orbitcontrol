@@ -11,6 +11,7 @@
 
 Autonomous* Autonomous::instance=0;
 
+static int once=1;
 static uint64_t now,then,tmp,numIters,start,end,period;
 static double sum,sumSqrs,avg,stdDev,maxTime;
 extern double tscTicksPerSecond;
@@ -54,22 +55,22 @@ void Autonomous::exitAction() {
 	/* zero the parameters for the next iteration...*/
 	sum=sumSqrs=avg=stdDev=maxTime=0.0;
 	numIters=start=end=period=0;
+	once=1;
 #endif
 	syslog(LOG_INFO, "OrbitController: leaving state %s.\n",toString().c_str());
 }
 
 void Autonomous::stateAction() {
-	static int once=1;
-
 	end=start;
 	rdtscll(start);
 	if(once) { once=0; }
 	else { period += start-end; }
 	//Wait for notification of ADC "fifo-half-full" event...
 	oc->rendezvousWithIsr();
+	rdtscll(then);
 	oc->stopAdcAcquisition();
 	oc->activateAdcReaders(HALF_FIFO_LENGTH/oc->adcArray[0]->getChannelsPerFrame());
-	//Wait (block) 'til AdcReaders have completed their block-reads: ~3 ms duration
+	//Wait (block) 'til AdcReaders have completed their block-reads: ~3 ms duration for 1/2-FIFO
 	oc->rendezvousWithAdcReaders();
 	oc->resetAdcFifos();
 	oc->startAdcAcquisition();
@@ -77,8 +78,6 @@ void Autonomous::stateAction() {
 	/* At this point, we have approx 50 ms to "do our thing" (at 10 kHz ADC framerate)
 	 * before ADC FIFOs reach their 1/2-full point and trigger another interrupt.
 	 */
-	//TODO -- we're eventually going to want to incorporate Dispersion effects here
-	rdtscll(then);
 	fastAlgorithm(oc);
 	rdtscll(now);
 #ifdef OC_DEBUG
