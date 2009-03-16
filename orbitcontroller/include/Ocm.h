@@ -51,6 +51,7 @@ public:
 	void setDelay(uint8_t usec) { delay=usec; }
 	uint32_t getPosition() const { return position; }
 	void setPosition(uint32_t p) { position=p; }
+	Vmic2536Module* getModule() const { return mod; }
 
 private:
 	Ocm();

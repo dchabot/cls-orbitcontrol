@@ -74,7 +74,7 @@ enum OrbitControllerMode {INITIALIZING,STANDBY,ASSISTED,AUTONOMOUS,TIMED,TESTING
 class OrbitController : public OcmController,public BpmController {
 public:
 	static OrbitController* getInstance();
-	void start(rtems_task_argument, rtems_task_argument);
+	void start();
 	void destroyInstance();
 	double getAdcFrameRateSetpoint() const { return adcFrameRateSetpoint; }
 	double getAdcFrameRateFeedback() const { return adcFrameRateFeedback; }
@@ -142,6 +142,9 @@ private:
 	rtems_task ocThreadBody(rtems_task_argument arg);
 	static rtems_task bpmThreadStart(rtems_task_argument arg);
 	rtems_task bpmThreadBody(rtems_task_argument arg);
+	static rtems_task ocmThreadStart(rtems_task_argument);
+	rtems_task ocmThreadBody(rtems_task_argument);
+
 
 	static OrbitController* instance;
 	Publisher* modeChangePublisher;
@@ -180,6 +183,10 @@ private:
 	bool initialized;
 	OrbitControllerMode mode;
 
+	rtems_id ocmTID;
+	rtems_name ocmThreadName;
+	rtems_task_argument ocmThreadArg;
+	rtems_task_priority ocmThreadPriority;
 	//OcmController attributes
 	//private struct for determining order in OCM sets
 	struct OcmCompare {
@@ -216,14 +223,14 @@ private:
 	//BpmController attributes
 	uint32_t samplesPerAvg;
 	map<string,Bpm*> bpmMap;
-	const uint32_t bpmMsgSize;
-	const uint32_t bpmMaxMsgs;
+	const uint32_t adcMsgSize;
+	const uint32_t adcMaxMsgs;
 	rtems_id bpmTID;
 	rtems_name bpmThreadName;
 	rtems_task_argument bpmThreadArg;
 	rtems_task_priority bpmThreadPriority;
-	rtems_id bpmQueueId;
-	rtems_name bpmQueueName;
+	rtems_id adcQueueId;
+	rtems_name adcQueueName;
 	Publisher* bpmEventPublisher;
 	//BpmController private methods
 	uint32_t sumAdcSamples(double* sums, AdcData** data);

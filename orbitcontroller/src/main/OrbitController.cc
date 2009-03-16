@@ -42,13 +42,15 @@ OrbitController::OrbitController() :
 	bufPoolId(0),bufPoolName(0),bufPool(0),
 	state(NULL),stateQueueId(0),stateQueueName(0),
 	initialized(false),mode(INITIALIZING),
+	ocmTID(0),ocmThreadName(0),ocmThreadArg(0),
+	ocmThreadPriority(OrbitControllerPriority+2),
 	spQueueId(0),spQueueName(0),
 	hResponseInitialized(false),vResponseInitialized(false),
 	dispInitialized(false),samplesPerAvg(5000),
-	bpmMsgSize(sizeof(rdSegments)),bpmMaxMsgs(10),
+	adcMsgSize(sizeof(rdSegments)),adcMaxMsgs(10),
 	bpmTID(0),bpmThreadName(0),
 	bpmThreadArg(0),bpmThreadPriority(OrbitControllerPriority+3),
-	bpmQueueId(0),bpmQueueName(0),bpmEventPublisher(0)
+	adcQueueId(0),adcQueueName(0),bpmEventPublisher(0)
 
 { }
 
@@ -62,7 +64,8 @@ OrbitController::~OrbitController() {
 	if(isrBarrierId) { rtems_barrier_delete(isrBarrierId); }
 	if(rdrBarrierId) { rtems_barrier_delete(rdrBarrierId); }
 	if(bpmTID) { rtems_task_delete(bpmTID); }
-	if(bpmQueueId) { rtems_message_queue_delete(bpmQueueId); }
+	if(adcQueueId) { rtems_message_queue_delete(adcQueueId); }
+	if(ocmTID) { rtems_task_delete(ocmTID); }
 	/* XXX -- container.clear() canNOT call item dtors if items are pointers!! */
 	map<string,Bpm*>::iterator bpmit;
 	for(bpmit=bpmMap.begin(); bpmit!=bpmMap.end(); bpmit++) { delete bpmit->second; }
@@ -108,20 +111,20 @@ OrbitController* OrbitController::getInstance() {
 
 void OrbitController::destroyInstance() { delete instance; }
 
-void OrbitController::start(rtems_task_argument ocThreadArg,
-							rtems_task_argument bpmThreadArg) {
+void OrbitController::start( ) {
 	//FIXME--
 	if(initialized==false) {
 		changeState(states[INITIALIZING]);
 	}
 	//fire up the OrbitController and BpmController threads:
-	this->ocThreadArg = ocThreadArg;
 	rtems_status_code rc = rtems_task_start(ocTID,ocThreadStart,(rtems_task_argument)this);
 	TestDirective(rc,"Failed to start OrbitController thread");
 
-	this->bpmThreadArg = bpmThreadArg;
 	rc = rtems_task_start(bpmTID,bpmThreadStart,(rtems_task_argument)this);
 	TestDirective(rc, "Failed to start BpmController thread");
+
+	rc = rtems_task_start(ocmTID,ocmThreadStart,(rtems_task_argument)this);
+	TestDirective(rc,"Failed to start OcmController thread");
 }
 
 OrbitControllerMode OrbitController::getMode() {
@@ -485,8 +488,8 @@ void OrbitController::activateAdcReaders(uint32_t numFrames) {
 }
 
 void OrbitController::enqueueAdcData() {
-	rtems_status_code rc = rtems_message_queue_send(bpmQueueId,rdSegments,sizeof(rdSegments));
-	TestDirective(rc, "BpmController: msq_q_send failure");
+	rtems_status_code rc = rtems_message_queue_send(adcQueueId,rdSegments,sizeof(rdSegments));
+	TestDirective(rc, "ADC data queue: msq_q_send failure");
 }
 
 rtems_task OrbitController::bpmThreadStart(rtems_task_argument arg) {
@@ -504,15 +507,15 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 	static double sortedSums[NumBpmChannels];
 	static double sortedSumsSqrd[NumBpmChannels];
 
-	syslog(LOG_INFO, "BpmController: entering main loop...\n");
+	syslog(LOG_INFO, "BpmController: entering main processing loop...\n");
 	for(;;) {
 		uint32_t bytes;
-		rtems_status_code rc = rtems_message_queue_receive(bpmQueueId,ds,&bytes,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
+		rtems_status_code rc = rtems_message_queue_receive(adcQueueId,ds,&bytes,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
 		TestDirective(rc,"BpmController: msg_q_rcv failure");
-		if(bytes != bpmMsgSize) {
+		if(bytes != adcMsgSize) {
 			//FIXME -- handle this error!!!
 			syslog(LOG_INFO, "BpmController: received %u bytes in msg: was expecting %u\n",
-								bytes,bpmMsgSize);
+								bytes,adcMsgSize);
 		}
 		/* XXX -- assumes each ADC Data Segment has an equal # of frames and channels per frame */
 		uint32_t numFrames = ds[0]->getFrames();
@@ -575,7 +578,9 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 				}
 			}
 		}
-		/* release memory allocated in OrbitController::activateAdcReaders() */
+		/* XXX -- ONLY bpmThread must delete AdcData objects !!!
+		 * 	----> release memory allocated in OrbitController::activateAdcReaders()
+		 */
 		for(uint32_t i=0; i<NumAdcModules; i++) {
 			delete ds[i];
 		}
@@ -666,4 +671,56 @@ double OrbitController::getBpmSigma(double sum, double sumSqr, uint32_t n) {
 	double b = pow((sum/n),2);
 
 	return sqrt(a-b)*BpmFactor;
+}
+
+rtems_task OrbitController::ocmThreadStart(rtems_task_argument arg) {
+	OrbitController* oc = (OrbitController*)arg;
+	oc->ocmThreadBody(oc->ocmThreadArg);
+}
+
+rtems_task OrbitController::ocmThreadBody(rtems_task_argument arg) {
+	AdcData *ds[NumAdcModules];
+
+	syslog(LOG_INFO, "OcmController: entering main processing loop...\n");
+	for(;;) {
+		if(mode==ASSISTED) {
+			/* If we have new OCM setpoints to deliver, do it now
+			 * We'll wait up to 20 ms for ALL the setpoints to enqueue
+			 */
+			int maxIter=4;
+			uint32_t numMsgs=0;
+			do {
+				rtems_status_code rc = rtems_message_queue_get_number_pending(spQueueId,&numMsgs);
+				TestDirective(rc, "OcmController: OCM msg_q_get_number_pending failure");
+				if(numMsgs < NumOcm) { rtems_task_wake_after(5); }
+				else { break; } //break from do{ }while
+			} while(--maxIter);
+			//deliver all the OCM setpoints we have.
+			if(numMsgs > 0) {
+				for(uint32_t i=0; i<numMsgs; i++) {
+					OrbitController::SetpointMsg msg(NULL,0);
+					size_t msgsz;
+					rtems_status_code rc = rtems_message_queue_receive(spQueueId,&msg,&msgsz,RTEMS_NO_WAIT,RTEMS_NO_TIMEOUT);
+					TestDirective(rc,"OcmController: msq_q_rcv failure");
+					msg.ocm->setSetpoint(msg.sp);
+				}
+				for(uint32_t i=0; i<psbArray.size(); i++) {
+					psbArray[i]->updateSetpoints();
+				}
+#ifdef OC_DEBUG
+				syslog(LOG_INFO, "OcmController: updated %i OCM setpoints\n",numMsgs);
+#endif
+			}
+		}
+		else if(mode==AUTONOMOUS || mode==TIMED) {
+			uint32_t bytes;
+			rtems_status_code rc = rtems_message_queue_receive(adcQueueId,ds,&bytes,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
+			TestDirective(rc,"BpmController: msg_q_rcv failure");
+			if(bytes != adcMsgSize) {
+				//FIXME -- handle this error!!!
+				syslog(LOG_INFO, "BpmController: received %u bytes in msg: was expecting %u\n",
+									bytes,adcMsgSize);
+			}
+		}
+	}
 }
