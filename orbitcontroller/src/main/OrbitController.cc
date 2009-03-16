@@ -399,6 +399,10 @@ rtems_task OrbitController::ocThreadStart(rtems_task_argument arg) {
 	oc->ocThreadBody(oc->ocThreadArg);
 }
 
+static uint64_t numIters,__start,__end,__period;
+static int once=1;
+extern double tscTicksPerSecond;
+
 rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 	OrbitControllerMode lmode;
 	size_t msgSize;
@@ -419,6 +423,13 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			//transition to new State
 			changeState(states[lmode]);
 			modeChangePublisher->publish();
+#ifdef OC_DEBUG
+			syslog(LOG_INFO, "OrbitController - Timed Mode: avgFreq=%.3g Hz\n",1.0/((double)(__period/numIters)/tscTicksPerSecond));
+			/* zero the parameters for the next iteration...*/
+			numIters=__period=0;
+			once=1;
+			__start=__end=0;
+#endif
 		}
 	}
 	//state exit: silence the ADC's
@@ -488,7 +499,8 @@ void OrbitController::activateAdcReaders(uint32_t numFrames) {
 }
 
 void OrbitController::enqueueAdcData() {
-	rtems_status_code rc = rtems_message_queue_send(adcQueueId,rdSegments,sizeof(rdSegments));
+	uint32_t msgCount;
+	rtems_status_code rc = rtems_message_queue_broadcast(adcQueueId,rdSegments,sizeof(rdSegments),&msgCount);
 	TestDirective(rc, "ADC data queue: msq_q_send failure");
 }
 
@@ -713,6 +725,12 @@ rtems_task OrbitController::ocmThreadBody(rtems_task_argument arg) {
 			}
 		}
 		else if(mode==AUTONOMOUS || mode==TIMED) {
+#ifdef OC_DEBUG
+			__end=__start;
+			rdtscll(__start);
+			if(once) { once=0; }
+			else { __period += __start-__end; }
+#endif
 			uint32_t bytes;
 			rtems_status_code rc = rtems_message_queue_receive(adcQueueId,ds,&bytes,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
 			TestDirective(rc,"BpmController: msg_q_rcv failure");
@@ -721,6 +739,7 @@ rtems_task OrbitController::ocmThreadBody(rtems_task_argument arg) {
 				syslog(LOG_INFO, "BpmController: received %u bytes in msg: was expecting %u\n",
 									bytes,adcMsgSize);
 			}
+			fastAlgorithm(this);
 		}
 	}
 }

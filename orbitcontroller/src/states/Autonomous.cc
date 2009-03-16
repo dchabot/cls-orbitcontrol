@@ -78,7 +78,9 @@ void Autonomous::stateAction() {
 	/* At this point, we have approx 50 ms to "do our thing" (at 10 kHz ADC framerate)
 	 * before ADC FIFOs reach their 1/2-full point and trigger another interrupt.
 	 */
-	fastAlgorithm(oc);
+	//fastAlgorithm(oc);
+	//hand raw ADC data off to processing thread
+	oc->enqueueAdcData();
 	rdtscll(now);
 #ifdef OC_DEBUG
 	tmp = now-then;
@@ -89,7 +91,5 @@ void Autonomous::stateAction() {
 	}
 	++numIters;
 #endif
-	//hand raw ADC data off to processing thread
-	oc->enqueueAdcData();
 }
 

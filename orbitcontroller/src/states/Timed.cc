@@ -61,7 +61,7 @@ void Timed::exitAction() {
 	oc->resetAdcFifos();
 	rtems_timer_cancel(timerId);
 	rtems_timer_delete(timerId);
-	#ifdef OC_DEBUG
+#ifdef OC_DEBUG
 	stdDev = (1.0/(double)(numIters))*sumSqrs - (1.0/(double)(numIters*numIters))*(sum*sum);
 	stdDev = sqrt(stdDev);
 	stdDev /= tscTicksPerSecond;
@@ -100,7 +100,7 @@ void Timed::stateAction() {
 	oc->resetAdcFifos();
 	oc->startAdcAcquisition();
 
-	fastAlgorithm(oc);
+	//fastAlgorithm(oc);
 
 	//hand raw ADC data off to processing thread
 	oc->enqueueAdcData();

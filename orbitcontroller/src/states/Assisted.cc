@@ -56,7 +56,7 @@ void Assisted::stateAction() {
 	/* If we have new OCM setpoints to deliver, do it now
 	 * We'll wait up to 20 ms for ALL the setpoints to enqueue
 	 */
-	int maxIter=4;
+	/*int maxIter=4;
 	uint32_t numMsgs=0;
 	do {
 		rtems_status_code rc = rtems_message_queue_get_number_pending(oc->spQueueId,&numMsgs);
@@ -79,7 +79,7 @@ void Assisted::stateAction() {
 #ifdef OC_DEBUG
 		syslog(LOG_INFO, "OrbitController: updated %i OCM setpoints\n",numMsgs);
 #endif
-	}
+	}*/
 	//hand raw ADC data off to processing thread
 	oc->enqueueAdcData();
 }
