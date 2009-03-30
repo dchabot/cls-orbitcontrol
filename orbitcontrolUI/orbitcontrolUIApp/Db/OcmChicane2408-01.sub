@@ -2,7 +2,7 @@
 #   
 #
 #### NOTE: "ringOrder" for these channels is meaningless in the context of orbit-control,
-####		as they don't take part in the correction algorithm. It's sufficient to give
+####		as these don't take part in the correction algorithm. It's sufficient to give
 ####		them sequential "ringOrder"s higher than that of any OCM (i.e. > 48)
 
 pattern
