@@ -43,7 +43,7 @@ struct {
 };
 epicsExportAddress(dset,devSupOCMWaveform);
 
-enum wfType {xResp,yResp,disp};
+enum wfType {xResp,yResp};
 
 struct ocmWF {
 	wfType type;
@@ -52,7 +52,6 @@ struct ocmWF {
 static wfType getRecType(string type) {
 	if(type.compare("x:responseVector")==0) { return xResp; }
 	else if(type.compare("y:responseVector")==0) { return yResp; }
-	else if(type.compare("dispersionVector")==0) { return disp; }
 	else {
 		type.append(": unknown record type!!! WTF ?!?!?!?");
 		throw runtime_error(type.c_str());
@@ -106,9 +105,6 @@ static long read_wf(void* wfr) {
 			break;
 		case yResp:
 			ocmCtlr->setVerticalResponseMatrix((double*)wfrp->bptr);
-			break;
-		case disp:
-			ocmCtlr->setDispersionVector((double*)wfrp->bptr);
 			break;
 		default:
 			syslog(LOG_INFO,"devSupOCMWaveform: read_wf() default case, AAARRRGGG!!!\n");

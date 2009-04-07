@@ -84,12 +84,20 @@ void Initializing::stateAction() {
 								NumAdcModules+1,
 								&oc->rdrBarrierId);
 	TestDirective(rc,"OrbitController: RDR barrier_create() failure");
-	oc->spQueueName = rtems_build_name('S','P','Q','1');
-	rc = rtems_message_queue_create(oc->spQueueName,
-									NumOcm*10/*FIXME--(see ntbk#2 pg22) max msgs in queue*/,
-									sizeof(OrbitController::SetpointMsg)/*max msg size (bytes)*/,
+	oc->ocmThreadName = rtems_build_name('O','C','M','t');
+	rc = rtems_task_create(oc->ocmThreadName,
+								oc->ocmThreadPriority,
+								RTEMS_MINIMUM_STACK_SIZE*8,
+								RTEMS_FLOATING_POINT|RTEMS_LOCAL,
+								RTEMS_PREEMPT | RTEMS_NO_TIMESLICE | RTEMS_NO_ASR | RTEMS_INTERRUPT_LEVEL(0),
+								&oc->ocmTID);
+	TestDirective(rc,"OcmController: thread create failure");
+	oc->ocmQueueName = rtems_build_name('O','C','M','q');
+	rc = rtems_message_queue_create(oc->ocmQueueName,
+									10/*max msgs in queue*/,
+									sizeof(oc->rdSegments)/*max msg size (bytes)*/,
 									RTEMS_LOCAL|RTEMS_FIFO,
-									&oc->spQueueId);
+									&oc->ocmQueueId);
 	TestDirective(rc, "OrbitController: power-supply msg_queue_create() failure");
 	oc->bpmThreadName = rtems_build_name('B','P','M','t');
 	rc = rtems_task_create(oc->bpmThreadName,
@@ -107,7 +115,7 @@ void Initializing::stateAction() {
 									&oc->bpmQueueId);
 	TestDirective(rc,"BpmController: msg_q_create failure");
 	oc->bpmEventPublisher = new Publisher();
-	oc->stateQueueName = rtems_build_name('S','T','A','Q');
+	oc->stateQueueName = rtems_build_name('S','T','A','q');
 	rc = rtems_message_queue_create(oc->stateQueueName,
 										5/* FIXME -- max msgs in queue*/,
 										sizeof(State*)/*max msg size (bytes)*/,

@@ -74,7 +74,7 @@ enum OrbitControllerMode {INITIALIZING,STANDBY,ASSISTED,AUTONOMOUS,TIMED,TESTING
 class OrbitController : public OcmController,public BpmController {
 public:
 	static OrbitController* getInstance();
-	void start(rtems_task_argument, rtems_task_argument);
+	void start();
 	void destroyInstance();
 	double getAdcFrameRateSetpoint() const { return adcFrameRateSetpoint; }
 	double getAdcFrameRateFeedback() const { return adcFrameRateFeedback; }
@@ -91,7 +91,6 @@ public:
 	void setOcmSetpoint(Ocm* ch, int32_t val);
 	void setVerticalResponseMatrix(double v[NumVOcm*NumBpm]);
 	void setHorizontalResponseMatrix(double h[NumHOcm*NumBpm]);
-	void setDispersionVector(double d[NumBpm]);
 	void setMaxHorizontalStep(int32_t step) { maxHStep = step; }
 	int32_t getMaxHorizontalStep() const { return maxHStep; }
 	void setMaxVerticalStep(int32_t step) { maxVStep = step; }
@@ -123,7 +122,7 @@ private:
 	friend class Timed;
 	friend class Testing;
 
-	friend void fastAlgorithm(OrbitController*);
+	friend void fastAlgorithm(double*,OrbitController*);
 
 	void changeState(State*);
 	void lock();
@@ -142,6 +141,9 @@ private:
 	rtems_task ocThreadBody(rtems_task_argument arg);
 	static rtems_task bpmThreadStart(rtems_task_argument arg);
 	rtems_task bpmThreadBody(rtems_task_argument arg);
+	static rtems_task ocmThreadStart(rtems_task_argument);
+	rtems_task ocmThreadBody(rtems_task_argument);
+
 
 	static OrbitController* instance;
 	Publisher* modeChangePublisher;
@@ -180,6 +182,10 @@ private:
 	bool initialized;
 	OrbitControllerMode mode;
 
+	rtems_id ocmTID;
+	rtems_name ocmThreadName;
+	rtems_task_argument ocmThreadArg;
+	rtems_task_priority ocmThreadPriority;
 	//OcmController attributes
 	//private struct for determining order in OCM sets
 	struct OcmCompare {
@@ -189,31 +195,24 @@ private:
 	};
 	set<Ocm*,OcmCompare> vOcmSet;//vertical OCM
 	set<Ocm*,OcmCompare> hOcmSet;//horizontal OCM
-	rtems_id spQueueId;
-	rtems_name spQueueName;
-	//private struct for enqueueing OCM setpoint changes (single)
-	struct SetpointMsg {
-		SetpointMsg(Ocm* ocm, int32_t setpoint):ocm(ocm),sp(setpoint){}
-		~SetpointMsg(){}
-		Ocm* ocm;
-		int32_t sp;
-	};
+	rtems_id ocmQueueId;
+	rtems_name ocmQueueName;
 	int32_t maxHStep;
 	int32_t maxVStep;
 	double maxHFrac;
 	double maxVFrac;
-	/* FIXME -- replace static arrays with vector<vector<double>> && vector<double>
+	/* FIXME -- should replace static arrays with vector<vector<double> >
 	 * NOTE  -- also replace const NumOcm/NumBpm,etc with static variables and let
 	 * 			the UI inform *us* of how many OCM/BPM are required...
 	 */
 	double hmat[NumHOcm][NumBpm];
 	double vmat[NumVOcm][NumBpm];
-	double dmat[NumBpm];
 	bool hResponseInitialized;
 	bool vResponseInitialized;
-	bool dispInitialized;
 
 	//BpmController attributes
+	uint32_t framesCollected;
+	uint32_t framesPerCorrection;
 	uint32_t samplesPerAvg;
 	map<string,Bpm*> bpmMap;
 	const uint32_t bpmMsgSize;
@@ -226,8 +225,8 @@ private:
 	rtems_name bpmQueueName;
 	Publisher* bpmEventPublisher;
 	//BpmController private methods
-	uint32_t sumAdcSamples(double* sums, AdcData** data);
-	void sortBPMData(double *sortedArray,double *rawArray,uint32_t adcChannelsPerFrame);
+	uint32_t sumAdcSamples(double*,AdcData**);
+	void sortBPMData(double*,double*,uint32_t);
 	double getBpmScaleFactor(uint32_t numSamples);
 	double getBpmSigma(double sum, double sumSqr, uint32_t n);
 };
