@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <ics110bl.h>
 
-#define ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
+//#define ICS110BLMODULE_USE_SINGLE_CYCLE_VME_ACCESS
 
 class Ics110blModule : public VmeModule {
 public:

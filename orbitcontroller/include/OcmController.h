@@ -25,7 +25,6 @@ public:
 	virtual void showAllOcms()=0;
 	virtual void setVerticalResponseMatrix(double v[NumVOcm*NumBpm])=0;
 	virtual void setHorizontalResponseMatrix(double h[NumHOcm*NumBpm])=0;
-	virtual void setDispersionVector(double d[NumBpm])=0;
 	virtual void setMaxHorizontalStep(int32_t step)=0;
 	virtual int32_t getMaxHorizontalStep()const=0;
 	virtual void setMaxVerticalStep(int32_t step)=0;

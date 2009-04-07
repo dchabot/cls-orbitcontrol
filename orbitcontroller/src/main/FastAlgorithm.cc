@@ -7,13 +7,11 @@
 #include <OrbitController.h>
 #include <cmath>
 
-void fastAlgorithm(OrbitController* oc) {
-	static double sums[NumAdcModules*32];
+void fastAlgorithm(double* sums, OrbitController* oc) {
 	static double sorted[TOTAL_BPMS*2];
 	static double h[NumHOcm],v[NumVOcm];
 
-	if (oc->hResponseInitialized && oc->vResponseInitialized/* && oc->dispInitialized*/) {
-		memset(sums, 0, sizeof(sums));
+	if (oc->hResponseInitialized && oc->vResponseInitialized) {
 		memset(sorted, 0, sizeof(sorted));
 		memset(h, 0, sizeof(h));
 		memset(v, 0, sizeof(v));
@@ -29,11 +27,10 @@ void fastAlgorithm(OrbitController* oc) {
 		for (bit=oc->bpmMap.begin(); bit!=oc->bpmMap.end(); bit++) {
 			Bpm *bpm = bit->second;
 			uint32_t pos = bpm->getPosition();
-			sorted[2* pos ] *= sf / bpm->getXVoltsPerMilli();
-			sorted[2* pos + 1] *= sf / bpm->getYVoltsPerMilli();
+			sorted[2*pos ] *= sf / bpm->getXVoltsPerMilli();
+			sorted[2*pos+1] *= sf / bpm->getYVoltsPerMilli();
 		}
 
-		//TODO: calc dispersion effect
 		//First, calc BPM deltas
 		for (bit=oc->bpmMap.begin(); bit!=oc->bpmMap.end(); bit++) {
 			Bpm *bpm = bit->second;

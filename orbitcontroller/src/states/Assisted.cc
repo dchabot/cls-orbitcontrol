@@ -59,7 +59,7 @@ void Assisted::stateAction() {
 	/*int maxIter=4;
 	uint32_t numMsgs=0;
 	do {
-		rtems_status_code rc = rtems_message_queue_get_number_pending(oc->spQueueId,&numMsgs);
+		rtems_status_code rc = rtems_message_queue_get_number_pending(oc->ocmQueueId,&numMsgs);
 		TestDirective(rc, "OrbitController: OCM msg_q_get_number_pending failure");
 		if(numMsgs < NumOcm) { rtems_task_wake_after(5); }
 		else { break; }
@@ -67,9 +67,9 @@ void Assisted::stateAction() {
 	//deliver all the OCM setpoints we have.
 	if(numMsgs > 0) {
 		for(uint32_t i=0; i<numMsgs; i++) {
-			OrbitController::SetpointMsg msg(NULL,0);
+			OrbitController::OcmThreadMsg msg(NULL,0);
 			size_t msgsz;
-			rtems_status_code rc = rtems_message_queue_receive(oc->spQueueId,&msg,&msgsz,RTEMS_NO_WAIT,RTEMS_NO_TIMEOUT);
+			rtems_status_code rc = rtems_message_queue_receive(oc->ocmQueueId,&msg,&msgsz,RTEMS_NO_WAIT,RTEMS_NO_TIMEOUT);
 			TestDirective(rc,"OcmController: msq_q_rcv failure");
 			msg.ocm->setSetpoint(msg.sp);
 		}
@@ -80,6 +80,6 @@ void Assisted::stateAction() {
 		syslog(LOG_INFO, "OrbitController: updated %i OCM setpoints\n",numMsgs);
 #endif
 	}*/
-	//hand raw ADC data off to processing thread
+	//hand-off raw ADC data
 	oc->enqueueAdcData();
 }

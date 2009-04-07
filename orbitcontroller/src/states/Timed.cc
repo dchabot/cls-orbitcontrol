@@ -11,21 +11,15 @@
 #include <OrbitControlException.h>
 
 
-static uint64_t now,then,tmp,numIters;
+static uint64_t now,then,tmp,numIters,start,end,period;
 static double sum,sumSqrs,avg,stdDev,maxTime;
-static rtems_interval periodTicks;
+static int once=1;
 extern double tscTicksPerSecond;
-static rtems_id timerId;
+static rtems_id periodId;
+static rtems_interval periodTicks;
 static uint32_t numFrames;
 
 extern void fastAlgorithm(OrbitController*);
-
-static void timerCallback(rtems_id timeId, void* arg) {
-	rtems_id tid = (rtems_id)arg;
-
-	rtems_event_send(tid,RTEMS_EVENT_1);
-	rtems_timer_reset(timerId);
-}
 
 Timed* Timed::instance=0;
 
@@ -42,25 +36,28 @@ Timed* Timed::getInstance() {
 void Timed::entryAction() {
 	syslog(LOG_INFO, "OrbitController: entering state %s",toString().c_str());
 	oc->mode = TIMED;
-	periodTicks = 10; //FIXME -- make this value an OrbitController attribute
-	numFrames = ((((uint32_t)ceil(oc->adcFrameRateFeedback))*1000)/oc->rtemsTicksPerSecond)*periodTicks;
-	rtems_status_code rc = rtems_timer_create(rtems_build_name('T','I','M','R'), &timerId);
-	TestDirective(rc,"OrbitController: failure creating Timed-State timer");
+	rtems_status_code rc = rtems_rate_monotonic_create(rtems_build_name('P','E','R','1'),&periodId);
+	TestDirective(rc, "OrbitController: failure creating RMS period");
+	periodTicks = 1; //FIXME -- make this value an OrbitController attribute
+	numFrames = ((((uint32_t)(oc->adcFrameRateFeedback)*1000)/oc->rtemsTicksPerSecond)*periodTicks)/*-1*/;
+	syslog(LOG_INFO, "OrbitController: Timed mode numFrames=%d\n",numFrames);
 	//start on the "edge" of a clock-tick:
 	rtems_task_wake_after(2);
 	oc->disableAdcInterrupts();
 	oc->resetAdcFifos();
 	oc->startAdcAcquisition();
-	rc = rtems_timer_fire_after(timerId,periodTicks,timerCallback,(void*)oc->ocTID);
+	//initiate the RMS period
+	rc = rtems_rate_monotonic_period(periodId,periodTicks);
+	TestDirective(rc,"OrbitController: Timed->onEntry() RMS period failure");
 }
 
 void Timed::exitAction() {
 	//state exit: silence the ADC's
 	oc->stopAdcAcquisition();
 	oc->resetAdcFifos();
-	rtems_timer_cancel(timerId);
-	rtems_timer_delete(timerId);
-#ifdef OC_DEBUG
+	rtems_status_code rc = rtems_rate_monotonic_delete(periodId);
+	TestDirective(rc,"OrbitController: failure deleting RMS period");
+	#ifdef OC_DEBUG
 	stdDev = (1.0/(double)(numIters))*sumSqrs - (1.0/(double)(numIters*numIters))*(sum*sum);
 	stdDev = sqrt(stdDev);
 	stdDev /= tscTicksPerSecond;
@@ -77,24 +74,22 @@ void Timed::exitAction() {
 }
 
 void Timed::stateAction() {
-	rtems_event_set eventsIn = 0;
-
-	rtems_status_code rc = rtems_event_receive(RTEMS_EVENT_1,
-												RTEMS_WAIT|RTEMS_EVENT_ANY,
-												periodTicks+1,&eventsIn);
-	TestDirective(rc,"OrbitController: failure receiving Timed-State event");
 	rdtscll(then);
+	//block for remainder of periodTicks and re-initialize RMS period
+	rtems_status_code rc = rtems_rate_monotonic_period(periodId,periodTicks);
+	TestDirective(rc,"OrbitController: failure with RMS period");
 	oc->stopAdcAcquisition();
 	oc->activateAdcReaders(numFrames);
 	//Wait (block) 'til AdcReaders have completed their block-reads
 	oc->rendezvousWithAdcReaders();
+
 	oc->resetAdcFifos();
 	oc->startAdcAcquisition();
 
+	oc->enqueueAdcData();
+
 	//fastAlgorithm(oc);
 
-	//hand raw ADC data off to processing thread
-	oc->enqueueAdcData();
 	rdtscll(now);
 #ifdef OC_DEBUG
 	tmp = now-then;

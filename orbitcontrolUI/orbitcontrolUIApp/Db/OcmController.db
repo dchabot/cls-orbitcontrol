@@ -15,14 +15,6 @@ record(waveform, "OCM:y:responseVector") {
 	field(NELM, "$(responseYSize)")
 }
 
-record(waveform, "OCM:dispersionVector") {
-	field(DTYP, "OCM Waveform")
-	field(INP, "0")
-	field(SCAN, "Passive")
-	field(FTVL, "DOUBLE")
-	field(NELM, "$(numBpm)")
-}
-
 ###NOTE: need to get limits for maxStep && corrFraction records!!!
 record(longout, "OCM:x:maxStep") {
 	field(DESC, "OCM max gain")

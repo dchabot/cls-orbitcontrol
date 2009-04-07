@@ -44,13 +44,13 @@ OrbitController::OrbitController() :
 	initialized(false),mode(INITIALIZING),
 	ocmTID(0),ocmThreadName(0),ocmThreadArg(0),
 	ocmThreadPriority(OrbitControllerPriority+2),
-	spQueueId(0),spQueueName(0),
+	ocmQueueId(0),ocmQueueName(0),
 	hResponseInitialized(false),vResponseInitialized(false),
-	dispInitialized(false),samplesPerAvg(5000),
-	adcMsgSize(sizeof(rdSegments)),adcMaxMsgs(10),
+	framesCollected(0),framesPerCorrection(100),samplesPerAvg(5000),
+	bpmMsgSize(sizeof(rdSegments)),bpmMaxMsgs(10),
 	bpmTID(0),bpmThreadName(0),
 	bpmThreadArg(0),bpmThreadPriority(OrbitControllerPriority+3),
-	adcQueueId(0),adcQueueName(0),bpmEventPublisher(0)
+	bpmQueueId(0),bpmQueueName(0),bpmEventPublisher(0)
 
 { }
 
@@ -60,11 +60,11 @@ OrbitController::~OrbitController() {
 	resetAdcFifos();
 	if(mutexId) { rtems_semaphore_delete(mutexId); }
 	if(ocTID) { rtems_task_delete(ocTID); }
-	if(spQueueId) { rtems_message_queue_delete(spQueueId); }
+	if(ocmQueueId) { rtems_message_queue_delete(ocmQueueId); }
 	if(isrBarrierId) { rtems_barrier_delete(isrBarrierId); }
 	if(rdrBarrierId) { rtems_barrier_delete(rdrBarrierId); }
 	if(bpmTID) { rtems_task_delete(bpmTID); }
-	if(adcQueueId) { rtems_message_queue_delete(adcQueueId); }
+	if(bpmQueueId) { rtems_message_queue_delete(bpmQueueId); }
 	if(ocmTID) { rtems_task_delete(ocmTID); }
 	/* XXX -- container.clear() canNOT call item dtors if items are pointers!! */
 	map<string,Bpm*>::iterator bpmit;
@@ -273,9 +273,11 @@ void OrbitController::showAllOcms() {
 }
 
 void OrbitController::setOcmSetpoint(Ocm* ocm, int32_t val) {
-	SetpointMsg msg(ocm, val);
-	rtems_status_code rc = rtems_message_queue_send(spQueueId,(void*)&msg,sizeof(msg));
-	TestDirective(rc,"OcmController: msg_q_send failure");
+	/*OcmThreadMsg msg(ocm, val);
+	rtems_status_code rc = rtems_message_queue_send(ocmQueueId,(void*)&msg,sizeof(msg));
+	TestDirective(rc,"OcmController: msg_q_send failure");*/
+	ocm->setSetpoint(val);
+	ocm->activateSetpoint();
 }
 
 //XXX -- vmat & hmat are populated in Row-Major order (i.e - "ith row, jth column")
@@ -313,20 +315,6 @@ void OrbitController::setHorizontalResponseMatrix(double h[NumHOcm*NumBpm]) {
 		for(row=0; row<NumHOcm; row++) {
 			syslog(LOG_INFO, "hmat[%i][%i]=%.3e\n",row,col,hmat[row][col]);
 		}
-	}
-#endif
-}
-
-void OrbitController::setDispersionVector(double d[NumBpm]) {
-	lock();
-	for(uint32_t col=0; col<NumBpm; col++) {
-		dmat[col] = d[col];
-	}
-	dispInitialized=true;
-	unlock();
-#ifdef OC_DEBUG
-	for(uint32_t col=0; col<NumBpm; col++) {
-		syslog(LOG_INFO, "dmat[%i]=%.3e\n",col,dmat[col]);
 	}
 #endif
 }
@@ -383,7 +371,7 @@ void OrbitController::changeState(State* aState) {
 
 //FIXME -- refactor lock()/unlock() to signatures like lock(id:rtems_id)
 // 		   This will permit finer-grained locking by admitting BPM,OCM,
-//		   and OrbitController locks.
+//		   and OrbitController locks, rather than a single, all-encompassing mutex.
 void OrbitController::lock() {
 	rtems_status_code rc = rtems_semaphore_obtain(mutexId,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
 	TestDirective(rc, "OrbitController: mutex lock failure");
@@ -420,6 +408,7 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 			changeState(state);
 		}
 		else {
+			//transition to new State
 #ifdef OC_DEBUG
 			if(mode==TIMED) {
 				syslog(LOG_INFO, "OrbitController - Timed Mode: avgFreq=%.3g Hz\n",1.0/((double)(__period/numIters)/tscTicksPerSecond));
@@ -429,7 +418,6 @@ rtems_task OrbitController::ocThreadBody(rtems_task_argument arg) {
 				__start=__end=0;
 			}
 #endif
-			//transition to new State
 			changeState(states[lmode]);
 			modeChangePublisher->publish();
 		}
@@ -501,9 +489,13 @@ void OrbitController::activateAdcReaders(uint32_t numFrames) {
 }
 
 void OrbitController::enqueueAdcData() {
-	uint32_t msgCount;
-	rtems_status_code rc = rtems_message_queue_broadcast(adcQueueId,rdSegments,sizeof(rdSegments),&msgCount);
-	TestDirective(rc, "ADC data queue: msq_q_send failure");
+	rtems_status_code rc = rtems_message_queue_send(bpmQueueId,rdSegments,sizeof(rdSegments));
+	TestDirective(rc, "BPM queue: msq_q_send failure");
+
+	if(mode==AUTONOMOUS || mode==TIMED) {
+		rc = rtems_message_queue_send(ocmQueueId,rdSegments,sizeof(rdSegments));
+		TestDirective(rc, "OCM queue: msq_q_send failure");
+	}
 }
 
 rtems_task OrbitController::bpmThreadStart(rtems_task_argument arg) {
@@ -524,12 +516,12 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 	syslog(LOG_INFO, "BpmController: entering main processing loop...\n");
 	for(;;) {
 		uint32_t bytes;
-		rtems_status_code rc = rtems_message_queue_receive(adcQueueId,ds,&bytes,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
+		rtems_status_code rc = rtems_message_queue_receive(bpmQueueId,ds,&bytes,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
 		TestDirective(rc,"BpmController: msg_q_rcv failure");
-		if(bytes != adcMsgSize) {
+		if(bytes != bpmMsgSize) {
 			//FIXME -- handle this error!!!
 			syslog(LOG_INFO, "BpmController: received %u bytes in msg: was expecting %u\n",
-								bytes,adcMsgSize);
+								bytes,bpmMsgSize);
 		}
 		/* XXX -- assumes each ADC Data Segment has an equal # of frames and channels per frame */
 		uint32_t numFrames = ds[0]->getFrames();
@@ -615,7 +607,7 @@ double OrbitController::getBpmScaleFactor(uint32_t numSamples) {
  */
 void OrbitController::sortBPMData(double *sortedArray,
 					double *rawArray,
-					uint32_t adcChannelsPerFrame) {
+					uint32_t channelsPerFrame) {
 	int i,j;
 	int nthAdc = 0;
 
@@ -623,17 +615,17 @@ void OrbitController::sortBPMData(double *sortedArray,
 		sortedArray[2*i] = rawArray[nthAdc+adc0ChMap[j]];
 		sortedArray[2*i+1] = rawArray[nthAdc+adc0ChMap[j]+1];
 	}
-	nthAdc += adcChannelsPerFrame;
+	nthAdc += channelsPerFrame;
 	for(j=0; j<adc1ChMap_LENGTH; i++,j++) {
 		sortedArray[2*i] = rawArray[nthAdc+adc1ChMap[j]];
 		sortedArray[2*i+1] = rawArray[nthAdc+adc1ChMap[j]+1];
 	}
-	nthAdc += adcChannelsPerFrame;
+	nthAdc += channelsPerFrame;
 	for(j=0; j<adc2ChMap_LENGTH; i++,j++) {
 		sortedArray[2*i] = rawArray[nthAdc+adc2ChMap[j]];
 		sortedArray[2*i+1] = rawArray[nthAdc+adc2ChMap[j]+1];
 	}
-	nthAdc += adcChannelsPerFrame;
+	nthAdc += channelsPerFrame;
 	for(j=0; j<adc3ChMap_LENGTH; i++,j++) {
 		sortedArray[2*i] = rawArray[nthAdc+adc3ChMap[j]];
 		sortedArray[2*i+1] = rawArray[nthAdc+adc3ChMap[j]+1];
@@ -694,56 +686,31 @@ rtems_task OrbitController::ocmThreadStart(rtems_task_argument arg) {
 
 rtems_task OrbitController::ocmThreadBody(rtems_task_argument arg) {
 	AdcData *ds[NumAdcModules];
+	static double sums[NumAdcModules*32];
 
 	syslog(LOG_INFO, "OcmController: entering main processing loop...\n");
 	for(;;) {
-		if(mode==ASSISTED) {
-			/* If we have new OCM setpoints to deliver, do it now
-			 * We'll wait up to 20 ms for ALL the setpoints to enqueue
-			 */
-			int maxIter=4;
-			uint32_t numMsgs=0;
-			do {
-				rtems_status_code rc = rtems_message_queue_get_number_pending(spQueueId,&numMsgs);
-				TestDirective(rc, "OcmController: OCM msg_q_get_number_pending failure");
-				if(numMsgs < NumOcm) { rtems_task_wake_after(5); }
-				else { break; } //break from do{ }while
-			} while(--maxIter);
-			//deliver all the OCM setpoints we have.
-			if(numMsgs > 0) {
-				for(uint32_t i=0; i<numMsgs; i++) {
-					OrbitController::SetpointMsg msg(NULL,0);
-					size_t msgsz;
-					rtems_status_code rc = rtems_message_queue_receive(spQueueId,&msg,&msgsz,RTEMS_NO_WAIT,RTEMS_NO_TIMEOUT);
-					TestDirective(rc,"OcmController: msq_q_rcv failure");
-					msg.ocm->setSetpoint(msg.sp);
-				}
-				for(uint32_t i=0; i<psbArray.size(); i++) {
-					psbArray[i]->updateSetpoints();
-				}
-#ifdef OC_DEBUG
-				syslog(LOG_INFO, "OcmController: updated %i OCM setpoints\n",numMsgs);
-#endif
-			}
+		uint32_t bytes;
+		rtems_status_code rc = rtems_message_queue_receive(ocmQueueId,ds,&bytes,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
+		TestDirective(rc,"OcmThread: msg_q_rcv failure");
+		if(bytes != bpmMsgSize) {
+			//FIXME -- handle this error!!!
+			syslog(LOG_INFO, "BpmController: received %u bytes in msg: was expecting %u\n",
+								bytes,bpmMsgSize);
 		}
-		else if(mode==AUTONOMOUS || mode==TIMED) {
+		sumAdcSamples(sums,ds);
+		framesCollected += ds[0]->getFrames();
+		if(framesCollected >= framesPerCorrection) {
+			fastAlgorithm(sums,this);
+			//reset variables
+			framesCollected = 0;
+			memset(sums, 0, sizeof(sums));
 #ifdef OC_DEBUG
-			if(mode==TIMED) {
-				__end=__start;
-				rdtscll(__start);
-				if(once) { once=0; }
-				else { __period += __start-__end; ++numIters; }
-			}
+			__end=__start;
+			rdtscll(__start);
+			if(once) { once=0; }
+			else { __period += __start-__end; ++numIters; }
 #endif
-			uint32_t bytes;
-			rtems_status_code rc = rtems_message_queue_receive(adcQueueId,ds,&bytes,RTEMS_WAIT,RTEMS_NO_TIMEOUT);
-			TestDirective(rc,"BpmController: msg_q_rcv failure");
-			if(bytes != adcMsgSize) {
-				//FIXME -- handle this error!!!
-				syslog(LOG_INFO, "BpmController: received %u bytes in msg: was expecting %u\n",
-									bytes,adcMsgSize);
-			}
-			fastAlgorithm(this);
 		}
 	}
 }
