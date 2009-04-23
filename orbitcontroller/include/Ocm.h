@@ -35,7 +35,9 @@ const uint32_t NumOcm=48;
 const uint32_t NumHOcm=NumOcm/2;
 const uint32_t NumVOcm=NumOcm/2;
 
-enum ocmType {HORIZONTAL=1,VERTICAL=0,UNKNOWN=-1};
+enum ocmType {CHICANE=2,HORIZONTAL=1,VERTICAL=0,UNKNOWN=-1};
+
+class PowerSupplyController;
 
 class Ocm {
 public:
@@ -58,6 +60,8 @@ private:
 	Ocm();
 	Ocm(const Ocm&);
 	const Ocm& operator=(const Ocm&);
+
+	friend class PowerSupplyController;
 
 	Vmic2536Module* mod;
 	uint8_t channel;

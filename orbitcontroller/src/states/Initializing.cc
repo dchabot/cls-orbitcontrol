@@ -152,11 +152,11 @@ void Initializing::stateAction() {
 	TestDirective(rc,"OrbitController: failure initializing buffer pool Region");
 
 	for(uint32_t i=0; i<NumDioModules; i++) {
-		oc->dioArray.push_back(new Vmic2536Module(oc->crateArray[dioconfig[i].crateId],
-									dioconfig[i].baseAddr));
-		oc->dioArray[i]->initialize();
+		Vmic2536Module* mod = new Vmic2536Module(oc->crateArray[dioconfig[i].crateId],
+													dioconfig[i].baseAddr);
+		mod->initialize();
 		//FIXME -- when all OCM are "fast" do we need 4 or 8 PowerSupplyBulk objects ???
-		oc->psbArray.push_back(new PowerSupplyBulk(oc->dioArray[i]));
+		oc->psCtlrs.push_back(new PowerSupplyController(mod));
 	}
 	for(uint32_t i=0; i<NumAdcModules; i++) {
 		oc->isrArray.push_back(new AdcIsr(oc->adcArray[i],oc->isrBarrierId));

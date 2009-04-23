@@ -1,0 +1,13 @@
+The file, Db/Makefile contains the important parameter, IS_EXPERIMENT_CONFIG. Setting this to
+"true" will cause the files "Bpms_exp.template" and "Ocm_exp.template" to be used for database
+construction.
+
+The "*App/Db/*_exp.template"'s utilize PV (record) names that WILL NOT CLASH with PV names utilized
+in production systems. For example, the production PV, "BPM1401-01:x" becomes 
+"BPM1401-01-exp:x" when this application is built using "IS_EXPERIMENT_CONFIG=true".
+
+This build-time setting permits construction and testing of a system that is IDENTICAL to the 
+production system, with the exception of record names. This is somewhat useful (yes, that was
+sarcasm)...
+
+see also "*App/Db/README.OCM.ringOrder" for other, equally important info...

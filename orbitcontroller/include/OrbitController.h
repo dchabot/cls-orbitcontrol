@@ -17,9 +17,7 @@
 #include <AdcReader.h>
 #include <AdcIsr.h>
 #include <AdcData.h>
-#include <Ocm.h>
-#include <PowerSupplyBulk.h>
-
+#include <PowerSupplyController.h>
 #include <Publisher.h>
 
 #include <Initializing.h>
@@ -31,14 +29,12 @@
 
 #include <vector>
 #include <map>
-#include <set>
 #include <rtems.h>
 #include <stdint.h>
 
 using std::vector;
 using std::string;
 using std::map;
-using std::set;
 using std::iterator;
 using std::pair;
 
@@ -169,10 +165,10 @@ private:
 
 	vector<VmeCrate*> crateArray;
 	vector<Ics110blModule*> adcArray;
-	vector<Vmic2536Module*> dioArray;
 	vector<AdcIsr*> isrArray;
 	vector<AdcReader*> rdrArray;
-	vector<PowerSupplyBulk*> psbArray;
+	vector<PowerSupplyController*> psCtlrs;
+	vector<Ocm*> chicaneOcm;
 	AdcData* rdSegments[NumAdcModules];
 
 	State *state;
@@ -187,14 +183,6 @@ private:
 	rtems_task_argument ocmThreadArg;
 	rtems_task_priority ocmThreadPriority;
 	//OcmController attributes
-	//private struct for determining order in OCM sets
-	struct OcmCompare {
-		bool operator()(Ocm* lhs, Ocm* rhs) const {
-			return (lhs->getPosition()<rhs->getPosition());
-		}
-	};
-	set<Ocm*,OcmCompare> vOcmSet;//vertical OCM
-	set<Ocm*,OcmCompare> hOcmSet;//horizontal OCM
 	rtems_id ocmQueueId;
 	rtems_name ocmQueueName;
 	int32_t maxHStep;
@@ -209,6 +197,8 @@ private:
 	double vmat[NumVOcm][NumBpm];
 	bool hResponseInitialized;
 	bool vResponseInitialized;
+	void distributeOcmSetpoints(double*,double*);
+	void updateOcmSetpoints();
 
 	//BpmController attributes
 	uint32_t framesCollected;

@@ -126,45 +126,11 @@ void Testing::stateAction() {
 			v[i] *= oc->maxVFrac;
 		}
 		oc->unlock();
+		//FIXME -- extract oc->distributeOcmSetpoints() here and add debug logging!!!
 		//distribute new OCM setpoints
-		set<Ocm*>::iterator hit,vit;
-		uint32_t i = 0;
-		for(hit=oc->hOcmSet.begin(); hit!=oc->hOcmSet.end(); hit++) {
-			Ocm *och = (*hit);
-			if(och->isEnabled()) {
-				och->setSetpoint((int32_t)h[i]+och->getSetpoint());
-				i++;
-			}
-		}
-		i=0;
-		for(vit=oc->vOcmSet.begin(); vit!=oc->vOcmSet.end(); vit++) {
-			Ocm *ocv = (*vit);
-			if(ocv->isEnabled()) {
-				ocv->setSetpoint((int32_t)v[i]+ocv->getSetpoint());
-				i++;
-			}
-		}
+		oc->distributeOcmSetpoints(h,v);
 		//distribute the UPDATE-signal to pwr-supply ctlrs
-		for(i=0; i<oc->psbArray.size(); i++) {
-			oc->psbArray[i]->updateSetpoints();
-		}
-		hit=oc->hOcmSet.begin();
-		for(i=0; hit!=oc->hOcmSet.end(); hit++,i++) {
-			Ocm *och = (*hit);
-			if(och->isEnabled()) {
-				syslog(LOG_INFO, "%s=%i + %.3e\n",och->getId().c_str(),
-						och->getSetpoint()-(int32_t)h[i],h[i]);
-			}
-		}
-		syslog(LOG_INFO, "\n\n\n");
-		vit=oc->vOcmSet.begin();
-		for(i=0; vit!=oc->vOcmSet.end(); vit++,i++) {
-			Ocm *ocv = (*vit);
-			if(ocv->isEnabled()) {
-				syslog(LOG_INFO, "%s=%i + %.3e\n",ocv->getId().c_str(),
-						ocv->getSetpoint()-(int32_t)v[i],v[i]);
-			}
-		}
+		oc->updateOcmSetpoints();
 		syslog(LOG_INFO, "\n\n\n");
 		for(bit=oc->bpmMap.begin(); bit!=oc->bpmMap.end(); bit++) {
 			Bpm *bpm = bit->second;

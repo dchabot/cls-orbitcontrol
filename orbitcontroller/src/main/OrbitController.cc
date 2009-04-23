@@ -14,6 +14,7 @@
 #include <vmic2536.h>
 #include <cmath> //fabs(double)
 #include <tscDefs.h>
+#include <utils.h>
 
 //BPM data-conversion factors:
 static const int mmPerMeter = 1000;
@@ -72,21 +73,14 @@ OrbitController::~OrbitController() {
 	bpmMap.clear();
 	delete bpmEventPublisher;
 	delete modeChangePublisher;
-	set<Ocm*>::iterator ocmit;
-	for(ocmit=hOcmSet.begin(); ocmit!=hOcmSet.end(); ocmit++) { delete *ocmit; }
-	hOcmSet.clear();
-	for(ocmit=vOcmSet.begin(); ocmit!=vOcmSet.end(); ocmit++) { delete *ocmit; }
-	vOcmSet.clear();
 	for(uint32_t i=0; i<isrArray.size(); i++) { delete isrArray[i]; }
 	isrArray.clear();
 	for(uint32_t i=0; i<rdrArray.size(); i++) { delete rdrArray[i]; }
 	rdrArray.clear();
 	for(uint32_t i=0; i<adcArray.size(); i++) { delete adcArray[i]; }
 	adcArray.clear();
-	for(uint32_t i=0; i<dioArray.size(); i++) { delete dioArray[i]; }
-	dioArray.clear();
-	for(uint32_t i=0; i<psbArray.size(); i++) { delete psbArray[i]; }
-	psbArray.clear();
+	for(uint32_t i=0; i<psCtlrs.size(); i++) { delete psCtlrs[i]; }
+	psCtlrs.clear();
 	for(uint32_t i=0; i<crateArray.size(); i++) { delete crateArray[i]; }
 	crateArray.clear();
 	for(uint32_t i=0; i<TESTING; i++) { delete states[i]; }
@@ -142,22 +136,17 @@ void OrbitController::setMode(OrbitControllerMode mode) {
 	unlock();
 }
 
-/* FIXME
- * Refactor the BPM and OCM callback mechanisms using standard
- * Observer && Command patterns (i.e. vectors of observers and their cmds,publish,etc)
- */
 void OrbitController::registerForModeEvents(Command* cmd) {
 	modeChangePublisher->subscribe(cmd);
 }
-/********************** OcmController public interface *********************/
 /**
- *
  * @param id
- * @return 1 if horizontal, 0 if vertical, -1 if id is ill-formed (error).
+ * @return 2 if chicane, 1 if horizontal, 0 if vertical, -1 if id is ill-formed (error).
  */
 static ocmType getOcmType(const string& id) {
     if(id.find("OCH") != string::npos) { return HORIZONTAL; }
     else if(id.find("OCV") != string::npos) { return VERTICAL; }
+    else if(id.find("BID") != string::npos) { return CHICANE; }
     else if(id.find("SOA") != string::npos) {
         size_t pos = id.find_first_of(":");
         if(id.compare(pos+1,1,"X")==0) { return HORIZONTAL; }
@@ -167,7 +156,7 @@ static ocmType getOcmType(const string& id) {
     syslog(LOG_INFO, "Can't identify type with id=%s\n",id.c_str());
     return UNKNOWN;
 }
-
+/********************** OcmController public interface *********************/
 Ocm* OrbitController::registerOcm(const string& id,
 									uint32_t crateId,
 									uint32_t vmeAddr,
@@ -175,34 +164,40 @@ Ocm* OrbitController::registerOcm(const string& id,
 									uint32_t pos) {
 	Ocm *ocm = NULL;
 	//find the matching VME crate/DIO module pair controlling this OCM:
-	for(uint32_t i=0; i<dioArray.size(); i++) {
-		if(crateId==dioArray[i]->getCrate()->getId()
-				&& vmeAddr==dioArray[i]->getVmeBaseAddr()) {
+	for(uint32_t i=0; i<psCtlrs.size(); i++) {
+		if(crateId==psCtlrs[i]->mod->getCrate()->getId()
+				&& vmeAddr==psCtlrs[i]->mod->getVmeBaseAddr()) {
 			//found a matching crate/module pair
 			ocm = getOcmById(id);
 			if(ocm == NULL) {
 				lock();
-				ocm = new Ocm(id,dioArray[i],ch);
+				ocm = new Ocm(id,psCtlrs[i]->mod,ch);
 				ocm->setPosition(pos);
-				//stuff this OCM into hOcmSet or vOcmSet:
+				//stuff this OCM into the appropriate psCtlr list (hocm or vocm):
 				ocmType ocmtype = getOcmType(id);
-				pair<set<Ocm*>::iterator,bool> ret;
-				if(ocmtype==HORIZONTAL) { ret = hOcmSet.insert(ocm); }
-				else if(ocmtype==VERTICAL) { ret = vOcmSet.insert(ocm); 	}
-				if(ret.second != false) {
-					syslog(LOG_INFO, "OcmController: added %s to %s OCM set.\n",
+				if(ocmtype==HORIZONTAL) {
+					psCtlrs[i]->hocm.push_back(ocm);
+					psCtlrs[i]->sortOcm(psCtlrs[i]->hocm);
+				}
+				else if(ocmtype==VERTICAL) {
+					psCtlrs[i]->vocm.push_back(ocm);
+					psCtlrs[i]->sortOcm(psCtlrs[i]->vocm);
+				}
+				else if(ocmtype==CHICANE) {
+					//don't add chicane OCMs: they don't participate in orbit control (UI only)
+					syslog(LOG_INFO, "OcmController: Omitting chicane magnet %s. Accessible via UI only\n",
+										ocm->getId().c_str());
+					chicaneOcm.push_back(ocm);
+					unlock();
+					return ocm;
+				}
+				syslog(LOG_INFO, "OcmController: added %s to PowerSupplyController @ %#08x, crate %d.\n",
 										ocm->getId().c_str(),
-										getOcmType(ocm->getId())==HORIZONTAL?"horizontal":"vertical");
-				}
-				else {
-					//the OCM already exists in hOcmSet or vOcmSet.
-					//Destroy new instance and return ptr to std::set member
-					delete ocm;
-					ocm = *(ret.first);
-				}
+										psCtlrs[i]->mod->getVmeBaseAddr(),
+										psCtlrs[i]->mod->getCrate()->getId());
 				unlock();
+				return ocm;
 			}
-			break;
 		}
 	}
 	if(ocm==NULL) {
@@ -214,24 +209,36 @@ Ocm* OrbitController::registerOcm(const string& id,
 }
 
 void OrbitController::unregisterOcm(Ocm* ocm) {
-	set<Ocm*>::iterator it;
 	ocmType ocmtype = getOcmType(ocm->getId());
-	if(ocmtype==HORIZONTAL) {
-		it = hOcmSet.find(ocm);
-		if(it != hOcmSet.end()) {
-			hOcmSet.erase(it);
-			delete ocm;
+	if((ocmtype==HORIZONTAL)||(ocmtype==VERTICAL)) {
+		for(uint32_t i=0; i<psCtlrs.size(); i++) {
+			for(uint32_t j=0; j<psCtlrs[i]->hocm.size(); j++) {
+				Ocm* o = psCtlrs[i]->hocm[j];
+				if(o->getId().compare(ocm->getId())==0) {
+					delete ocm;
+					return;
+				}
+			}
+			for(uint32_t j=0; j<psCtlrs[i]->vocm.size(); j++) {
+				Ocm* o = psCtlrs[i]->vocm[j];
+				if(o->getId().compare(ocm->getId())==0) {
+					delete ocm;
+					return;
+				}
+			}
 		}
 	}
-	else if(ocmtype==VERTICAL) {
-		it = vOcmSet.find(ocm);
-		if(it != vOcmSet.end()) {
-			vOcmSet.erase(it);
-			delete ocm;
+	else if(ocmtype==CHICANE) {
+		for(uint32_t i=0; i<chicaneOcm.size(); i++) {
+			if(chicaneOcm[i]->getId().compare(ocm->getId())==0) {
+				delete ocm;
+				chicaneOcm.erase(chicaneOcm.begin()+i);
+				return;
+			}
 		}
 	}
 	else {
-		syslog(LOG_INFO, "Failed to remove %s from OCM maps; it doesn't exist!\n",
+		syslog(LOG_INFO, "Failed to remove %s from PowerSupplyControllers; it doesn't exist!\n",
 				ocm->getId().c_str());
 	}
 }
@@ -239,16 +246,34 @@ void OrbitController::unregisterOcm(Ocm* ocm) {
 Ocm* OrbitController::getOcmById(const string& id) {
 	lock();
 	Ocm *ocm = NULL;
-	set<Ocm*>::iterator it;
 	ocmType ocmtype = getOcmType(id);
-	if(ocmtype==HORIZONTAL) {
-		for(it=hOcmSet.begin(); it!=hOcmSet.end(); it++) {
-			if(id.compare((*it)->getId())==0) { ocm=*it; break; }
+	if((ocmtype==HORIZONTAL)||(ocmtype==VERTICAL)) {
+		for(uint32_t i=0; i<psCtlrs.size(); i++) {
+			for(uint32_t j=0; j<psCtlrs[i]->hocm.size(); j++) {
+				if(psCtlrs[i]->hocm[j]->getId().compare(id)==0) {
+					//syslog(LOG_INFO, "Found existing OCM with id=%s\n",id.c_str());
+					ocm=psCtlrs[i]->hocm[j];
+					unlock();
+					return ocm;
+				}
+			}
+			for(uint32_t j=0; j<psCtlrs[i]->vocm.size(); j++) {
+				if(psCtlrs[i]->vocm[j]->getId().compare(id)==0) {
+					//syslog(LOG_INFO, "Found existing OCM with id=%s\n",id.c_str());
+					ocm=psCtlrs[i]->hocm[j];
+					unlock();
+					return ocm;
+				}
+			}
 		}
 	}
-	else if(ocmtype==VERTICAL) {
-		for(it=vOcmSet.begin(); it!=vOcmSet.end(); it++) {
-			if(id.compare((*it)->getId())==0) { ocm=*it; break; }
+	else if(ocmtype==CHICANE) {
+		for(uint32_t i=0; i<chicaneOcm.size(); i++) {
+			if(chicaneOcm[i]->getId().compare(id)==0) {
+				//syslog(LOG_INFO, "Found existing OCM with id=%s\n",id.c_str());
+				ocm = chicaneOcm[i];
+				break;
+			}
 		}
 	}
 	unlock();
@@ -265,10 +290,24 @@ static void printOcmInfo(Ocm* ocm) {
 }
 
 void OrbitController::showAllOcms() {
-	set<Ocm*>::iterator it;
-	for(it=hOcmSet.begin(); it!=hOcmSet.end(); it++) { printOcmInfo(*it); }
+	syslog(LOG_INFO, "Horizontal OCM:\n\n");
+	for(uint32_t i=0; i<psCtlrs.size(); i++) {
+		for(uint32_t j=0; j<psCtlrs[i]->hocm.size(); j++) {
+			printOcmInfo(psCtlrs[i]->hocm[j]);
+		}
+	}
 	syslog(LOG_INFO, "\n\n\n");
-	for(it=vOcmSet.begin(); it!=vOcmSet.end(); it++) { printOcmInfo(*it); }
+	syslog(LOG_INFO, "Vertical OCM:\n\n");
+	for(uint32_t i=0; i<psCtlrs.size(); i++) {
+		for(uint32_t j=0; j<psCtlrs[i]->vocm.size(); j++) {
+			printOcmInfo(psCtlrs[i]->vocm[j]);
+		}
+	}
+	syslog(LOG_INFO, "\n\n\n");
+	syslog(LOG_INFO, "Chicane channels:\n\n");
+	for(uint32_t i=0; i<chicaneOcm.size(); i++) {
+		printOcmInfo(chicaneOcm[i]);
+	}
 	syslog(LOG_INFO, "\n\n\n");
 }
 
@@ -555,15 +594,15 @@ rtems_task OrbitController::bpmThreadBody(rtems_task_argument arg) {
 					double y = sortedSums[2*pos+1]*cf/bpm->getYVoltsPerMilli();
 					bpm->setY(y);
 				}
-				/* also update each BPM instance's x&&y SNR: */
+				/* also update each BPM instance's x&&y sigma: */
 				sortBPMData(sortedSumsSqrd,sumsSqrd,ds[0]->getChannelsPerFrame());
 				for(it=bpmMap.begin(); it!=bpmMap.end(); it++) {
 					Bpm *bpm = it->second;
 					uint32_t pos = bpm->getPosition();
-					double xsnr = getBpmSigma(sortedSums[2*pos],sortedSumsSqrd[2*pos],numSamplesSummed);
-					bpm->setXSigma(xsnr);
-					double ysnr = getBpmSigma(sortedSums[2*pos+1],sortedSumsSqrd[2*pos+1],numSamplesSummed);
-					bpm->setYSigma(ysnr);
+					double sigx = getBpmSigma(sortedSums[2*pos],sortedSumsSqrd[2*pos],numSamplesSummed);
+					bpm->setXSigma(sigx);
+					double sigy = getBpmSigma(sortedSums[2*pos+1],sortedSumsSqrd[2*pos+1],numSamplesSummed);
+					bpm->setYSigma(sigy);
 				}
 				bpmEventPublisher->publish();
 				/* zero the array of running-sums,reset counter, update num pts in avg */
@@ -677,6 +716,77 @@ double OrbitController::getBpmSigma(double sum, double sumSqr, uint32_t n) {
 	double b = pow((sum/n),2);
 
 	return sqrt(a-b)*BpmFactor;
+}
+
+/******************** OCM Controller ************************************/
+void OrbitController::distributeOcmSetpoints(double* deltaH,double* deltaV) {
+	//XXX -- ASSumes a symmetrical # of channels per PowerSupplyController
+	uint32_t chanPerCtlr = psCtlrs[0]->hocm.size();
+	//update horizontal channels 1st:
+	//for each channel:
+	for(uint32_t i=0; i<chanPerCtlr; i++) {
+		//for each pwr supply channel (OCM), update setpoint
+		uint32_t j;
+		for(j=0; j<psCtlrs.size(); j++) {
+			if(psCtlrs[j]->hocm[i]->isEnabled()) {
+				uint32_t pos = psCtlrs[j]->hocm[i]->getPosition();
+				psCtlrs[j]->setChannel(psCtlrs[j]->hocm[i],(int32_t)deltaH[pos]);
+			}
+		}
+		usecSpinDelay(psCtlrs[0]->hocm[0]->getDelay()-j);
+		//next, raise/lower PS_LATCH bits for same channels
+		for(j=0; j<psCtlrs.size(); j++) {
+			if(psCtlrs[j]->hocm[i]->isEnabled()) {
+				psCtlrs[j]->raiseLatch(psCtlrs[j]->hocm[i]);
+			}
+		}
+		usecSpinDelay(psCtlrs[0]->hocm[0]->getDelay()-j);
+		for(j=0; j<psCtlrs.size(); j++) {
+			if(psCtlrs[j]->hocm[i]->isEnabled()) {
+				psCtlrs[j]->lowerLatch(psCtlrs[j]->hocm[i]);
+			}
+		}
+		usecSpinDelay(psCtlrs[0]->hocm[0]->getDelay()-j);
+	}
+
+	//now, repeat above over the vertical channels:
+	for(uint32_t i=0; i<chanPerCtlr; i++) {
+		//for each pwr supply ctlr, update setpoint
+		uint32_t j;
+		for(j=0; j<psCtlrs.size(); j++) {
+			if(psCtlrs[j]->vocm[i]->isEnabled()) {
+				uint32_t pos = psCtlrs[j]->hocm[i]->getPosition();
+				psCtlrs[j]->setChannel(psCtlrs[j]->vocm[i],(int32_t)deltaV[pos]);
+			}
+		}
+		usecSpinDelay(psCtlrs[0]->vocm[0]->getDelay()-j);
+		//next, raise/lower PS_LATCH bits for same channels
+		for(j=0; j<psCtlrs.size(); j++) {
+			if(psCtlrs[j]->vocm[i]->isEnabled()) {
+				psCtlrs[j]->raiseLatch(psCtlrs[j]->vocm[i]);
+			}
+		}
+		usecSpinDelay(psCtlrs[0]->vocm[0]->getDelay()-j);
+		for(j=0; j<psCtlrs.size(); j++) {
+			if(psCtlrs[j]->vocm[i]->isEnabled()) {
+				psCtlrs[j]->lowerLatch(psCtlrs[j]->vocm[i]);
+			}
+		}
+		usecSpinDelay(psCtlrs[0]->vocm[0]->getDelay()-j);
+	}
+}
+
+void OrbitController::updateOcmSetpoints() {
+	uint32_t i;
+	//toggle UPDATE bits of each PowerSupplyController
+	for(i=0; i<psCtlrs.size(); i++) {
+		psCtlrs[i]->raiseUpdate();
+	}
+	usecSpinDelay(psCtlrs[0]->hocm[0]->getDelay()-i);
+	for(i=0; i<psCtlrs.size(); i++) {
+		psCtlrs[i]->lowerUpdate();
+	}
+	//spin-delay *should* be unnecessary here...
 }
 
 rtems_task OrbitController::ocmThreadStart(rtems_task_argument arg) {

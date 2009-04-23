@@ -19,7 +19,7 @@ STATE_DIR=../states
 # C++ source names, if any, go here -- minus the .cc
 CC_PIECES=${HARDWARE_DIR}/VmeCrate ${HARDWARE_DIR}/VmeModule  
 CC_PIECES+=${HARDWARE_DIR}/Vmic2536Module ${HARDWARE_DIR}/Ics110blModule
-CC_PIECES+=${HARDWARE_DIR}/Ocm ${HARDWARE_DIR}/PowerSupplyBulk
+CC_PIECES+=${HARDWARE_DIR}/Ocm ${HARDWARE_DIR}/PowerSupplyController
 CC_PIECES+=${HARDWARE_DIR}/AdcReader ${HARDWARE_DIR}/AdcIsr 
 CC_PIECES+=${STATE_DIR}/State ${STATE_DIR}/Initializing ${STATE_DIR}/Standby 
 CC_PIECES+=${STATE_DIR}/Assisted ${STATE_DIR}/Autonomous ${STATE_DIR}/Timed
@@ -36,7 +36,7 @@ H_PIECES+=${INCLUDE_DIR}/OrbitControlException ${INCLUDE_DIR}/OcmController
 H_PIECES+=${INCLUDE_DIR}/VmeCrate ${INCLUDE_DIR}/VmeModule
 H_PIECES+=${INCLUDE_DIR}/Ics110blModule ${INCLUDE_DIR}/Vmic2536Module
 H_PIECES+=${INCLUDE_DIR}/AdcReader ${INCLUDE_DIR}/AdcData ${INCLUDE_DIR}/AdcIsr
-H_PIECES+=${INCLUDE_DIR}/PowerSupplyBulk ${INCLUDE_DIR}/Ocm
+H_PIECES+=${INCLUDE_DIR}/PowerSupplyController ${INCLUDE_DIR}/Ocm
 H_PIECES+=${INCLUDE_DIR}/State ${INCLUDE_DIR}/Standby ${INCLUDE_DIR}/Initializing
 H_PIECES+=${INCLUDE_DIR}/Assisted ${INCLUDE_DIR}/Autonomous ${INCLUDE_DIR}/Timed
 H_PIECES+=${INCLUDE_DIR}/Testing

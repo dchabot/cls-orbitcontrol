@@ -104,24 +104,8 @@ void fastAlgorithm(double* sums, OrbitController* oc) {
 		}
 		oc->unlock();
 		//distribute new OCM setpoints
-		set<Ocm*>::iterator hit, vit;
-		uint32_t i = 0;
-		for (hit=oc->hOcmSet.begin(); hit!=oc->hOcmSet.end(); hit++, i++) {
-			Ocm *och = (*hit);
-			if (och->isEnabled()) {
-				och->setSetpoint((int32_t)h[i] + och->getSetpoint());
-			}
-		}
-		i = 0;
-		for (vit=oc->vOcmSet.begin(); vit!=oc->vOcmSet.end(); vit++, i++) {
-			Ocm *ocv = (*vit);
-			if (ocv->isEnabled()) {
-				ocv->setSetpoint((int32_t)v[i] + ocv->getSetpoint());
-			}
-		}
+		oc->distributeOcmSetpoints(h,v);
 		//distribute the UPDATE-signal to pwr-supply ctlrs
-		for (i=0; i<oc->psbArray.size(); i++) {
-			oc->psbArray[i]->updateSetpoints();
-		}
+		oc->updateOcmSetpoints();
 	}
 }

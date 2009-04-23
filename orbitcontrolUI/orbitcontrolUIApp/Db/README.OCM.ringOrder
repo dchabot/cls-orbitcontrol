@@ -1,0 +1,49 @@
+The Orbit Corrector Magnets (OCM) with PV names such as "OCH*:dac" (orbit corrector horizontal)
+and "OCV*:dac" (orbit corrector vertical) have a critical parameter in their appropriate "*.sub"
+files: the "ringOrder" attribute.
+
+"ringOrder" represents the OCM's physical position within the SR1 lattice. The order of magnets
+within a cell (only those participating in the orbit-control algorithm!) goes like this for
+the horizontal plane:
+	
+	OCH:1 --> SOA:X:1 --> SOA:X:2 --> OCH:2
+And similarly for the vertical plane, with OCV's and SOA:Y's...
+
+At the time of this README's writing (Apr 23/09), the inclusion of the SOA (sextupole) magnets
+in the orbit-control algorithm seems doubtful (complications with new pwr-supply controller
+modules), so the ringOrder parameter in the *.sub files omits them. Thus, instead of the "proper"
+ordering of:
+	OCH:1 	(ringPosition=0)
+	SOA:X:1 (ringPostion=1)
+	SOA:X:2	(ringPosition=2)
+	OCH:2	(ringPostion=3)
+	
+I'm using an ordering like this:
+	OCH:1	(ringPosition=0)
+	OCH:2	(ringPosition=1)
+
+################## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #################################	
+This is important because "ringOrder" is an attribute of the OCM software objects and is utilized
+in the orbit-control algorithm (so-called "fast" corrections only!) to index the array of power
+supply "delta" values. See OrbitController::distributeOcmSetpoints(deltaH,deltaV) for the actual
+usage.
+################## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #################################
+
+The reason for this is that the array of "deltas" is naturally in "ring order", while the 
+assignment of software objects to physical hardware has an "assymmetry" present that prevents
+a nice, one-to-one correspondence: namely, there is a single power-supply controller that is
+responsible for controlling channels in lattice-cells 1,2, and 12. So the pwr-supply controllers 
+govern lattice cells like so:
+	ctlr-0 : cells 1,2,12
+	cltr-1 : cells 3,4,5
+	ctlr-2 : cells 6,7,8
+	ctlr-3 : cells 9,10,11
+	
+Therefore, a naieve(?) loop distributing "deltas" over the ctlrs in sequence would end up sending
+the wrong deltas to the every channel after cells 1 and 2!
+
+Note also that when the SOA channels *are* brought "on-line", the "ringOrder" parameter will need
+to be adjusted for *all* OCH/OCV entries in ALL "Ocm*.sub" files (the SOA entries "should be" 
+correct). Adjusting values in this file seems far simpler and less error-prone than sorting
+the array(s) of delta-values, or implementing some artificial object-model to compensate for
+the hardware-assymmetry...
