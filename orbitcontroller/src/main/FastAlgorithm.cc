@@ -27,7 +27,7 @@ void fastAlgorithm(double* sums, OrbitController* oc) {
 		for (bit=oc->bpmMap.begin(); bit!=oc->bpmMap.end(); bit++) {
 			Bpm *bpm = bit->second;
 			uint32_t pos = bpm->getPosition();
-			sorted[2*pos ] *= sf / bpm->getXVoltsPerMilli();
+			sorted[2*pos] *= sf / bpm->getXVoltsPerMilli();
 			sorted[2*pos+1] *= sf / bpm->getYVoltsPerMilli();
 		}
 
@@ -37,7 +37,7 @@ void fastAlgorithm(double* sums, OrbitController* oc) {
 			if (bpm->isEnabled()) {
 				//subtract reference and DC orbit-components
 				uint32_t pos = bpm->getPosition();
-				sorted[2*pos ] -= (bpm->getXRef() + bpm->getXOffs());
+				sorted[2*pos] -= (bpm->getXRef() + bpm->getXOffs());
 				sorted[2*pos+1] -= (bpm->getYRef() + bpm->getYOffs());
 			}
 		}

@@ -47,7 +47,7 @@ OrbitController::OrbitController() :
 	ocmThreadPriority(OrbitControllerPriority+2),
 	ocmQueueId(0),ocmQueueName(0),
 	hResponseInitialized(false),vResponseInitialized(false),
-	framesCollected(0),framesPerCorrection(100),samplesPerAvg(5000),
+	framesCollected(0),framesPerCorrection(30),samplesPerAvg(5000),
 	bpmMsgSize(sizeof(rdSegments)),bpmMaxMsgs(10),
 	bpmTID(0),bpmThreadName(0),
 	bpmThreadArg(0),bpmThreadPriority(OrbitControllerPriority+3),
@@ -805,7 +805,7 @@ rtems_task OrbitController::ocmThreadBody(rtems_task_argument arg) {
 		TestDirective(rc,"OcmThread: msg_q_rcv failure");
 		if(bytes != bpmMsgSize) {
 			//FIXME -- handle this error!!!
-			syslog(LOG_INFO, "BpmController: received %u bytes in msg: was expecting %u\n",
+			syslog(LOG_INFO, "OcmController: received %u bytes in msg: was expecting %u\n",
 								bytes,bpmMsgSize);
 		}
 		sumAdcSamples(sums,ds);
@@ -816,10 +816,17 @@ rtems_task OrbitController::ocmThreadBody(rtems_task_argument arg) {
 			framesCollected = 0;
 			memset(sums, 0, sizeof(sums));
 #ifdef OC_DEBUG
-			__end=__start;
-			rdtscll(__start);
-			if(once) { once=0; }
-			else { __period += __start-__end; ++numIters; }
+			if(once) {
+				once=0;
+				rdtscll(__start);
+				__end=__start;
+			}
+			else {
+				rdtscll(__start);
+				__period += __start-__end;
+				__end=__start;
+				++numIters;
+			}
 #endif
 		}
 	}
