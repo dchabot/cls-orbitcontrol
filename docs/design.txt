@@ -1,0 +1,29 @@
+= CLS Orbit Control Notes =
+:author: Daron_Chabot
+:email: dchabot@bnl.gov
+:date: Sept 2009
+
+== Required Tools ==
+- RTEMS cvs HEAD and toolchain (rpms or /opt contents (Dave B))
+- mercurial !!!
+
+== Modifications to Existing Apps ==
+- SOA (sextupole) apps: serial to VME
+
+== Modifications to OrbitControl App ==
+OrbitController (RTEMS): NumHOcm + NumVOcm
+OrbitControlUI (EPICS): Un-comment SOA PVs; alter RingOrder (*.sub files)
+
+== Design Notes ==
+
+
+=== Overview === 
+
+=== Deployment View === 
+
+=== Structural View ===
+
+=== Behavioral View ===
+
+=== Future Work === 
+
