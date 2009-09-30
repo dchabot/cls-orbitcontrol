@@ -3,27 +3,203 @@
 :email: dchabot@bnl.gov
 :date: Sept 2009
 
+_This document examines the 3^rd^-generation of the CLS' orbit control
+system, implementing so-called fast corrections on the order of 100 Hz.
+The 2^nd^-generation system is documented in, "SR1 Orbit Control Design
+Note - 5.2.39.4- Rev 0". That document should also be consulted, as its
+contents are still relevent,
+<http://www.lightsource.ca/operations/pdf/5.2.39.4.Rev.0-SR1_Orbit_Control_Design_Note-Chabot.pdf>_.
+ 
+== Project Source Structure ==
+The source code for this project has the following layout:
+--------------------------------------------------
+project-root/
+            .hg/                # Mercurial repo. Contains complete history of project.
+            docs/
+            orbitcontroller/    # root of the base, RTEMS OrbitController application
+                include/
+                src/
+                    hardware/
+                    main/
+                    states/
+                    test/
+                    utils/
+            orbitcontrolUI/     # root of the EPICS-based user interface (UI)
+                configure/
+                iocBoot/
+                orbitcontrolUIApp/
+                    Db/
+                    src/
+                orbitcontrolUI.cmd # start-up script 
+--------------------------------------------------
+
 == Required Tools ==
-- RTEMS cvs HEAD and toolchain (rpms or /opt contents (Dave B))
-- mercurial !!!
+* RTEMS CVS development HEAD. The development HEAD is the RTEMS version 
+that would be released as version 4.10. This branch contains the important 
+addition to the i386-rtems architecture of PCI _interrupt sharing_. There
+are also other features available in RTEMS 4.9 and later revisions that are
+utilized in the orbit control software (eg: RTEMS _thread barriers_).
+
+* The cross-development toolchain associated with RTEMS CVS HEAD
+(Current at the time of last modifications to the project. These are now
+somewhat outdated):
+** binutils-2.19.1
+** gcc-4.3.3
+** newlib-1.17
+** gdb-6.8
+
+NOTE: The toolchain components can be installed via YUM and RPM, see
+<http://www.rtems.com/wiki/index.php/APT/Yum_Repository> for more information.
+The tools may also be built from source. The tools' sources and patches are 
+available from <http://www.rtems.com/ftp/pub/rtems/SOURCES>. Alternatively, 
+a pre-built set of tools and RTEMS libraries is available (Dave Beauregard).
+
+* SIS1100/3100 RTEMS Driver
+** This is available in the MKS repository (repo).
+
+* SLAC RTEMS Tools
+** These can be found at 
+http://www.slac.stanford.edu/~strauman/rtems/software.html#RTEMS .
+** cexp-1.6
+** GeSys-2.1
+** telnetd-1.2
+** rtems-gdb-stub-1.4
+
+* EPICS version 3.14.10. However this is not a _strict_ requirement. The
+EPICS components of the system (source under orbitcontrolUI/) do not depend
+on any particular feature of EPICS Base found in versions later than 3.14.6.
+However, the call to +osdTimeRegister()+, in "orbitcontrolUI.cmd" was necessary
+for successful operation under Base 3.14.10. This call may be safely omitted
+if it is desired to use a version of Base < 3.14.10. Note, changes are required
+to +orbitcontrolUI/configure/RELEASE+. In particular, the value of EPICS_BASE
+will need to modified to suit.
+
+* The Mercurial distributed version control software (DVCS) was used for 
+fine-grained changeset management. _All_ revisions are contained in the ".hg/"
+directory that accompanies the MKS project associated with the 3rd generation
+orbit control software system. Therefore, this "hidden" directory should also
+be checked out of MKS, in addition to all other relevant sources.
+** The latest version in MKS (assuming no one has worked on the source since
+the end of April/09) corresponds to the Mercurial version tagged as 
++v3.0.1+. This version was the last to be tested on production hardware on
+March 16/09.
+** Mercurial version 5.0.1 is the latest version of the software, exercised
+only on the test-bench setup (i.e. _ioc1009-109_). This version features a
+significant re-factoring of those classes involved with the power-supplies.
+This version _has not been tested on production systems and should only be
+utilized after proper vetting_. See *Future Work*, below, for further details.
+
+NOTE: It must be realized that the _entire revision history_ is captured in
+and accessible *only* from the Mercurial system, even though it is preserved
+in MKS.
+
+== Deployment and Testing ==
+* *ioc1009-109*: test-bench RTEMS IOC
+* */export/tftpboot/epics/IOC1009-109*: location of test-bench generic RTEMS
+system (GeSys) and startup script (st.sys). The orbitcontroller and 
+orbitcontrolUI binaries can be served from the developers' +srv-unix+
+home directory, as these are NFS exported shares.
+* *css2400-106*: syslog server (ioc1009-109 messages and status).
+* *ioc2400-104*: production RTEMS IOC
+* *ioc2400-109*: production Linux soft-IOC. *NOTE*: in the 3^rd^-generation
+system, this IOC _plays no role whatsoever_.
+* */iocApps/SR/ioc2400-104*: location of production orbitcontroller and 
+orbitcontrolUI binaries.
+* */export/tftpboot/epics/IOC2400-104*: location of production generic RTEMS
+system (GeSys) and startup script (st.sys). 
+* *css1021-102*: syslog server (ioc2400-104 messages and status). 
 
 == Modifications to Existing Apps ==
 - SOA (sextupole) apps: serial to VME
 
 == Modifications to OrbitControl App ==
-OrbitController (RTEMS): NumHOcm + NumVOcm
-OrbitControlUI (EPICS): Un-comment SOA PVs; alter RingOrder (*.sub files)
+- OrbitController (RTEMS): NumHOcm + NumVOcm
+- OrbitControlUI (EPICS): Un-comment SOA PVs; alter RingOrder (\*.sub files)
+
+NOTE: Two additional sources of *very important* information may be found
+in the files, +orbitcontrolUI/README.1st+, and 
++orbitcontrolUI/orbitcontrolUIApp/Db/README.OCM.ringOrder+.
+
+== Operational Considerations ==
+- concurrent operation of static (DC) and dynamic correction algorithms.
+- Tasha's new GUI
+- OrbitController state change via caput
 
 == Design Notes ==
 
-
 === Overview === 
 
-=== Deployment View === 
+.System overview.
+image::SR-view.png["System View"]
 
-=== Structural View ===
+=== OrbitController ===
 
-=== Behavioral View ===
+==== Structural ====
+
+Structurally, The OrbitControl system is based on a *Model-View-Controller*
+architecture (see figure below). The model objects are simply instances of
++Bpm+ or +Ocm+ classes, manipulated via concrete instances of their 
+respective controllers, either +BpmController+ or +OcmController+ classes.
+These controllers are_interfaces_: C++ classes containing only _pure 
+virtual_ methods.
+
+.MVC Structure of OrbitController system.
+image::SR-MVC.png["MVC Structure"] 
+
+.Key classes and threads of the OrbitController system (Mercurial tag v5.0.1).
+image::OC-res-concurrency.png["Resource-Concurrency View"]
+
+==== Behavioral ====
+From the user's perspective, the OrbitController is essentially a Finite
+State Machine (FSM). The runtime behavior of the OrbitController, including
+BPM data acquisition and orbit-correction algorithm application, may be 
+altered simply by instructing the FSM to transition to one of the
+following states:
+
+. *Initializing*: Upon instantiation, the OrbitController sets up its 
+hardware from this state. This state cannot be transitioned to from the UI.
+. *Standby*: Under certain conditions it may be necessary to cease BPM data
+acquisition, but still remain responsive to power-supply inputs originating
+from the UI (i.e. caputs to power-supply PVs).
+. *Assisted*: This is the behavior of the RTEMS orbit control system as 
+present in the 2nd generation system (AKA _slow_ correction). BPM data 
+acquisition is _interrupt driven_, yet still periodic at approximately
+20 Hz. This mode relies power-supply setpoints to be calculated by and
+distributed from the MatLab program, +srorb+. 
+. *Autonomous*: In this mode, BPM data acquisition is identical to the 
+*Assisted* mode. However, the OrbitController will autonomously calculate
+and distribute new power-supply setpoints at the same frequency as data
+acquisition occurs (i.e. 20 Hz)
+. *Timed*: BPM data acquisition is _timer driven_ in this mode, permitting
+faster rates that waiting for FIFO half-full interrupts. As with the 
+*Autonomous* mode, the OrbitController applies the orbit-control algorithm
+with minimal intervention from other software.
+. *Testing*: BPM DAQ is interrupt-driven. However only a _single_
+iteration of the acquire-BPM-data-->calculate-and-apply-correction algorithm
+ is applied. This mode produces verbose debugging info (new corrector values
+are dumped to syslog, so one can verify the algorithm is producing correct 
+deltas for the pwr supply updates).
+
+The FSM behavior of the OrbitController is represented in the following image.
+However, it should be noted that not all states are depicted in this image (for
+purely aesthetic reasons).
+
+.OrbitController FSM
+image::SR-OC-FSM-v2.png["OrbitController FSM"]
+
+=== OrbitControlUI ===
+* stuff
 
 === Future Work === 
-
+* In particular, the power-supply setpoint distribution algorithm was heavily
+modified to amortize the cost of the spin-delays associated with affecting
+setpoint changes (thanks to Neil Johnson for the idea). A behavioral
+modification also permits application of the orbit control algorithm based
+on the number of ADC frames collected, rather than based on ADC or RTEMS 
+Timer interrupts. Coupled with the faster technique of distributing power-
+supply setpoints, this change permits application of orbit corrections well
+in excess of 100 Hz. However, as stated, this version _has not been tested
+on production systems and should only be utilized after proper vetting_.
+Also, there is no way of changing, at run-time, the number of ADC frames
+that will trigger read-out of the ADCs and application of the orbit-
+correction algorithm (see _FastAlgorithm.cc_). The interface to permit
