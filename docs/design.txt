@@ -68,17 +68,33 @@ http://www.slac.stanford.edu/~strauman/rtems/software.html#RTEMS .
 * EPICS version 3.14.10. However this is not a _strict_ requirement. The
 EPICS components of the system (source under orbitcontrolUI/) do not depend
 on any particular feature of EPICS Base found in versions later than 3.14.6.
-However, the call to +osdTimeRegister()+, in "orbitcontrolUI.cmd" was necessary
+Having explained that, modifications to the _build system_ of EPICS Base
+_were necessary_, thus the decision to use a developer-local copy of Base,
+thereby avoiding contamination of the standard CLS Base installation. The 
+modifications are discussed below, and the simple patch to illicit the
+altered behavior from EPICS Base is available in Appendix <<A>>.
+**  Changes are required to +orbitcontrolUI/configure/RELEASE+. In 
+particular, the value of EPICS_BASE will need to be modified to suit.
+** The call to +osdTimeRegister()+, in "orbitcontrolUI.cmd" was necessary
 for successful operation under Base 3.14.10. This call may be safely omitted
-if it is desired to use a version of Base < 3.14.10. Note, changes are required
-to +orbitcontrolUI/configure/RELEASE+. In particular, the value of EPICS_BASE
-will need to modified to suit.
+if it is desired to use a version of Base < 3.14.10.
+** In order to coax EPICS' build system into generating "loadable 
+modules" instead of statically-linked executables, modifications to that 
+system are required. See patch in Appendix <<A>>. Specifically, a 
++USE_GESYS+ Makefile variable was introduced to instruct EPICS' build 
+system to produce either loadable modules _or_ the traditional, 
+statically-linked RTEMS exectuable image. From the root of the 
+EPICS-based UI application (+orbitcontrolUI+), invoking +Make+ as
+follows will produce a dynamically loadable module:
+-----------------------------------------------------------
+make USE_GESYS=YES 
+-----------------------------------------------------------
 
 * The Mercurial distributed version control software (DVCS) was used for 
 fine-grained changeset management. _All_ revisions are contained in the ".hg/"
 directory that accompanies the MKS project associated with the 3rd generation
 orbit control software system. Therefore, this "hidden" directory should also
-be checked out of MKS, in addition to all other relevant sources.
+be checked out of MKS, in addition to all other relevant sources	.
 ** The latest version in MKS (assuming no one has worked on the source since
 the end of April/09) corresponds to the Mercurial version tagged as 
 +v3.0.1+. This version was the last to be tested on production hardware on
@@ -89,36 +105,129 @@ significant re-factoring of those classes involved with the power-supplies.
 This version _has not been tested on production systems and should only be
 utilized after proper vetting_. See *Future Work*, below, for further details.
 
-NOTE: It must be realized that the _entire revision history_ is captured in
-and accessible *only* from the Mercurial system, even though it is preserved
-in MKS.
+NOTE: It must be realized that the _entire revision history_, from the
+deployed 2^nd^ generation system to the experimental 3^rd^ generation system,
+is captured in and accessible from the Mercurial system *_only_*. Thus, even 
+though the Mercurial repo is preserved in MKS, it would be beneficial to 
+continue using +hg+ for day-to-day changeset management and developer
+interaction, and use MKS _only_ to capture significant milestones in
+the project's progression.
 
-== Deployment and Testing ==
+== Deployment and Testing Infrastructure ==
+The following are key pieces of physical and filesystem infrastructure
+supporting the OrbitController system:
+
 * *ioc1009-109*: test-bench RTEMS IOC
 * */export/tftpboot/epics/IOC1009-109*: location of test-bench generic RTEMS
 system (GeSys) and startup script (st.sys). The orbitcontroller and 
 orbitcontrolUI binaries can be served from the developers' +srv-unix+
 home directory, as these are NFS exported shares.
-* *css2400-106*: syslog server (ioc1009-109 messages and status).
+* *css2400-106*: syslog server (ioc1009-109 console messages and status).
 * *ioc2400-104*: production RTEMS IOC
-* *ioc2400-109*: production Linux soft-IOC. *NOTE*: in the 3^rd^-generation
-system, this IOC _plays no role whatsoever_.
+* *ioc2400-109*: production Linux soft-IOC.
+
+NOTE: in the 3^rd^-generation system, *ioc2400-109* _plays no role 
+whatsoever_. In fact, the softIoc running on it as part of the 2^nd^
+generation system *_must be killed_* prior to executing the 3^rd^
+generation OrbitController.
+
 * */iocApps/SR/ioc2400-104*: location of production orbitcontroller and 
 orbitcontrolUI binaries.
 * */export/tftpboot/epics/IOC2400-104*: location of production generic RTEMS
 system (GeSys) and startup script (st.sys). 
-* *css1021-102*: syslog server (ioc2400-104 messages and status). 
+* *css1021-102*: syslog server (ioc2400-104 console messages and status). 
 
-== Modifications to Existing Apps ==
-- SOA (sextupole) apps: serial to VME
+== Modifications Required for New Power-Supply Hardware ==
+Once the new, so-called "_fast_" power-supply controllers are in place for
+the sextupole magnets, several changes are required to supporting software.
+While the alterations necessary for the 3^rd^-generation system are small,
+they will require re-compiling the +orbitcontroller+ software, and editing
+several _substitution_ files in the +orbitcontrolUI+ portion of the system.
+However, there are extensive changes required to the out-of-scope software 
+responsible for serial communication with the power-supply controller 
+channels for the sextupoles. The modifications to both the OrbitController
+and external software software systems are detailed in the following 
+sections.
 
-== Modifications to OrbitControl App ==
-- OrbitController (RTEMS): NumHOcm + NumVOcm
-- OrbitControlUI (EPICS): Un-comment SOA PVs; alter RingOrder (\*.sub files)
+=== Modifications to External Software ===
+Currently, the communication media between power-supply controllers and the
+software responsible for that communication is _highly assymetric_: the 
+orbit-corrector magnet channels (aka _fast_ channels) receive their setpoints
+from VME digital I/O modules (VMIC-2536 modules), and those same channels
+are polled for feedback values over slow RS-232 serial lines. To confuse
+matters even more, the communication channels to the sextupole power-supplies
+are exclusively serial-based.
+
+Work is planned for the Fall of 2009 to install a VME-based 
+setpoint-delivery interface for the sextupole control channels. Once this VME
+interface is in place, the IOCs responsible for the serial-communication and
+control will need to be re-structured such that their functional domain is
+limited to _gathering channel feedback values only_. Glen Wright and Neil
+Johnson should be consulted on this matter for further details.
+
+=== Modifications to the OrbitControl App ===
+==== Altering Compile-Time Constants ====
+The number of orbit-control magnet (OCM) objects is currently defined as a
+preprocessor (compile-time) variable. To reflect the increased number of 
+OCM channels introduced to the OrbitController's domain as part of the 
+hardware upgrades, the definition of +NumOcm+ must be changed to follow
+suit (see _orbitcontroller/include/Ocm.h_).
+
++NumOcm+ is used to derive +NumHOcm+ and +NumVOcm+, the number of 
+horizontal and vertical corrector channels, respectively. These variables
+are utilized primarily as bounds on looping operations over various
+containers. In particular, the dimensions of the Response Matrices for each
+plane are partially determined by these parameters. Since the user interface
+(i.e. EPICS records) will create one +Ocm+ object per record, _it is possible
+to do away entirely with the compile-time variables_, as the number of
++Ocm+ objects will be implicitly given by the number that are created and
+stored in their respective containers. This approach will also permit the 
+use of dynamically sized arrays, instead of fixed-size arrays. For example:
+
+----------------------------------------------------
+double hmat[NumHOcm][NumBpm];
+double vmat[NumVOcm][NumBpm];
+----------------------------------------------------
+
+could then become:
+
+----------------------------------------------------
+vector<vector<double> > hmat;
+vector<vector<double> > vmat;
+----------------------------------------------------
+
+with the dimensions given by:
+----------------------------------------------------
+PowerSupplyController::hocm.size();
+OrbitController::bpmMap.size();
+----------------------------------------------------
+
+==== Altering EPICS Database Substitution Files ====
+Changes must also be to the control system interface of the project, found
+under _orbitcontrolUI/_. These changes are somewhat less obtrusive than 
+those required to the source under _orbitcontroller/_, as in this case only
+EPICS database substitution files must be modified. In particular, this 
+affects files of the form _Ocm24*.sub_ under 
+_orbitcontrolUI/orbitcontrolUIApp/Db_.
+
+The substitution file-fields that need to be modified are:
+
+. *vmeBaseAddr*: base address of the VME digital I/O (DIO) modules, model
+VMIC-2536, responsible for communicating setpoints to power-supply controllers. 
+. *channel*: the channel of the power-supply controller corresponding
+to an individual OCM. The VME DIO modules encode the channel number in their
+interactions with the power-supply controllers.
+. *ringOrder*: a number representing _where_ in the geographical sequence 
+(lattice) of magnets a particular OCM is situated. The +OrbitController+
+class uses the +ringOrder+ to sort +Ocm+ objects in their containers. This
+is necessary, as the Response Matrix elements are also sorted in "_ring 
+order_".
 
 NOTE: Two additional sources of *very important* information may be found
 in the files, +orbitcontrolUI/README.1st+, and 
-+orbitcontrolUI/orbitcontrolUIApp/Db/README.OCM.ringOrder+.
++orbitcontrolUI/orbitcontrolUIApp/Db/README.OCM.ringOrder+. Also, the
+Engineering Notebooks of the author will also be a good source of 
+information on this matter, as would Neil Johnson.
 
 == Operational Considerations ==
 - concurrent operation of static (DC) and dynamic correction algorithms.
@@ -140,7 +249,7 @@ Structurally, The OrbitControl system is based on a *Model-View-Controller*
 architecture (see figure below). The model objects are simply instances of
 +Bpm+ or +Ocm+ classes, manipulated via concrete instances of their 
 respective controllers, either +BpmController+ or +OcmController+ classes.
-These controllers are_interfaces_: C++ classes containing only _pure 
+These controllers are _interfaces_: C++ classes containing only _pure 
 virtual_ methods.
 
 .MVC Structure of OrbitController system.
@@ -202,4 +311,93 @@ in excess of 100 Hz. However, as stated, this version _has not been tested
 on production systems and should only be utilized after proper vetting_.
 Also, there is no way of changing, at run-time, the number of ADC frames
 that will trigger read-out of the ADCs and application of the orbit-
-correction algorithm (see _FastAlgorithm.cc_). The interface to permit
+correction algorithm (see _FastAlgorithm.cc_). However, although the 
+_EPICS interface_ does not yet exist to permit run-time alteration of the 
+rate of orbit-correction application, the _implementation_ of that 
+functionality is already present in the OrbitController. What is required is
+a set of +longin+ and +longout+ records for getting and setting (respectively)
+the number of ADC-frames collected, and the appropriate Device Support to
+interact with the OrbitController instance.  
+
+[[A]]
+== Appendix A ==
+Thanks to Michael Davidsaver for making a cleaner version of this patch.
+
+----------------------------------------------------------------------------
+From 8ea0edb9b6fdf64661a96112467b9672d37c7de7 Mon Sep 17 00:00:00 2001
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Wed, 1 Jul 2009 14:28:04 -0400
+Subject: RTEMS Generic System
+
+Optionally build RTEMS generic system loadable objects
+---
+ configure/os/CONFIG.Common.RTEMS      |   22 +++++++++++++++++++++-
+ configure/os/CONFIG_SITE.Common.RTEMS |    6 ++++++
+ 2 files changed, 27 insertions(+), 1 deletions(-)
+
+diff --git a/configure/os/CONFIG.Common.RTEMS b/configure/os/CONFIG.Common.RTEMS
+index 6057484..f2b5bb5 100644
+--- a/configure/os/CONFIG.Common.RTEMS
++++ b/configure/os/CONFIG.Common.RTEMS
+@@ -81,19 +81,39 @@ OPT_CXXFLAGS_YES = $(CFLAGS_OPTIMIZE_V)
+ OPT_CFLAGS_NO    = $(CFLAGS_DEBUG_V)
+ OPT_CXXFLAGS_NO  = $(CFLAGS_DEBUG_V)
+ 
++ifeq ($(USE_GESYS),YES)
++# Give loadable object a different extension
++override EXE=.obj
++STATIC_LDFLAGS_YES=
++
++# Don't product MUNCHed binary (ie myioc.boot)
++override MUNCHNAME=
++override MUNCH_CMD=
++endif
++
+ #--------------------------------------------------
+ # operating system class (include/os/<os_class>)
+ OS_CLASS = RTEMS
+ 
+ #--------------------------------------------------
+ # Operating system flags
++OP_SYS_LDFLAGS += $(CPU_CFLAGS)
++ifeq ($(USE_GESYS),YES)
++# Assume all system libraries were linked with the generic image
++OP_SYS_LDLIBS =
++# A Generic object is just a set of objects which have been
++# incrementally linked to create an object.
++# The result is almost the same as a shared library.
++OP_SYS_LDFLAGS += -Wl,-r
++else
+ OP_SYS_LDLIBS += -lrtemsCom -lc -lrtemscpu -lCom -lnfs -lm
+-OP_SYS_LDFLAGS += $(CPU_CFLAGS) -u Init \
++OP_SYS_LDFLAGS += -u Init \
+                  $(PROJECT_RELEASE)/lib/no-dpmem.rel \
+                  $(PROJECT_RELEASE)/lib/no-mp.rel \
+                  $(PROJECT_RELEASE)/lib/no-part.rel \
+                  $(PROJECT_RELEASE)/lib/no-signal.rel \
+                  $(PROJECT_RELEASE)/lib/no-rtmon.rel
++endif
+ 
+ #--------------------------------------------------
+ # RTEMS has neither shared libraries nor dynamic loading
+diff --git a/configure/os/CONFIG_SITE.Common.RTEMS b/configure/os/CONFIG_SITE.Common.RTEMS
+index 0133f69..4ff476e 100644
+--- a/configure/os/CONFIG_SITE.Common.RTEMS
++++ b/configure/os/CONFIG_SITE.Common.RTEMS
+@@ -12,6 +12,12 @@ RTEMS_VERSION ?= 4.9
+ #
+ RTEMS_PREFIX   ?= $(RTEMS_BASE)/bin/
+ 
++# Link Generic System loadable objects instead of full executable.
++#
++# A GeSys object is similar to a shared library.  It can be (un)loaded
++# at runtime by the Generic System loader which is available as a
++# patch against RTEMS.
++USE_GESYS=NO
+ 
+ # If you're using neither BOOTP/DHCP nor FLASH to pick up your IOC
+ # network configuration you must uncomment and specify your Internet 
+-- 
+1.5.6.5
+----------------------------------------------------------------------------
+
