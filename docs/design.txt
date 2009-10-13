@@ -166,23 +166,27 @@ limited to _gathering channel feedback values only_. Glen Wright and Neil
 Johnson should be consulted on this matter for further details.
 
 === Modifications to the OrbitControl App ===
+
+[[constants]]
 ==== Altering Compile-Time Constants ====
-The number of orbit-control magnet (OCM) objects is currently defined as a
-preprocessor (compile-time) variable. To reflect the increased number of 
-OCM channels introduced to the OrbitController's domain as part of the 
-hardware upgrades, the definition of +NumOcm+ must be changed to follow
-suit (see _orbitcontroller/include/Ocm.h_).
+
+The number of orbit-control magnet (OCM) objects is currently defined in 
+software as a preprocessor (compile-time) variable. To reflect the 
+increased number of OCM channels introduced to the OrbitController's domain
+as part of the hardware upgrades, the definition of +NumOcm+ must be changed
+to follow suit (see _orbitcontroller/include/Ocm.h_).
 
 +NumOcm+ is used to derive +NumHOcm+ and +NumVOcm+, the number of 
 horizontal and vertical corrector channels, respectively. These variables
 are utilized primarily as bounds on looping operations over various
-containers. In particular, the dimensions of the Response Matrices for each
-plane are partially determined by these parameters. Since the user interface
-(i.e. EPICS records) will create one +Ocm+ object per record, _it is possible
-to do away entirely with the compile-time variables_, as the number of
-+Ocm+ objects will be implicitly given by the number that are created and
-stored in their respective containers. This approach will also permit the 
-use of dynamically sized arrays, instead of fixed-size arrays. For example:
+containers. In particular, the dimensions of the (inverse) Response Matrices
+for each plane are partially determined by these parameters. Since the user 
+interface (i.e. EPICS records) will create one +Ocm+ object per record, 
+_it is possibleto do away entirely with the compile-time variables_, 
+as the number of +Ocm+ objects will be implicitly given by the number 
+that are created and stored in their respective containers. This approach 
+will also permit the use of dynamically sized arrays, instead of fixed-size
+arrays. For example:
 
 ----------------------------------------------------
 double hmat[NumHOcm][NumBpm];
@@ -230,16 +234,53 @@ Engineering Notebooks of the author will also be a good source of
 information on this matter, as would Neil Johnson.
 
 == Operational Considerations ==
-- concurrent operation of static (DC) and dynamic correction algorithms.
-- Tasha's new GUI
-- OrbitController state change via caput
+From an operational perspective, the function of the 3^rd^-generation
+OrbitController is relatively transparent. A new, simplified MatLab GUI
+was constructed, and it is this client that contains the logic for 
+interacting with the latest control-system software. In fact, the older
+program, +clsorb+, may still be utilized _in parallel_ with the new system.
+This configuration permits "slow" control over those magnet power-supplies
+which require it, while the newer program serves as the interface to affect
+the "fast" corrections. From the perspective of the orbit-control software,
+the new GUI simply serves to populate the +waveform+ process-variable 
+representations of the inverted Response Matrices, as well as affect 
+state-transitions of the OrbitController.
+
+NOTE: Tasha Summers should be consulted for further details regarding the 
+MatLab interface to the orbit-control system.
 
 == Design Notes ==
 
 === Overview === 
 
+Conceptually, the orbit-control system is simply those system components 
+acting in concert to physically apply periodic solutions to the linear 
+equation:
+
+- *latexmath:[$\Delta \theta_x = R^{-1}\Delta x$]* 
+
+where, *latexmath:[$\Delta \theta_x$]* is the vector of horizontal orbit
+angular deflections (linearly related to the current through the 
+corresponding power-supply channel), *latexmath:[$R^{-1}$]* is the inverted
+Response Matrix, and *latexmath:[$\Delta x$]* is the vector of desired
+horizontal beam positions. An analogous relationship also holds for the
+vertical plane.
+
+From a control systems view, VME equipment is utilized to digitize BPM 
+signals and deliver digital power-supply setpoints to horizontal and vertical
+corrector magnets, HCM and VCM, respectively. This may be visualized
+as in the <<system overview>> figure, below.
+
+[[system overview]]
 .System overview.
 image::SR-view.png["System View"]
+
+The VME crates in all quadrants of the system are under the control of a
+single IOC: an "industrial" 3 GHz PC with 1 GB of RAM. The physical 
+separation and multi-crate control requirements are satisfied via the Struck
+Innovative Systems PCI-VME interface (sis1100/3100). This interface permits
+multi-crate control and much latitude with respect to VME crate and 
+crate-controller positioning.
 
 === OrbitController ===
 
@@ -300,8 +341,27 @@ image::SR-OC-FSM-v2.png["OrbitController FSM"]
 * stuff
 
 === Future Work === 
-* In particular, the power-supply setpoint distribution algorithm was heavily
-modified to amortize the cost of the spin-delays associated with affecting
+* The method for dealing with the scenario of disabled BPM and OCM channels
+is incomplete in the 3^rd^-generation OrbitControl system. This could be
+dealt with in two ways:
+. Client-side: The MatLab program has the responsibliity of providing new
+inverted Response Matrices to account for the disabled BPM or OCM channel.
+This could be as simple as zeroing the appropriate row the matrix.
+. OrbitController-side: There are enable/disable +Binary Out+ 
+process-variables associated with each BPM and OCM. In the case of the OCMs,
+if one is disabled (via a caput), that channel's value is omitted from the 
+channel-setpoint distribution process. Dealing with one or more disabled BPMs
+is complicated by the fact that they constitute one of the inputs to the 
+equation which produces the OCM setpoint corrections.
+
+NOTE: Disabling of OCM or BPM channels via Channel Access has *_NOT_*
+been tested !! In any case, the flexibility afforded via the presence of dynamically
+adjustable Response Matrices (see section on altering compile-time <<constants>>)
+would be well worth their (minimal) implementation effort, especially with 
+respect to the solution of the disabled OCM/BPM problem.
+ 
+* The power-supply setpoint distribution algorithm was heavily modified to 
+distribute the cost of the spin-delays associated with affecting
 setpoint changes (thanks to Neil Johnson for the idea). A behavioral
 modification also permits application of the orbit control algorithm based
 on the number of ADC frames collected, rather than based on ADC or RTEMS 

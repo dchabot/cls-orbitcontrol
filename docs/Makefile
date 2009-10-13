@@ -23,7 +23,7 @@ images: $(IMAGES)
 	$(FIG2DEV) $^ $@ 
 
 html: $(SRC).txt $(IMAGES)
-	$(ASCIIDOC) $(SRC).txt
+	$(ASCIIDOC) -a asciimath -b xhtml11 $(SRC).txt
     
 pdf: $(SRC).txt $(IMAGES)
 	$(ASCIIDOC) -b docbook $(SRC).txt
