@@ -269,9 +269,9 @@ vertical plane.
 From a control systems view, VME equipment is utilized to digitize BPM 
 signals and deliver digital power-supply setpoints to horizontal and vertical
 corrector magnets, HCM and VCM, respectively. This may be visualized
-as in the <<system overview>> figure, below.
+as in the <<overview>> figure, below.
 
-[[system overview]]
+[[overview]]
 .System overview.
 image::SR-view.png["System View"]
 
@@ -279,8 +279,8 @@ The VME crates in all quadrants of the system are under the control of a
 single IOC: an "industrial" 3 GHz PC with 1 GB of RAM. The physical 
 separation and multi-crate control requirements are satisfied via the Struck
 Innovative Systems PCI-VME interface (sis1100/3100). This interface permits
-multi-crate control and much latitude with respect to VME crate and 
-crate-controller positioning.
+multi-crate control and a high degree of flexibility with respect to VME 
+crate and crate-controller positioning.
 
 === OrbitController ===
 
@@ -291,17 +291,58 @@ architecture (see figure below). The model objects are simply instances of
 +Bpm+ or +Ocm+ classes, manipulated via concrete instances of their 
 respective controllers, either +BpmController+ or +OcmController+ classes.
 These controllers are _interfaces_: C++ classes containing only _pure 
-virtual_ methods.
+virtual_ methods. It is important to realize that the +OrbitController+ is
+_both_ an +OcmController+ *and* a +BpmController+: utilizing
+multiple-inheritance, the +OrbitController+ provides implementations for 
+both pure-virtual controller classes.
 
 .MVC Structure of OrbitController system.
-image::SR-MVC.png["MVC Structure"] 
+image::SR-MVC.png["MVC Structure"]
 
+NOTE: Conventionally, the "View" in an MVC design is a GUI element such as a
+text-field or button. In this case, the "View" is not a specific element, as
+the control-points of the software are exposed via Channel Access and
+therefore do not require a GUI at all in order to be accessed. In fact, it
+is probably more accurate to classify the system as simply a 
+Model-Controller architecture, with Channel Access as the interface between
+the "Controller" and any conventional GUI widgets that might be utilized.
+
+==== Resource and Concurrency View ====
+
+Upon closer inspection of the architectural details, the classes and 
+_active objects_ (i.e. threads) appear as shown below (<<resource-view>>):
+
+[[resource-view]]
 .Key classes and threads of the OrbitController system (Mercurial tag v5.0.1).
 image::OC-res-concurrency.png["Resource-Concurrency View"]
 
+This representation of the OrbitController illustrates several key concepts:
+
+. *EPICS Device Support Interfaces*: this is the _only_ means by which
+a user may control and receive feedback from the system.
+. *Active Objects*: These are indicated by their double-barred boxes. For
+example, the +AdcReader+ objects. *Note* the _relative_ priorities of the
+threads are also indicated (1 is _highest_ priority). Since RTEMS schedules
+threads according to a _priority-preemptive_ scheme, this information is
+vital to understanding which threads react to certain inputs, and what the
+flow of control (context) will be. 
+. *Active Object Resources*: these include the _MVC_-"Model" objects, their
+containers, their association with their respective +Controller+ interfaces, 
+and the objects that are _private_ (in the OOP) sense to the +OrbitController+.
+
+NOTE: The <<resource-view>> above, corresponds to the revision tagged as 
+"v5.0.1" in the Mercurial repo. While there are a few important differences
+between what is illustrated and what is contained in revision "v3.0.1", the
+_structural_ differences are small. Arguably most important are the 
+_behavioral_ differences between the two versions: v5.0.1 is capable of 
+significantly more rapid orbit-corrections than is v3.0.1, and it scales
+better with increased numbers of orbit-corrector magnet channels.
+
+[[FSM-Behavior]]
 ==== Behavioral ====
-From the user's perspective, the OrbitController is essentially a Finite
-State Machine (FSM). The runtime behavior of the OrbitController, including
+From the user's perspective, including the newer MatLab control program,
+the OrbitController is essentially a _Finite State Machine_ (FSM). 
+The runtime behavior of the OrbitController, including
 BPM data acquisition and orbit-correction algorithm application, may be 
 altered simply by instructing the FSM to transition to one of the
 following states:
@@ -330,15 +371,99 @@ iteration of the acquire-BPM-data-->calculate-and-apply-correction algorithm
 are dumped to syslog, so one can verify the algorithm is producing correct 
 deltas for the pwr supply updates).
 
-The FSM behavior of the OrbitController is represented in the following image.
-However, it should be noted that not all states are depicted in this image (for
-purely aesthetic reasons).
+The behavior of the OrbitController is represented in the following image of
+the <<FSM>>. However, it should be noted that not all states are depicted in
+this image (for purely aesthetic reasons).
 
+[[FSM]]
 .OrbitController FSM
 image::SR-OC-FSM-v2.png["OrbitController FSM"]
 
+From the developer's point of view, the FSM is implemented using a variation
+of the _State Pattern_, as presented in the book, ""Design Patterns: Elements
+of Reusable Object-Oriented Software", by Erich Gamma _et al_. This pattern
+permits the addition of States by simply sub-classing the appropriate class,
+ and implementing the required _abstract_ (pure virtual) methods, 
++stateAction()+, +stateEntry()+, and +stateExit()+.
+
 === OrbitControlUI ===
-* stuff
+
+The portion of the system that the user sees and interacts with is the 
+_OrbitControlUI_, or user-interface. This is simply a set of EPICS records
+backed by a set of corresponding Device Support routines. Although the 
+average user does not directly interact with the Device Support, it is 
+ultimately those pieces of software which inject into and receive data from 
+the lower-level RTEMS OrbitController sub-system.
+
+The EPICS Database comprising the user-interface contains approximately 1000
+records as of version v3.0.1. This number can be expected to grow to the order
+of 1500 when the "slow" sextupole OCMs are added to the OrbitController's 
+domain. This surprisingly large number arises because their are 54 BPM sets 
+(48 used for corrections) and 48 OCM sets, each with 2 planes of operation.
+
+The next two sections will look in more detail at the BPM and OCM databases.
+
+==== EPICS BPM Database ====
+
+As mentioned, there are 54 sets of BPMs in the storage ring, each of which
+provides two, primary process variables: an _x-position_ and a _y-position_, 
+represented as +analog input+ (_ai_) records. The OrbitController's 
++BpmControl+ thread simply produces averages of the digitized _x_ and _y_ 
+BPM signals collected by the +AdcReader+ threads (see <<resource-view>> 
+figure). It is those averages that populate the database records, 
++BPM14aa-bb:x+ and +BPM14aa-bb:y+.
+
+Although not yet utilized by operations, there are also 54 sets of _standard
+deviations_ produced for the corresponding _x_ and _y_ BPM average positions.
+These are records with names like, +BPM14aa-bb:x:sigma+ or , 
++BPM14aa-bb:y:sigma+. These values are are also calculated by the +BpmControl+
+thread.
+
+[[BPM-database]]
+.OrbitControllerUI: BPM database.
+image::SR-UI-BPM.png["UI BPMs"]
+
+As previously mentioned, the effect of disabling a BPM _x_ or _y_ channel is
+not fully understood or dealt with. However, the database +binary-out+ records
+with names like, +BPM14aa-bb:isInCorrection+, are intended to provide the 
+interface to such functionality. Note that this interface is intended to 
+disable *both* the _x_ and _y_ BPM channels _as a unit_.
+
+Two other groups of +analog-output+ records utilized in the orbit-correction 
+algorithm are those with names like +BPM14aa-bb:x:ref+ (reference, or 
+"Golden Orbit") and +BPM14aa-bb:x:offs+ (offset). These values are typically
+set by the MatLab program as part of initializing the system for "fast",
+autonomous operations, and are seldom changed during operation. The 
+OrbitController linearly combines these numbers with the current BPM
+average positions and this result forms the vector, 
+*latexmath:[$\Delta x$]*, utilized in the expression,
+*latexmath:[$\Delta \theta_x = R^{-1}\Delta x$]*, given previously.
+
+There are three, thus far undiscussed, records remaining in the 
+<<BPM-database>> figure. These records may not properly be grouped with
+the others of that figure, but their placement is for reasons of 
+conciseness, and their utility is discussed below:
+
+. +BPM:samplesPerAvg+: controls the number of BPM samples comprising the 
+average published in the +BPM14aa-bb:x+ records. Therefore, it also controls
+the frequency of publishing (record processing). Only useful if the 
+OrbitController is in the +Assisted+ state. This is a +longin+-type record.
+. +OrbitController:mode+: controls the state of the OrbitController, as
+discussed in <<FSM-behavior>>. This is a +multi-bit binary output+ record.
+Note, addition or deletion of OrbitController states will need to be reflected
+here.
+. +OrbitController:mode:fbk+: feedback on the current state of the 
+OrbitController. This is a +multi-bit binary input+ record.
+
+==== EPICS OCM Database ====
+
+some text.
+
+[[OCM-database]]
+.OrbitControllerUI: OCM database.
+image::SR-UI-OCM.png["UI OCMs"]
+
+some more text.
 
 === Future Work === 
 * The method for dealing with the scenario of disabled BPM and OCM channels
