@@ -296,10 +296,11 @@ _both_ an +OcmController+ *and* a +BpmController+: utilizing
 multiple-inheritance, the +OrbitController+ provides implementations for 
 both pure-virtual controller classes.
 
+[[MVC-view]]
 .MVC Structure of OrbitController system.
 image::SR-MVC.png["MVC Structure"]
 
-NOTE: Conventionally, the "View" in an MVC design is a GUI element such as a
+Conventionally, the "View" in an MVC design is a GUI element such as a
 text-field or button. In this case, the "View" is not a specific element, as
 the control-points of the software are exposed via Channel Access and
 therefore do not require a GUI at all in order to be accessed. In fact, it
@@ -338,7 +339,7 @@ _behavioral_ differences between the two versions: v5.0.1 is capable of
 significantly more rapid orbit-corrections than is v3.0.1, and it scales
 better with increased numbers of orbit-corrector magnet channels.
 
-[[FSM-Behavior]]
+[[FSM-behavior]]
 ==== Behavioral ====
 From the user's perspective, including the newer MatLab control program,
 the OrbitController is essentially a _Finite State Machine_ (FSM). 
@@ -442,28 +443,85 @@ average positions and this result forms the vector,
 There are three, thus far undiscussed, records remaining in the 
 <<BPM-database>> figure. These records may not properly be grouped with
 the others of that figure, but their placement is for reasons of 
-conciseness, and their utility is discussed below:
+conciseness. Actually, these records are part of the +OrbitController+'s
+interface. Their utility is discussed below:
 
 . +BPM:samplesPerAvg+: controls the number of BPM samples comprising the 
 average published in the +BPM14aa-bb:x+ records. Therefore, it also controls
-the frequency of publishing (record processing). Only useful if the 
-OrbitController is in the +Assisted+ state. This is a +longin+-type record.
+the frequency of publishing (record processing). This is a +longout+-type record.
+In any of the so-called "fast" modes of operation, the BPM values will be 
+changing too rapidly for Channel Access monitors to keep up with. Yet, UI
+programs like +clsorb+ still need relatively real-time BPM values to function.
+Therefore, the +BpmControl+ thread triggers CA monitors at a rate determined
+by +BPM:samplesPerAvg+, while the autonomous orbit-correction algorithm
+operates using only a small, but current fraction of samples for its work.
+Note, BPM signals are currently digitized at 10 kHz, so 5000 samples is 0.5 [s].
 . +OrbitController:mode+: controls the state of the OrbitController, as
 discussed in <<FSM-behavior>>. This is a +multi-bit binary output+ record.
 Note, addition or deletion of OrbitController states will need to be reflected
-here.
+here. Note, there also exists a record that monitors the PCT-value (i.e.
+storage-ring current), and sets the OrbitController's mode to +Assisted+
+if the value is less than 2.5 mA. This is to assure that the signal-to-noise
+(SNR) ratio of the BPMs is large enough to accurately perform corrections to
+the beam position.
 . +OrbitController:mode:fbk+: feedback on the current state of the 
 OrbitController. This is a +multi-bit binary input+ record.
 
 ==== EPICS OCM Database ====
 
-some text.
+As of version v3.0.1 of the OrbitController, the set of "fast" orbit-correctors
+consists of 48 OCM. The records controlling the setpoints of the power-supplies
+for these have names ending in "*:dac*" (eg: +OCM14aa-bb:dac+). Those records
+with the suffix of "*:adc*" are *not* feedback from the power-supply
+channels: they are feedback on the _setpoint values_, as the OrbitController
+has no physical means of obtaining true power-supply current values.
 
 [[OCM-database]]
 .OrbitControllerUI: OCM database.
 image::SR-UI-OCM.png["UI OCMs"]
 
-some more text.
+Once the hardware modifications are in place to incorporate the dual-purpose 
+sextupole magnets into the "fast" orbit-correction algorithm, there will need
+to be records created to control them. Place-holder values already exist in 
+the various "*.sub" (substitution) files, but they are commented out. At this
+point, please consult the file, "_orbitcontrolUI/Db/README.OCM.ringOrder_".
+It contains crucial further details for this stage of the upgrade process.
+
+The records with names of the pattern, +OCM14aa-bb:delay+, control the amount
+of spin-delay (in micro-seconds) required for correct operation of the OCM
+setpoint delivery. This delay is necessary, as the VMIC-2536 hardware contains 
+optical-isolators with relatively long rise and (especially) fall-times. The
+nominal (worst-case) settings of 35 micro-seconds are issued to each channel
+upon record initialization, and need *not* be altered.
+
+Enabling and disabling of OCM channels is accomplished via those records with
+names like, +OCM14aa-bb:isInCorrection+. Note that this does not actually 
+_enable_ or _disable_ a channel, but rather only admits or omits that channel
+from participating in the orbit correction algorithm. Thus, the correction
+calculated for that channel may or may not be distributed depending on the
+setting of these records.
+
+The three remaining families of records in the <<OCM-database>> figure are
+not actually associated with any physical OCM channel. They exist to provide
+support the mathematical operations of the orbit-control algorithm. Each record
+receives it values from the operator's MatLab program. They are briefly 
+discussed here:
+
+. +OCM:x/y:responseVector+: These are actually the _inverse_ Response matrices,
+as calculated and delivered by the MatLab support software. As EPICS +waveform+
+records have no innate support for multiply dimensioned arrays, the values are
+arranged in _column order_. So, if the matrix is 48x48, then waveform elements
+0-47 are column one, elements 48-95 are column two, and so on. Note, these 
+records are infrequently updated, typically once upon initialization,
+and never while the orbit-control is active.
+. +OCM:x/y:maxStep+: These records are a form of _gain_ control. They throttle the
+magnitude of the (absolute) values delivered to each OCM. This limits the size
+of correction applied at iteration of the orbit-control algorithm.
+. +OCM:x/y:corrFraction+: These records are another form of _gain_ control.
+Their values determine what fraction of the correction value is actually
+sent to a power-supply channel (OCM). For example, if one channel's 
+correction was clipped to the size of +OCM:x:maxStep+, and +OCM:x:corrFraction+
+was 0.5, then the correction sent to that channel would be 0.5*+maxStep+.
 
 === Future Work === 
 * The method for dealing with the scenario of disabled BPM and OCM channels
@@ -485,7 +543,8 @@ adjustable Response Matrices (see section on altering compile-time <<constants>>
 would be well worth their (minimal) implementation effort, especially with 
 respect to the solution of the disabled OCM/BPM problem.
  
-* The power-supply setpoint distribution algorithm was heavily modified to 
+* The following comments pertain to version v5.0.1 (*only!*) of the OrbitController 
+software. The power-supply setpoint distribution algorithm was heavily modified to 
 distribute the cost of the spin-delays associated with affecting
 setpoint changes (thanks to Neil Johnson for the idea). A behavioral
 modification also permits application of the orbit control algorithm based
