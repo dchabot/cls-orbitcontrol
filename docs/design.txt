@@ -472,7 +472,7 @@ OrbitController. This is a +multi-bit binary input+ record.
 As of version v3.0.1 of the OrbitController, the set of "fast" orbit-correctors
 consists of 48 OCM. The records controlling the setpoints of the power-supplies
 for these have names ending in "*:dac*" (eg: +OCM14aa-bb:dac+). Those records
-with the suffix of "*:adc*" are *not* feedback from the power-supply
+with the suffix of "*:fbk*" are *not* feedback from the power-supply
 channels: they are feedback on the _setpoint values_, as the OrbitController
 has no physical means of obtaining true power-supply current values.
 

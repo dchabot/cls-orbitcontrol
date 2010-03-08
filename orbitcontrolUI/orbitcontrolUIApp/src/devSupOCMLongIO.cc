@@ -75,7 +75,7 @@ init_record(void* lor) {
 		//this is a "setpoint" or "delay"-type record
 		/* strip off the $(clsName)-prefix from the record name; this will form the OCM's id */
 		string name(lorp->name);
-		size_t pos = name.find_first_of(":");
+		size_t pos = name.find_last_of(":");
 		string id = name.substr(0,pos);
 		/* <rant> WTF doesn't c++ have a string tokenizer method ?!?!? </rant> */
 		char cbuf[128] = {0};

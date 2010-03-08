@@ -14,7 +14,7 @@ record(longout, "$(clsName)-exp:dac") {
 	field(EGU, "DAC")
 }
 
-record(longin, "$(clsName)-exp:dac:fbk") {
+record(longin, "$(clsName)-exp:fbk") {
 	field(DESC, "OCM ch$(channel) setpoint fbk")
 	field(DTYP, "OCM LongIO")
 	field(SCAN, "1 second")
